@@ -3,6 +3,8 @@
 Só simulação, nas noites sintéticas: nada aqui envia ordens. Cada noite é jogada de dois jeitos:
   segurar      fica com a posição inicial até o fim;
   rebalancear  vende e compra a faixa que o modelo aponta, pela regra abaixo.
+A carteira pode começar numa faixa ou em dinheiro (inicial=None): aí ela só entra quando o modelo
+der o sinal de compra, e "segurar" é ficar com o dinheiro parado.
 
 Regra (a mesma da aba Trade do painel, que a mostra na noite que está passando):
   - só age a partir de `apurado_min` % apurado e com o modelo já rodando;
@@ -42,8 +44,8 @@ VERSOES = ("segurar", "rebalancear")
 
 @dataclass
 class Regra:
-    inicial: str = "F <4%"
-    entrada: float = 0.41      # preço pago pela posição inicial
+    inicial: str | None = "F <4%"  # None = começa em dinheiro e espera o sinal de compra
+    entrada: float = 0.41      # preço pago pela posição inicial (não usado começando em dinheiro)
     banca: float = 100.0
     limiar: float = 0.70
     vantagem: float = 0.05
@@ -60,8 +62,11 @@ def faixa_de(margem: float) -> str:
 def jogar(t, apurado, probs, bids, asks, regra: Regra, versao: str, final: str,
           faixas: list[str] = NOMES_FAIXAS) -> dict:
     """Uma noite com uma versão da regra. probs/bids/asks: (n, faixas). Devolve valor final e trocas."""
-    h = faixas.index(regra.inicial)
-    cotas, caixa, vendas, ops = regra.banca / regra.entrada, 0.0, 0, []
+    if regra.inicial is None:  # em dinheiro: a primeira compra é o sinal do modelo
+        h, cotas, caixa = None, 0.0, regra.banca
+    else:
+        h, cotas, caixa = faixas.index(regra.inicial), regra.banca / regra.entrada, 0.0
+    vendas, ops = 0, []
     valor = []
     for k in range(len(t)):
         if versao != "segurar" and probs[k] is not None and apurado[k] >= regra.apurado_min:
@@ -118,6 +123,8 @@ def lote(d: pd.DataFrame, regra: Regra, ritmo: str, gl: float) -> pd.DataFrame:
             if v == "rebalancear":
                 linha["termina_em"] = r["termina_em"]
                 linha["n_ops"] = len(r["ops"])
+                compras = [o for o in r["ops"] if o["op"] == "compra"]
+                linha["t_compra"] = compras[0]["t"] if compras else None
         linhas.append(linha)
     return pd.DataFrame(linhas)
 
@@ -159,8 +166,13 @@ def resumo(av: pd.DataFrame, banca: float) -> dict:
         dist[v] = {"media": float(np.sum(w * x)), "mediana": quantil(x, w, 0.5), "p10": quantil(x, w, 0.1),
                    "lucro": float(np.sum(w[x > banca])), "prejuizo": float(np.sum(w[x < banca])),
                    "perde_metade": float(np.sum(w[x < banca / 2]))}
+    operou = (av["n_ops"] > 0).to_numpy()
+    t_compra = av["t_compra"].to_numpy(float)
+    comprou = np.isfinite(t_compra)
     return {"cenarios": tab, "media": {v: dist[v]["media"] for v in VERSOES}, "dist": dist, "banca": banca,
-            "lucro_noites": {v: dist[v]["lucro"] for v in VERSOES}, "n": len(av)}
+            "lucro_noites": {v: dist[v]["lucro"] for v in VERSOES}, "n": len(av),
+            "operou": float(np.sum(w[operou])),
+            "t_compra_mediano": quantil(t_compra[comprou], w[comprou] / w[comprou].sum(), 0.5) if comprou.any() else None}
 
 
 # faixa do 1º turno (5 pontos) que corresponde a cada faixa do 2º (4 pontos)
@@ -187,17 +199,18 @@ def noite_real_1t(regra: Regra, spreads=(0.01, 0.03)) -> dict:
     pm = pd.read_parquet(DADOS / "polymarket_1t.parquet")
     final = NOME_PM[pm[(pm["mercado"] == "margem") & pm["venceu"].astype(bool)]["faixa"].iloc[0]]
     favorita = FAIXAS_1T[int(np.argmax(preco[0]))]
-    inicios = list(dict.fromkeys([EQUIVALENTE_1T[regra.inicial], favorita]))
+    sua = None if regra.inicial is None else EQUIVALENTE_1T[regra.inicial]
+    inicios = [None] if sua is None else list(dict.fromkeys([sua, favorita]))
     linhas = []
     for ini in inicios:
-        entrada = float(preco[0][FAIXAS_1T.index(ini)])
-        rg = replace(regra, inicial=ini, entrada=entrada)
+        entrada = float(preco[0][FAIXAS_1T.index(ini)]) if ini else None
+        rg = replace(regra, inicial=ini, entrada=entrada or 1.0)
         for s in spreads:
             bids, asks = np.maximum(preco - s, 0.0), np.minimum(preco + s, 1.0)
             com = jogar(t, ap_d, probs_d, bids, asks, rg, "rebalancear", final, faixas=FAIXAS_1T)
-            linhas.append({"inicio": ini, "sua": ini == EQUIVALENTE_1T[regra.inicial], "favorita": ini == favorita,
-                           "entrada": entrada, "spread": s, "com_trocas": com["valor"],
-                           "segurar": regra.banca / entrada if ini == final else 0.0,
+            parado = regra.banca if ini is None else (regra.banca / entrada if ini == final else 0.0)
+            linhas.append({"inicio": ini or "dinheiro", "sua": ini == sua, "favorita": ini == favorita,
+                           "entrada": entrada, "spread": s, "com_trocas": com["valor"], "segurar": parado,
                            "ops": [{k2: o[k2] for k2 in ("t", "op", "faixa", "preco")} for o in com["ops"]]})
     return {"final": final, "t_entrada": float(t[0]), "linhas": linhas}
 
@@ -205,21 +218,25 @@ def noite_real_1t(regra: Regra, spreads=(0.01, 0.03)) -> dict:
 def main() -> None:
     p = carregar_params()
     d = noites(p)
-    for inicial, entrada in (("F <4%", 0.405), ("F 4-8%", 0.325)):
+    for inicial, entrada in (("F <4%", 0.405), ("F 4-8%", 0.325), (None, 1.0)):
+        nome = "em dinheiro (espera o sinal)" if inicial is None else f"em Sim \"{inicial}\" a {entrada * 100:.1f}¢"
         for ritmo in RITMOS:
             r = resumo(lote(d, Regra(inicial=inicial, entrada=entrada), ritmo, p.gl), 100.0)
             tab = pd.DataFrame(r["cenarios"]).round(2)
-            print(f"\n### Começando em Sim \"{inicial}\" a {entrada * 100:.1f}¢, mercado {ritmo}\n")
+            print(f"\n### Começando {nome}, mercado {ritmo}\n")
             print(md(tab, index=False))
             for v, x in r["dist"].items():
                 print(f"{v:12s} média US$ {x['media']:6.1f} | mediana US$ {x['mediana']:6.1f} | 10% piores ≤ US$ "
                       f"{x['p10']:6.1f} | prejuízo {x['prejuizo']:4.0%} | perde mais da metade {x['perde_metade']:4.0%}")
+            tc = r["t_compra_mediano"]
+            print(f"operou em {r['operou']:.0%} das noites" + (f"; 1ª compra mediana às {17 + int(tc // 60)}h{int(tc % 60):02d}" if tc is not None else ""))
         real = noite_real_1t(Regra(inicial=inicial, entrada=entrada))
         print(f"\nNoite real do 1º turno (preços reais; venceu {real['final']}):")
         for ln in real["linhas"]:
             ops = "; ".join(f"{o['op']} {o['faixa']} a {o['preco'] * 100:.0f}¢" for o in ln["ops"]) or "sem trocas"
-            print(f"  começa em {ln['inicio']:7s} a {ln['entrada'] * 100:4.1f}¢, ±{ln['spread'] * 100:.0f}¢: "
-                  f"com trocas US$ {ln['com_trocas']:6.1f} | segurar US$ {ln['segurar']:6.1f} | {ops}")
+            preco = f"a {ln['entrada'] * 100:4.1f}¢" if ln["entrada"] else "       "
+            print(f"  começa em {ln['inicio']:8s} {preco}, ±{ln['spread'] * 100:.0f}¢: "
+                  f"com trocas US$ {ln['com_trocas']:6.1f} | parado US$ {ln['segurar']:6.1f} | {ops}")
 
 
 if __name__ == "__main__":

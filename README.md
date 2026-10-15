@@ -455,8 +455,12 @@ simulação: nada aqui envia ordens.
   - o interruptor do automático.
 
   Tudo vale do ciclo do clique em diante.
-- **"Testar esta regra nas 100 noites simuladas salvas"** roda só a regra automática nas noites de
-  `estudos/banca.py`, nos três ritmos de mercado. É o mesmo cálculo de `python eleicao/estudos/trade.py`.
+- **"Testar esta regra nas 100 noites simuladas e na noite real do 1º turno"** roda só a regra
+  automática nas noites de `estudos/banca.py`, nos três ritmos de mercado, e na noite de 4/10 com
+  os preços reais. É o mesmo cálculo de `python eleicao/estudos/trade.py`.
+- **"Começa em: Dinheiro (espera o sinal)"** é a variante sem posição: a carteira fica parada até
+  o modelo dar o sinal (a favorita com pelo menos o limiar e a chance passando o preço de compra
+  pela vantagem pedida), compra, e daí segue a mesma regra de trocas.
 
 Com a regra padrão, começando em Sim "F <4%" a 40,5¢ com US$100. Cada noite pesa pela chance que
 o mercado dá hoje ao cenário dela:
@@ -490,6 +494,23 @@ tabelas para a regra que estiver na tela.
 Para planejar, o "mais esperto" é o cenário mais razoável e "como em 4/10" é o teto. Na noite, a
 coluna "Modelo − venda" do painel, nos primeiros 20–30 min, mostra se o mercado está andando atrás
 do modelo.
+
+**Começando em dinheiro e esperando o sinal** (US$100, regra padrão):
+
+| Ritmo do mercado | Pelo sinal: média | Mediana | Noites com prejuízo | Operou em | 1ª compra (mediana) |
+|---|---|---|---|---|---|
+| como em 4/10 | US$ 349 | US$ 299 | 6% | 99% | 17h16 |
+| mais esperto | US$ 159 | US$ 166 | 10% | 94% | 17h16 |
+| igual ao modelo | US$ 100 | US$ 100 | 0% | 0% | — |
+
+- **Se o mercado acompanha o modelo, ela não compra e não perde nada.** A exigência de vantagem
+  sobre o preço barra a entrada. Por isso, das duas variantes, é a que menos sofre quando a
+  premissa do atraso falha. Começando com posição, a regra vende a preço justo e perde em 2 de
+  cada 3 noites nesse ritmo.
+- **O ganho continua vindo do atraso do mercado.** A 1ª compra sai cedo (17h16 na mediana, perto
+  de 2% apurado), quando o mercado simulado ainda está no preço de antes da apuração.
+- **Na noite real do 1º turno**, ela comprava "Flávio <5%" a 40¢ às 17h33: US$ 100 viravam
+  ~US$ 250 (US$ 238 com 3¢ de cada lado). Mas é a mesma noite de onde saiu o ritmo "como em 4/10".
 
 ### No terminal
 

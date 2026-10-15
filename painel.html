@@ -229,7 +229,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
 
   <!-- trade: carteira que troca para a faixa do modelo -->
   <section class="controle" id="ctl-trade" aria-label="Regra da carteira" hidden>
-    <label class="campo"><span>Começa em (Sim)</span><select id="tr-inicial"></select></label>
+    <label class="campo"><span>Começa em</span><select id="tr-inicial"></select></label>
     <label class="campo"><span>Preço pago (¢)</span><input id="tr-entrada" type="number" min="1" max="99" step="0.5"></label>
     <label class="campo"><span>Banca (US$)</span><input id="tr-banca" type="number" min="1" step="1" value="100"></label>
     <label class="campo"><span>Trocar com chance ≥ (%)</span><input id="tr-limiar" type="number" min="1" max="99" step="1" value="70"></label>
@@ -355,7 +355,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     <div class="revelado" id="tr-revelado" hidden></div>
     <div class="banca-res">
       <div class="res"><span>Carteira (com trocas)</span><b id="tr-valor">—</b><span id="tr-valor-s"></span></div>
-      <div class="res"><span>Segurando a posição inicial</span><b id="tr-segurar">—</b><span id="tr-segurar-s"></span></div>
+      <div class="res"><span id="tr-segurar-rot">Segurando a posição inicial</span><b id="tr-segurar">—</b><span id="tr-segurar-s"></span></div>
       <div class="res"><span>Diferença</span><b id="tr-dif">—</b><span id="tr-dif-s"></span></div>
     </div>
     <ul class="vendas" id="tr-ops"></ul>
@@ -1004,14 +1004,18 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   let trade = { inicial: "F <4%", entrada: 40.5, banca: 100, limiar: 70, vantagem: 5, apurado: 2, trocas: 2, auto: true };
   function salvarTrade() { try { localStorage.setItem("painel-trade", JSON.stringify(trade)); } catch (e) { /* sem armazenamento */ } }
   function lerTradeSalvo() { try { return JSON.parse(localStorage.getItem("painel-trade") || "null"); } catch (e) { return null; } }
-  const precoHoje = (f) => (CFG ? +(CFG.preco_hoje[f] * 100).toFixed(1) : 40);
+  const precoHoje = (f) => (CFG && CFG.preco_hoje[f] != null ? +(CFG.preco_hoje[f] * 100).toFixed(1) : trade.entrada);
+  // "dinheiro" = começa sem posição e só compra quando o modelo der o sinal
+  const parado = (r) => (r.inicial === "dinheiro" ? "ficar em dinheiro" : `segurar "${r.inicial}"`);
   const regraTrade = () => ({ inicial: trade.inicial, entrada: trade.entrada / 100, banca: trade.banca, limiar: trade.limiar / 100,
                               vantagem: trade.vantagem / 100, apurado_min: trade.apurado, max_trocas: trade.trocas });
 
   // manuais: o que você fez na noite, em ordem — {k, acao: "favorita" | "dinheiro" | "auto", valor}.
   // Ligar/desligar o automático vale dali para a frente (não reescreve a noite).
   function jogarTrade(C, r, manuais, autoInicio) {
-    let h = FAIXAS.indexOf(r.inicial), cotas = r.banca / r.entrada, caixa = 0, vendas = 0, auto = autoInicio;
+    const dinheiro = r.inicial === "dinheiro";
+    let h = dinheiro ? null : FAIXAS.indexOf(r.inicial), cotas = dinheiro ? 0 : r.banca / r.entrada;
+    let caixa = dinheiro ? r.banca : 0, vendas = 0, auto = autoInicio;
     const i0 = h, cotas0 = cotas, ops = [], hs = [], valor = [], seg = [], porK = {};
     manuais.forEach((m) => { (porK[m.k] = porK[m.k] || []).push(m); });
     C.forEach((c, k) => {
@@ -1041,7 +1045,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       }
       hs.push(h);
       valor.push(caixa + (h !== null ? cotas * bid(h) : 0));
-      seg.push(cotas0 * bid(i0));
+      seg.push(dinheiro ? r.banca : cotas0 * bid(i0));
     });
     return { ops, hs, valor, seg, h, cotas, caixa, cotas0, i0, vendas, auto };
   }
@@ -1075,7 +1079,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     });
     ev.sort((a, b) => a.k - b.k);
     const valorFinal = final ? R.caixa + (R.h !== null && FAIXAS[R.h] === final ? R.cotas : 0) : null;
-    const segFinal = final ? (FAIXAS[R.i0] === final ? R.cotas0 : 0) : null;
+    const segFinal = final ? (r.inicial === "dinheiro" ? r.banca : FAIXAS[R.i0] === final ? R.cotas0 : 0) : null;
     const ultV = R.valor.length ? R.valor[R.valor.length - 1] : r.banca, ultS = R.seg.length ? R.seg[R.seg.length - 1] : r.banca;
     return { L, ev, R, regra: r, final, foco: R.h == null ? null : FAIXAS[R.h], vendas: R.vendas, auto: R.auto,
              valorAgora: final ? valorFinal : ultV, segAgora: final ? segFinal : ultS };
@@ -1086,9 +1090,10 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     if (s.estado === "fim" && mf != null) {
       const fx = faixaDe(mf);
       return [T.valorAgora >= T.segAgora ? "bom" : "ruim", "Apuração encerrada",
-        `Resultado: ${margem(mf)}, faixa "${fx}". A carteira terminou ${T.foco ? `em "${T.foco}"` : "em dinheiro"} com ${usd(T.valorAgora)}; segurar "${r.inicial}" daria ${usd(T.segAgora)}.`];
+        `Resultado: ${margem(mf)}, faixa "${fx}". A carteira terminou ${T.foco ? `em "${T.foco}"` : "em dinheiro"} com ${usd(T.valorAgora)}; ${parado(r)} daria ${usd(T.segAgora)}.`];
     }
-    if (!um) return ["neutro", "Espere", `Ainda não há votos apurados. A carteira começa em Sim "${r.inicial}".`];
+    if (!um) return ["neutro", "Espere", "Ainda não há votos apurados. " + (r.inicial === "dinheiro"
+      ? "A carteira começa em dinheiro e só compra quando o modelo der o sinal." : `A carteira começa em Sim "${r.inicial}".`)];
     const c = um.c, fav = um.fav, pfav = c.probs[fav], foco = T.foco;
     const desl = T.auto ? "" : " O automático está desligado: a regra só observa.";
     if (um.ap < r.apurado_min) return ["neutro", "Cedo demais", `Só ${virg(um.ap.toFixed(1))}% apurado; a regra só age a partir de ${virg(r.apurado_min)}%. A favorita do modelo agora é "${fav}" (${pct(pfav)}).`];
@@ -1111,16 +1116,18 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     renderTopo(s, ult);
     renderModelo(um, ult, T.foco);
     renderParcial(ult);
-    setTxt("k-pos-rot", `Carteira · ${T.foco ? `Sim em "${T.foco}"` : "em dinheiro"}`);
+    setTxt("k-pos-rot", `Carteira · ${T.foco ? `Sim em "${T.foco}"` : T.R.ops.length ? "em dinheiro" : "em dinheiro, esperando o sinal"}`);
     setTxt("k-chance", usd(T.valorAgora));
     if (ult && T.foco) {
       const mk = ult.c.mercado && ult.c.mercado[T.foco];
       setTxt("k-preco", `${virg(T.R.cotas.toFixed(1))} cotas` + (um ? ` · modelo dá ${pct(um.c.probs[T.foco], 1)}` : "") + (mk ? ` · venda a ~${cents(mk[0])}` : ""));
-    } else setTxt("k-preco", ult ? `${usd(T.R.caixa)} em caixa` : `começa com ${usd(r.banca)} em Sim "${r.inicial}" a ${cents(r.entrada)}`);
-    setTxt("k-dif", ult ? `segurar "${r.inicial}": ${usd(T.segAgora)}` : "");
+    } else setTxt("k-preco", ult ? `${usd(T.R.caixa)} em caixa` : r.inicial === "dinheiro" ? `começa com ${usd(r.banca)} em dinheiro`
+      : `começa com ${usd(r.banca)} em Sim "${r.inicial}" a ${cents(r.entrada)}`);
+    setTxt("k-dif", ult ? `${parado(r)}: ${usd(T.segAgora)}` : "");
     const [n, tag, txt] = conselhoTrade(T, um, s);
     $("k-conselho").dataset.n = n; setTxt("k-tag", tag); setTxt("k-txt", txt);
     $("plano").innerHTML = '<span class="rot">Regra</span>' + [
+      ...(r.inicial === "dinheiro" ? ["começa em dinheiro: compra no 1º sinal"] : []),
       `troca quando a favorita do modelo tem ≥ ${pct(r.limiar)}`,
       `compra com vantagem ≥ ${virg(Math.round(r.vantagem * 100))} pts`,
       `desde ${virg(r.apurado_min)}% apurado`,
@@ -1137,6 +1144,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     const g = G.carteira, [t0, t1] = eixoT(L);
     g.data.datasets[0].data = serie(L, (o) => o.valor);
     g.data.datasets[1].data = serie(L, (o) => o.seg);
+    g.data.datasets[1].label = r.inicial === "dinheiro" ? "Ficando em dinheiro" : "Segurando a posição inicial";
     g.options.scales.x.min = t0; g.options.scales.x.max = t1;
     const compras = new Set(T.R.ops.filter((o) => o.op === "compra").map((o) => o.k));
     g.$linhas = { verticais: T.R.ops.filter((o) => o.op === "compra" || !compras.has(o.k))
@@ -1148,11 +1156,15 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     const r = T.regra, L = T.L;
     const suf = s.estado === "fim" ? " (final)" : T.final ? " (com o resultado revelado)" : " (a preço de venda de agora)";
     const res = (id, v) => { setTxt(id, usd(v)); setTxt(id + "-s", `${v >= r.banca ? "+" : "−"}${usd(Math.abs(v - r.banca))} sobre a banca${suf}`); };
+    const dinheiro = r.inicial === "dinheiro";
+    setTxt("tr-segurar-rot", dinheiro ? "Ficando em dinheiro" : "Segurando a posição inicial");
     if (L.length) {
       res("tr-valor", T.valorAgora); res("tr-segurar", T.segAgora);
       const d = T.valorAgora - T.segAgora;
       setTxt("tr-dif", (d >= 0 ? "+" : "−") + usd(Math.abs(d)));
-      setTxt("tr-dif-s", Math.abs(d) < 0.005 ? "igual a segurar" : d > 0 ? "trocar rendeu mais que segurar" : "segurar rendeu mais que trocar");
+      setTxt("tr-dif-s", Math.abs(d) < 0.005 ? (dinheiro ? "igual a ficar parado" : "igual a segurar")
+        : d > 0 ? (dinheiro ? "operar pelo sinal rendeu mais que ficar parado" : "trocar rendeu mais que segurar")
+        : (dinheiro ? "ficar parado rendeu mais que operar" : "segurar rendeu mais que trocar"));
     } else ["tr-valor", "tr-segurar", "tr-dif"].forEach((id) => { setTxt(id, "—"); setTxt(id + "-s", "comece uma simulação"); });
     $("tr-ops").innerHTML = T.R.ops.length
       ? T.R.ops.map((o) => `<li>${hora(o.t)} · ${o.manual ? "você " : ""}${o.op === "vende" ? "vendeu" : "comprou"} "${esc(o.faixa)}" a ${cents(o.preco)}${o.op === "vende" ? ` → ${usd(o.valor)}` : ` (${virg(o.cotas.toFixed(1))} cotas)`}</li>`).join("")
@@ -1160,10 +1172,12 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     const rv = $("tr-revelado"), mf = s.info.margem_final;
     if (mf != null) {
       rv.hidden = false; rv.dataset.n = T.valorAgora >= T.segAgora ? "bom" : "ruim";
-      rv.textContent = `Resultado: ${margem(mf)} → faixa "${faixaDe(mf)}". A carteira ${s.estado === "fim" ? "terminou" : "está"} ${T.foco ? `em "${T.foco}"` : "em dinheiro"}; segurar "${r.inicial}" ${T.final === r.inicial ? "ganha" : "perde"}.`;
+      rv.textContent = `Resultado: ${margem(mf)} → faixa "${faixaDe(mf)}". A carteira ${s.estado === "fim" ? "terminou" : "está"} ${T.foco ? `em "${T.foco}"` : "em dinheiro"}` +
+        (dinheiro ? "." : `; segurar "${r.inicial}" ${T.final === r.inicial ? "ganha" : "perde"}.`);
     } else rv.hidden = true;
     const pode = s.estado === "rodando" && L.length > 0 && !!L[L.length - 1].c.mercado;
     $("tr-favorita").disabled = !pode || !um || um.fav === T.foco;
+    setTxt("tr-favorita", T.foco === null ? "Comprar a favorita agora" : "Trocar agora para a favorita");
     $("tr-dinheiro").disabled = !pode || T.foco === null;
   }
 
@@ -1191,11 +1205,12 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   function lerTrade() {
     const n = (id, d) => { const v = parseFloat(String($(id).value).replace(",", ".")); return Number.isFinite(v) ? v : d; };
     const inicial = $("tr-inicial").value, novaFaixa = inicial !== trade.inicial;
-    trade = { inicial, entrada: novaFaixa ? precoHoje(inicial) : Math.min(Math.max(n("tr-entrada", precoHoje(inicial)), 1), 99),
+    trade = { inicial, entrada: novaFaixa && inicial !== "dinheiro" ? precoHoje(inicial) : Math.min(Math.max(n("tr-entrada", precoHoje(inicial)), 1), 99),
               banca: Math.max(n("tr-banca", 100), 1), limiar: Math.min(Math.max(n("tr-limiar", 70), 1), 99),
               vantagem: Math.max(n("tr-vantagem", 5), 0), apurado: Math.max(n("tr-apurado", 2), 0),
               trocas: Math.max(Math.round(n("tr-trocas", 2)), 0), auto: trade.auto };
     if (novaFaixa) $("tr-entrada").value = trade.entrada;
+    $("tr-entrada").disabled = inicial === "dinheiro";  // começando em dinheiro, não há preço pago
     salvarTrade();
     avaliarTrade(S.sim).ev.forEach((e) => S.sim.vistosTrade.add(e.chave));  // regra nova: o que já passou não toca
     renderizar();
@@ -1204,6 +1219,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     $("tr-inicial").value = trade.inicial; $("tr-entrada").value = trade.entrada; $("tr-banca").value = trade.banca;
     $("tr-limiar").value = trade.limiar; $("tr-vantagem").value = trade.vantagem; $("tr-apurado").value = trade.apurado;
     $("tr-trocas").value = trade.trocas;
+    $("tr-entrada").disabled = trade.inicial === "dinheiro";
     mostrarAuto();
   }
   ["tr-inicial", "tr-entrada", "tr-banca", "tr-limiar", "tr-vantagem", "tr-apurado", "tr-trocas"].forEach((id) => $(id).addEventListener("change", lerTrade));
@@ -1215,26 +1231,31 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     try {
       const res = {};
       for (const [i, ritmo] of CFG.ritmos.entries()) res[ritmo] = await post("/api/trade/lote", { ...r, ritmo, noite_real: i === 0 });
-      const V = [["segurar", "Segurar"], ["rebalancear", "Com trocas"]];
+      const dinheiro = r.inicial === "dinheiro";
+      const V = [["segurar", dinheiro ? "Ficar em dinheiro" : "Segurar"], ["rebalancear", dinheiro ? "Pelo sinal" : "Com trocas"]];
       const melhor = (o) => (o.rebalancear > o.segurar ? "rebalancear" : "segurar");
       // média sozinha engana: os ganhos grandes vêm de poucas noites
-      $("tr-t-ritmos").innerHTML = "<thead><tr><th>Ritmo do mercado</th><th>Com trocas: média</th><th>Mediana</th>" +
-        "<th>10% piores ficam abaixo de</th><th>Noites com prejuízo</th><th>Perdem mais da metade</th><th>Segurar: média</th></tr></thead><tbody>" +
-        CFG.ritmos.map((rt) => { const x = res[rt].dist.rebalancear, s = res[rt].dist.segurar, m = melhor(res[rt].media);
+      $("tr-t-ritmos").innerHTML = `<thead><tr><th>Ritmo do mercado</th><th>${V[1][1]}: média</th><th>Mediana</th>` +
+        "<th>10% piores ficam abaixo de</th><th>Noites com prejuízo</th><th>Perdem mais da metade</th>" +
+        `<th>Operou em</th><th>1ª compra (mediana)</th><th>${V[0][1]}: média</th></tr></thead><tbody>` +
+        CFG.ritmos.map((rt) => { const d = res[rt], x = d.dist.rebalancear, s = d.dist.segurar, m = melhor(d.media);
           return `<tr><td>${esc(rt)}</td><td class="${m === "rebalancear" ? "melhor" : ""}">${usd(x.media)}</td><td>${usd(x.mediana)}</td>` +
             `<td>${usd(x.p10)}</td><td>${pct(x.prejuizo)}</td><td>${pct(x.perde_metade)}</td>` +
+            `<td>${pct(d.operou)}</td><td>${d.t_compra_mediano != null ? hora(d.t_compra_mediano) : "—"}</td>` +
             `<td class="${m === "segurar" ? "melhor" : ""}">${usd(s.media)}</td></tr>`; }).join("") + "</tbody>";
       const base = res[CFG.ritmos[0]], real = base.noite_real;
       if (real) {
         const op = (o) => `${hora(o.t)} ${o.op === "vende" ? "vende" : "compra"} "${esc(o.faixa)}" a ${cents(o.preco)}`;
         $("tr-t-real").innerHTML = "<thead><tr><th>Começando em</th><th>Preço pago</th><th>Diferença compra/venda</th>" +
-          '<th>Com trocas</th><th>Segurar</th><th style="text-align:left">O que a regra fez</th></tr></thead><tbody>' +
-          real.linhas.map((l) => `<tr><td>${esc(l.inicio)}${l.sua ? " (a sua)" : ""}${l.favorita ? " (favorita do mercado)" : ""}</td>` +
-            `<td>${cents(l.entrada)}</td><td>±${virg(Math.round(l.spread * 100))}¢</td>` +
+          `<th>${V[1][1]}</th><th>${V[0][1]}</th><th style="text-align:left">O que a regra fez</th></tr></thead><tbody>` +
+          real.linhas.map((l) => `<tr><td>${l.inicio === "dinheiro" ? "Dinheiro (espera o sinal)" :
+              esc(l.inicio) + (l.sua ? " (a sua)" : "") + (l.favorita ? " (favorita do mercado)" : "")}</td>` +
+            `<td>${l.entrada != null ? cents(l.entrada) : "—"}</td><td>±${virg(Math.round(l.spread * 100))}¢</td>` +
             `<td class="${l.com_trocas > l.segurar ? "melhor" : ""}">${usd(l.com_trocas)}</td><td class="${l.segurar > l.com_trocas ? "melhor" : ""}">${usd(l.segurar)}</td>` +
             `<td style="white-space:normal;text-align:left">${l.ops.length ? l.ops.map(op).join(" → ") : "não trocou"}</td></tr>`).join("") + "</tbody>";
-        setTxt("tr-real-nota", `Faixas de 5 pontos naquele mercado: a sua posição vira a faixa equivalente. Venceu "${real.final}". ` +
-          `Modelo com os parâmetros de antes daquela noite, decidindo com 5 min de atraso; compra inicial pelo preço das ${hora(real.t_entrada)}. ` +
+        setTxt("tr-real-nota", (dinheiro ? `Faixas de 5 pontos naquele mercado; a carteira começa em dinheiro e compra no sinal. Venceu "${real.final}". `
+            : `Faixas de 5 pontos naquele mercado: a sua posição vira a faixa equivalente. Venceu "${real.final}". `) +
+          `Modelo com os parâmetros de antes daquela noite, decidindo com 5 min de atraso${dinheiro ? "" : `; compra inicial pelo preço das ${hora(real.t_entrada)}`}. ` +
           `O ritmo "como em 4/10" saiu desta noite: ela mostra que o mercado já andou atrás do modelo uma vez, não que vai repetir no 2º turno.`);
       }
       $("tr-t-cenarios").innerHTML = `<thead><tr><th>Cenário (mercado "${esc(CFG.ritmos[0])}")</th><th>Noites</th><th>Chance hoje</th>` +
@@ -1242,7 +1263,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
         base.cenarios.map((c) => { const m = melhor(c);
           return `<tr><td>${esc(c.cenario)}</td><td>${c.noites}</td><td>${pct(c.chance_hoje)}</td>` +
             V.map(([v]) => `<td class="${v === m ? "melhor" : ""}">${usd(c[v])}</td>`).join("") + `<td>${pct(c.acertou_faixa)}</td></tr>`; }).join("") + "</tbody>";
-      setTxt("tr-lote-estado", `${base.n} noites, começando em Sim "${r.inicial}" a ${cents(r.entrada)} com ${usd(r.banca)}. ` +
+      setTxt("tr-lote-estado", `${base.n} noites, começando ${dinheiro ? "em dinheiro (espera o sinal)" : `em Sim "${r.inicial}" a ${cents(r.entrada)}`} com ${usd(r.banca)}. ` +
         "Cada noite pesa pela chance que o mercado dá hoje ao cenário dela (média, mediana e prejuízo).");
     } catch (e) { setTxt("tr-lote-estado", "Erro: " + e.message); }
     finally { $("tr-rodar").disabled = false; }
@@ -1412,10 +1433,10 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       else renderizar();
     }));
     $("b-entrada").value = entradaPadrao();
-    $("tr-inicial").innerHTML = FAIXAS.map((f) => `<option>${esc(f)}</option>`).join("");
+    $("tr-inicial").innerHTML = '<option value="dinheiro">Dinheiro (espera o sinal)</option>' + FAIXAS.map((f) => `<option>${esc(f)}</option>`).join("");
     const tsalvo = lerTradeSalvo();
     trade = Object.assign(trade, { inicial: pos.faixa, entrada: precoHoje(pos.faixa) },
-                          tsalvo && FAIXAS.includes(tsalvo.inicial) ? tsalvo : {});
+                          tsalvo && (FAIXAS.includes(tsalvo.inicial) || tsalvo.inicial === "dinheiro") ? tsalvo : {});
     mostrarTrade();
     if (!temChart()) setTxt("tab-nota", "Os gráficos precisam da internet (Chart.js); o resto do painel funciona sem eles.");
     criarGraficos();

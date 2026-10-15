@@ -466,10 +466,12 @@ class Contexto:
         if ritmo not in RITMOS:
             raise ValueError(f"ritmo desconhecido: {ritmo}")
         inicial = d.get("inicial") or "F <4%"
-        if inicial not in NOMES_FAIXAS:
+        if inicial == "dinheiro":  # começa sem posição e espera o sinal de compra
+            inicial = None
+        elif inicial not in NOMES_FAIXAS:
             raise ValueError(f"faixa desconhecida: {inicial}")
         regra = trade.Regra(inicial=inicial,
-                            entrada=min(max(numero(d.get("entrada"), PRECO_HOJE[inicial]), 0.01), 0.99),
+                            entrada=min(max(numero(d.get("entrada"), PRECO_HOJE.get(inicial, 0.5)), 0.01), 0.99),
                             banca=max(numero(d.get("banca"), 100.0), 1.0),
                             limiar=min(max(numero(d.get("limiar"), 0.7), 0.0), 1.0),
                             vantagem=numero(d.get("vantagem"), 0.05),
