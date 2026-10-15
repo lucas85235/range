@@ -8,9 +8,9 @@
 Ao vivo, roda o mesmo monitor do terminal (monitor.py) a cada 40 s, com os preços públicos da
 Polymarket, e grava o log em dados/ao_vivo/<sessão>/. Com --retomar (ou o botão da aba ao vivo),
 recarrega os ciclos do log e refaz o modelo com os retratos da sessão. Na simulação, gera uma apuração sintética
-do 2º turno (como rodar_simulacoes.py) e a reproduz em tempo acelerado, servindo ao monitor os
-mesmos JSON do TSE (replay_tse.py) direto da memória. O preço de mercado da simulação é o de
-banca.py: mistura do preço de hoje com a chance do modelo.
+do 2º turno (como estudos/rodar_simulacoes.py) e a reproduz em tempo acelerado, servindo ao monitor os
+mesmos JSON do TSE (nucleo/replay_tse.py) direto da memória. O preço de mercado da simulação
+é o de nucleo/mercado_sim.py: mistura do preço de hoje com a chance do modelo.
 
 A página (painel.html) calcula a posição, o plano de venda, os alertas e a banca simulada a
 partir dos ciclos que este servidor entrega. Só leitura: nada aqui envia ordens.
@@ -35,14 +35,14 @@ from urllib.parse import parse_qs, urlparse
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from banca import ATRASO, PRECO_HOJE, RITMOS  # noqa: E402
-from dados_eleicao import secoes  # noqa: E402
-from fonte_tse import URL_OFICIAL, FonteTSE  # noqa: E402
-from modelo import NOMES_FAIXAS, faixa_provavel  # noqa: E402
-from monitor import (AO_VIVO, BRT, Degrau, Monitor, achar_sessao, carregar_base, carregar_params,  # noqa: E402
-                     conferir_sessao, ler_log, retratos)
-from replay_tse import GRADE, Replay, passo, responder  # noqa: E402
-from simulacao import gerar_apuracao, sortear_cenario  # noqa: E402
+from nucleo.dados_eleicao import secoes  # noqa: E402
+from nucleo.fonte_tse import URL_OFICIAL, FonteTSE  # noqa: E402
+from nucleo.mercado_sim import PRECO_HOJE, RITMOS, mercado_sim, sortear_margem  # noqa: E402
+from nucleo.modelo import NOMES_FAIXAS, carregar_params, faixa_provavel  # noqa: E402
+from monitor import (AO_VIVO, BRT, Degrau, Monitor, achar_sessao, carregar_base, conferir_sessao,  # noqa: E402
+                     ler_log, retratos)
+from nucleo.replay_tse import GRADE, Replay, passo, responder  # noqa: E402
+from nucleo.simulacao import gerar_apuracao, sortear_cenario  # noqa: E402
 
 AQUI = Path(__file__).resolve().parent
 PASSO_SIM = 1.0  # minutos simulados entre ciclos (o TSE troca os arquivos a cada ~40 s)
@@ -71,26 +71,6 @@ def limpo(x):
     if isinstance(x, (float, np.floating)):
         return float(x) if math.isfinite(x) else None
     return x
-
-
-def sortear_margem(rng: np.random.Generator) -> float:
-    """Margem final pelas chances que o mercado dá hoje (uniforme dentro da faixa sorteada)."""
-    p = np.array([PRECO_HOJE[f] for f in NOMES_FAIXAS])
-    i = int(rng.choice(len(p), p=p / p.sum()))
-    a = (-16, -12, -8, -4, 0, 4, 8, 12)[i]
-    return float(rng.uniform(a, a + 4))
-
-
-def mercado_sim(probs: dict | None, t: float, ritmo: str) -> dict[str, list[float]]:
-    """{faixa: [bid, ask]} simulados: (1 - λ) * preço de hoje + λ * chance do modelo (banca.py)."""
-    par = RITMOS[ritmo]
-    relogio = t + ATRASO
-    lam = 1.0 if par is None else (1 - math.exp(-(relogio - par[0]) / par[1]) if relogio > par[0] else 0.0)
-    out = {}
-    for f in NOMES_FAIXAS:
-        p = PRECO_HOJE[f] if not probs else (1 - lam) * PRECO_HOJE[f] + lam * probs[f]
-        out[f] = [round(max(p - 0.01, 0.0), 4), round(min(p + 0.01, 1.0), 4)]
-    return out
 
 
 def linha_terminal(res: dict) -> str:
@@ -400,7 +380,7 @@ class Contexto:
 
     def trade_lote(self, d: dict) -> dict:
         """A regra de trade (trade.py) nas noites simuladas salvas, com os parâmetros da página."""
-        import trade
+        from estudos import trade
         with self._lock_dados:
             if getattr(self, "_noites", None) is None:
                 self._noites = trade.noites(self.params)

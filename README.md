@@ -7,12 +7,40 @@ vale a faixa de cima. Resolve pelo resultado oficial do TSE.
 Só leitura: o monitor consulta os JSON públicos do TSE e os preços públicos da Polymarket. Não
 envia ordens. O Brasil é "close-only" na Polymarket: qualquer venda é manual.
 
-## Resumo
+## Começo rápido
+
+Os comandos rodam da pasta que contém `eleicao/`. De dentro de `eleicao/`, tire o `eleicao/` do
+começo.
+
+```bash
+pip install -r eleicao/requirements.txt
+```
+
+No dia 25/10, a partir das 16h50: painel no navegador, já lendo o TSE (troque a faixa e o plano
+pelos seus):
+
+```bash
+python eleicao/painel.py --ao-vivo --faixa "F <4%" --degrau f90@2:100
+```
+
+Se o painel cair no meio da apuração, retome a mesma sessão:
+
+```bash
+python eleicao/painel.py --retomar ultima
+```
+
+Antes do dia, para ensaiar: abra o painel sem `--ao-vivo` e use as abas "Simulação" e "Trade
+(simulação)". Detalhes em [Como usar](#como-usar-no-dia-2510); o que cada pasta tem, em
+[Estrutura do projeto](#estrutura-do-projeto).
 
 Guia visual (como ler a tela, duas noites simuladas e o modelo contra o mercado):
 [Guia da apuração](https://claude.ai/artifact/SvkYDSc7NdFR23Sz2EjnyQ).
-Painel no navegador, ao vivo e com noites simuladas: `python eleicao/painel.py` (ver
-[Como usar](#como-usar-no-dia-2510)).
+
+**Conteúdo:** [Resumo](#resumo) · [O problema](#o-problema-a-parcial-do-tse-engana) ·
+[O modelo](#como-o-modelo-funciona) · [Backtest](#backtest) · [Limitações](#limitações) ·
+[Como usar](#como-usar-no-dia-2510) · [Estrutura do projeto](#estrutura-do-projeto)
+
+## Resumo
 
 - **A parcial do TSE engana muito no começo.** Na apuração real do 1º turno de 2026, ela passou
   duas horas mostrando Flávio +10 a +11 na disputa contra Lula. O resultado foi +2,0.
@@ -136,8 +164,8 @@ esse erro para ~1,3 ponto, mas foi desligado pelo motivo descrito acima.
 
 ### Modelo × Polymarket (noite real do 1º turno)
 
-`mercado_1t.py` baixa os preços, minuto a minuto, do mercado de margem do 1º turno (faixas de
-5 pontos, margem sobre todos os válidos). `comparar_mercado.py` roda o modelo como se fosse ao
+`coleta/mercado_1t.py` baixa os preços, minuto a minuto, do mercado de margem do 1º turno (faixas de
+5 pontos, margem sobre todos os válidos). `estudos/comparar_mercado.py` roda o modelo como se fosse ao
 vivo naquela noite. Na tabela, o modelo foi atrasado 5 minutos (publicação do TSE e download)
 e o mercado foi normalizado para as faixas somarem 100%. Resultado: Flávio +1,86, faixa
 "Flávio <5%".
@@ -201,7 +229,7 @@ diz 68%, sai em 74%; quando diz 83%, em 94%; quando diz 95%, em quase 100%.
 
 ![Quando a faixa certa passa de 90%](resultados/sim_2026_tempo90.png)
 
-### Regras de venda (`estrategia.py`)
+### Regras de venda (`estudos/estrategia.py`)
 
 Como o Brasil é close-only, a única decisão é segurar ou vender. Testei regras de venda em 47
 noites simuladas com a margem final a menos de 1 ponto de 4: 7 do lote geral e 40 de um lote só
@@ -227,7 +255,7 @@ Vender pela chance sozinha antecipa a venda, mas tira mais posições vencedoras
 resultados de teste, não recomendação de investimento: não sou consultor financeiro licenciado,
 e a decisão e o tamanho da posição são seus.
 
-### Em dinheiro: banca de US$100 (`banca.py`)
+### Em dinheiro: banca de US$100 (`estudos/banca.py`)
 
 Exemplo: US$100 em "F <4%" a 41¢ compram 244 cotas, e cada cota paga US$1 se a faixa ganhar.
 Segurando até o fim, você termina com US$244 ou US$0. Com uma regra de venda, quando ela
@@ -325,7 +353,7 @@ Dados (uma vez). O BU do 1º turno de 2026 tem ~5 GB, e a CDN do TSE limita a ve
 há muitas conexões:
 
 ```bash
-python eleicao/baixar_bu.py --ano 2026 --turno 1 --workers 2
+python eleicao/coleta/baixar_bu.py --ano 2026 --turno 1 --workers 2
 ```
 
 ### Painel no navegador
@@ -349,7 +377,7 @@ python eleicao/painel.py --faixa "F <4%" --degrau f90@2:100
   - A margem fica escondida até o fim ou até "Revelar resultado". Dá para pausar.
   - Banca simulada: venda 25%, 50% ou o resto no preço do momento. No fim, compara suas vendas,
     o plano e segurar até o fim.
-  - O preço da simulação vem de `banca.py`: vai do preço de hoje à chance do modelo, no ritmo
+  - O preço da simulação vem de `nucleo/mercado_sim.py`: vai do preço de hoje à chance do modelo, no ritmo
     escolhido ("como em 4/10", "mais esperto" ou "igual ao modelo", o pior caso para quem usa o
     modelo). Não é uma previsão do mercado.
 - **Sua posição** (faixa, Sim/Não, alerta e plano) muda na hora, vale para as duas abas e fica
@@ -421,7 +449,7 @@ simulação: nada aqui envia ordens.
 
   Tudo vale do ciclo do clique em diante.
 - **"Testar esta regra nas 100 noites simuladas salvas"** roda só a regra automática nas noites de
-  `banca.py`, nos três ritmos de mercado. É o mesmo cálculo de `python eleicao/trade.py`.
+  `estudos/banca.py`, nos três ritmos de mercado. É o mesmo cálculo de `python eleicao/estudos/trade.py`.
 
 Com a regra padrão, começando em Sim "F <4%" a 40,5¢ com US$100 (média ponderada pelas chances
 que o mercado dá hoje):
@@ -442,7 +470,7 @@ Ensaio de ponta a ponta com um 2º turno sintético de 2026 (margem +4,3), acele
 (17h–21h em 6 minutos):
 
 ```bash
-python eleicao/replay_tse.py --sintetico --ano-base 2026 --margem 4.3 --velocidade 40 --inicio -5
+python eleicao/nucleo/replay_tse.py --sintetico --ano-base 2026 --margem 4.3 --velocidade 40 --inicio -5
 ```
 
 ```bash
@@ -507,24 +535,43 @@ Limites do TSE: cada arquivo leva ~1 s e o servidor aceita ~15 por segundo por c
 conexões pioram. O monitor baixa até 450 municípios por ciclo, os mais atrasados primeiro. No
 replay de 2022, até 300 por minuto deixaram o modelo praticamente igual.
 
-## Arquivos
+## Estrutura do projeto
 
-| Arquivo | O que faz |
-|---|---|
-| `baixar_bu.py` | Baixa os Boletins de Urna (com hora de chegada) e reduz a um cargo (padrão: Presidente; `--cargo 11` = Prefeito), por seção |
-| `baixar_secao.py` | Baixa "votação por seção" (Presidente, todos os anos) |
-| `dados_eleicao.py` | Padroniza seções e municípios (F = candidato de direita, L = PT) |
-| `apuracao.py` | Reconstrói a apuração minuto a minuto, por município |
-| `modelo.py` | O modelo (transferência + ordem de chegada + incerteza) |
-| `simulacao.py` | Gera 2ºs turnos sintéticos seção a seção, com horários |
-| `backtest.py`, `rodar_simulacoes.py`, `relatorio.py` | Backtests, lotes de simulação, gráficos e tabelas |
-| `validar_2024.py` | Testa a ordem de chegada (w) nos 2ºs turnos de prefeito de 2024 |
-| `mercado_1t.py`, `comparar_mercado.py` | Preços da Polymarket na noite do 1º turno e comparação com o modelo |
-| `estrategia.py` | Testa regras de venda nas simulações e na noite real |
-| `banca.py` | Quanto sobra de uma banca com cada regra, por cenário e na média |
-| `guia_dados.py`, `guia_pagina.py`, `guia_template.html` | Dados e página do guia visual (noites simuladas e noite real) |
-| `fonte_tse.py`, `monitor.py` | Leitura do TSE e monitor ao vivo |
-| `painel.py`, `painel.html` | Painel no navegador: monitor ao vivo e noites simuladas |
-| `trade.py` | Regra da carteira que troca de faixa (aba Trade do painel) e o teste nas noites salvas |
-| `replay_tse.py` | Servidor local que imita o TSE para ensaiar |
-| `calibracao.json` | Parâmetros congelados que o monitor usa |
+```
+eleicao/
+├── painel.py, painel.html   painel no navegador (ao vivo, simulação e trade) — o que se usa no dia 25
+├── monitor.py               o mesmo monitor no terminal; a classe Monitor que o painel usa
+├── calibracao.json          parâmetros do modelo congelados (não mexer sem novo backtest)
+├── requirements.txt
+├── nucleo/                  a base que todo o resto importa
+│   ├── caminhos.py          onde ficam dados/, resultados/ e a calibração
+│   ├── dados_eleicao.py     padroniza seções e municípios (F = candidato de direita, L = PT)
+│   ├── apuracao.py          reconstrói a apuração minuto a minuto, por município
+│   ├── modelo.py            o modelo (transferência + ordem de chegada + incerteza)
+│   ├── simulacao.py         gera 2ºs turnos sintéticos seção a seção, com horários
+│   ├── fonte_tse.py         lê os JSON públicos do TSE
+│   ├── replay_tse.py        servidor local que imita o TSE, para ensaiar
+│   └── mercado_sim.py       preço de mercado das noites simuladas (preço de hoje → modelo)
+├── coleta/                  baixa os dados públicos
+│   ├── baixar_bu.py         boletins de urna, com hora de chegada (--cargo 11 = prefeito)
+│   ├── baixar_secao.py      votação por seção (Presidente, todos os anos)
+│   └── mercado_1t.py        preços da Polymarket na noite do 1º turno
+├── estudos/                 testes do modelo e das regras; cada um grava em resultados/
+│   ├── backtest.py          o modelo em apurações reais (hora do BU) e sorteadas
+│   ├── relatorio.py         gráficos e tabelas do backtest (real e simulado) para este README
+│   ├── rodar_simulacoes.py  lotes de noites simuladas
+│   ├── validar_2024.py      ordem de chegada (w) nos 2ºs turnos de prefeito de 2024
+│   ├── comparar_mercado.py  modelo × Polymarket na noite do 1º turno
+│   ├── estrategia.py        regras de venda nas simulações e na noite real
+│   ├── banca.py             quanto sobra de US$100 com cada regra
+│   └── trade.py             carteira que troca de faixa (a aba Trade do painel)
+├── guia/                    guia visual publicado (guia_dados.py → guia_pagina.py)
+├── dados/                   dados baixados (fora do git, menos ao_vivo/ e polymarket_1t)
+│   └── ao_vivo/             cada sessão do monitor/painel: log, retratos e sessao.json
+└── resultados/              tabelas, gráficos e dados que os estudos geram
+```
+
+Os scripts de `coleta/`, `estudos/` e `guia/` rodam direto (`python eleicao/estudos/banca.py`) e
+acham a raiz do projeto sozinhos. Em `resultados/`, o prefixo diz quem gerou: `real_*` e
+`tabelas.md` (relatorio), `sim_*` (rodar_simulacoes), `mercado_1t_*` (comparar_mercado),
+`estrategia*` (estrategia), `banca*` (banca), `validacao_2024*` (validar_2024) e `guia_*` (guia).

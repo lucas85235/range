@@ -21,34 +21,22 @@ import os
 import re
 import sys
 import time
-from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
 import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from dados_eleicao import DADOS, base_turno, secoes  # noqa: E402
-from fonte_tse import URL_OFICIAL, FonteTSE  # noqa: E402
-from modelo import (NOMES_FAIXAS, Ordem1T, Params, Transferencia, faixa_provavel, faixas_cobertas,  # noqa: E402
-                    ingenuo, prob_faixas)
+from nucleo.dados_eleicao import DADOS, base_turno, secoes  # noqa: E402
+from nucleo.fonte_tse import URL_OFICIAL, FonteTSE  # noqa: E402
+from nucleo.modelo import (NOMES_FAIXAS, Ordem1T, Params, Transferencia, carregar_params,  # noqa: E402
+                           faixa_provavel, faixas_cobertas, ingenuo, prob_faixas)
 
 UFS = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB",
        "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO", "ZZ"]
 BRT = dt.timezone(dt.timedelta(hours=-3))
 SLUG = "brazil-presidential-election-second-round-margin-of-victory"
-PARAMS_PADRAO = Params()  # substituído pela calibração (ver calibracao.json)
 AO_VIVO = DADOS / "ao_vivo"
-
-
-def carregar_params() -> Params:
-    arq = Path(__file__).resolve().parent / "calibracao.json"
-    if arq.exists():
-        d = json.loads(arq.read_text(encoding="utf-8")).get("params", {})
-        if "ws" in d:
-            d["ws"] = tuple(d["ws"])
-        return replace(PARAMS_PADRAO, **d)
-    return PARAMS_PADRAO
 
 
 def minutos_desde_17h(data: str, hora: str) -> float | None:

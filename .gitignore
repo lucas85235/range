@@ -13,7 +13,9 @@ dados/secao_*.parquet
 dados/log_*.txt
 
 # Mantém o que não dá pra rebaixar: capturas ao vivo e snapshot do mercado
-# (dados/ao_vivo/ e dados/polymarket_1t.parquet seguem versionados)
+# (dados/ao_vivo/ e dados/polymarket_1t.parquet seguem versionados). A trava só vale enquanto
+# um monitor/painel está com a sessão aberta.
+dados/ao_vivo/*/.trava
 
 # Editor / SO
 .vscode/
