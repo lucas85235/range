@@ -297,21 +297,38 @@ Noite real do 1º turno, US$100 comprados às 17h a preço real:
 
 ### Bateria de testes: qual estratégia é melhor (`estudos/bateria.py`)
 
-Todas as estratégias nas mesmas noites (100 simuladas e 2 apurações reais), em quatro mercados:
-os três ritmos e um que **sabe mais que o modelo** (metade do erro dele, sem atraso: o caso em que
-o mercado tem informação melhor). Relatório completo: [resultados/bateria.md](resultados/bateria.md).
+Todas as estratégias nas mesmas noites (100 simuladas e 2 apurações reais), em cinco mercados: os
+três ritmos; um que **sabe mais que o modelo** (metade do erro dele, sem atraso: o mercado tem
+informação melhor); e um que **segue a parcial do TSE** (uma multidão que lê a parcial como ruído
+sem viés, sem modelo nenhum). Relatório completo: [resultados/bateria.md](resultados/bateria.md).
+
+**O que o mercado seguiu na noite real de 4/10.** O mercado não tem o modelo, mas também não leu
+a parcial ao pé da letra. A parcial mostrou Flávio +10 por duas horas; quem a seguisse levaria o
+preço para "Flávio 5-10%". O mercado foi para "Flávio <5%" (a faixa certa), só que 30 a 60 min
+depois do modelo. Ajustando o preço real de cada faixa, minuto a minuto, de 17h a 21h:
+
+| Como o mercado formou o preço | Erro médio por faixa |
+|---|---|
+| segue a parcial do TSE (melhor ajuste) | 10,3¢ |
+| vai atrás do modelo: começa 30 min depois das 17h, τ = 35 min | 2,9¢ |
+| a melhor mistura: 10% parcial + 90% atrás do modelo | 2,7¢ |
+
+Ou seja, alguém no mercado corrige o viés da ordem de chegada, só que devagar. O ritmo "como em
+4/10" é esse ajuste. "Mais esperto" supõe que o mercado aprendeu com o 1º turno e reage mais
+rápido. "Igual ao modelo" e "sabe mais" são testes de estresse. "Segue a parcial" é o otimista, e
+não foi o que aconteceu em 4/10.
 
 Começando com US$100 em Sim "F <4%" (média ponderada pelas chances de hoje; entre parênteses, a
 chance de terminar com prejuízo):
 
-| Estratégia | como em 4/10 | mais esperto | igual ao modelo | sabe mais que o modelo |
-|---|---|---|---|---|
-| Segurar até o fim | US$ 95 (61%) | US$ 95 (61%) | US$ 95 (61%) | US$ 95 (61%) |
-| Faixa de 90% sai da sua (só vende) | US$ 137 (62%) | US$ 114 (62%) | US$ 98 (62%) | US$ 99 (62%) |
-| Chance ≤ 20% desde 5% (só vende) | US$ 151 (62%) | US$ 117 (62%) | US$ 104 (62%) | US$ 106 (62%) |
-| Trade com posição, limiar 70% | US$ 344 (7%) | US$ 151 (34%) | US$ 104 (65%) | US$ 105 (65%) |
-| Trade em dinheiro, limiar 70% | US$ 349 (6%) | US$ 159 (10%) | US$ 100 (0%) | US$ 99 (12%) |
-| Trade em dinheiro, limiar 80% | US$ 312 (3%) | US$ 143 (5%) | US$ 100 (0%) | US$ 103 (5%) |
+| Estratégia | como em 4/10 | mais esperto | igual ao modelo | sabe mais que o modelo | segue a parcial do TSE |
+|---|---|---|---|---|---|
+| Segurar até o fim | US$ 95 (61%) | US$ 95 (61%) | US$ 95 (61%) | US$ 95 (61%) | US$ 95 (61%) |
+| Faixa de 90% sai da sua (só vende) | US$ 137 (62%) | US$ 114 (62%) | US$ 98 (62%) | US$ 99 (62%) | US$ 148 (52%) |
+| Chance ≤ 20% desde 5% (só vende) | US$ 151 (62%) | US$ 117 (62%) | US$ 104 (62%) | US$ 106 (62%) | US$ 146 (62%) |
+| Trade com posição, limiar 70% | US$ 344 (7%) | US$ 151 (34%) | US$ 104 (65%) | US$ 105 (65%) | US$ 332 (1%) |
+| Trade em dinheiro, limiar 70% | US$ 349 (6%) | US$ 159 (10%) | US$ 100 (0%) | US$ 99 (12%) | US$ 382 (0%) |
+| Trade em dinheiro, limiar 80% | US$ 312 (3%) | US$ 143 (5%) | US$ 100 (0%) | US$ 103 (5%) | US$ 380 (0%) |
 
 **Vieses encontrados:**
 

@@ -2,6 +2,26 @@
 
 Gerado por `estudos/bateria.py`. Todas começam com US$100; posição comprada ao preço de hoje (F <4% a 40,5¢, F 4-8% a 32,5¢). Média, mediana e prejuízo pesam cada noite pela chance que o mercado dá hoje ao cenário dela. Mercados: os três ritmos (o preço vai atrás do modelo) e um que sabe mais que o modelo (metade do erro dele, sem atraso).
 
+## 0. O que o mercado seguiu na noite real do 1º turno (4/10)
+
+Erro médio do preço de cada faixa, minuto a minuto, de 17h a 21h: **segue a parcial 10.3¢** (melhor ajuste: ruído k = 4.0); **vai atrás do modelo 2.9¢** (começa 30 min depois das 17h, τ = 35 min); a melhor mistura das duas é 10% parcial + 90% modelo (2.7¢). A parcial mostrou Flávio +10 por duas horas; quem a lesse assim levaria o preço para "F 5-10%". O mercado foi para a faixa certa, só que 30 a 60 minutos depois do modelo.
+
+| trecho | segue a parcial | vai atrás do modelo | preço parado (de antes) |
+|---|---|---|---|
+| 17h00–17h30 | 3.6¢ | 1.7¢ | 1.9¢ |
+| 17h30–18h00 | 12.1¢ | 3.8¢ | 16.4¢ |
+| 18h00–19h00 | 12.9¢ | 4.8¢ | 27.2¢ |
+| 19h00–21h00 | 9.2¢ | 0.8¢ | 33.4¢ |
+
+| hora | apurado | parcial do TSE | "F <5%" no mercado | se seguisse a parcial | se fosse atrás do modelo | modelo |
+|---|---|---|---|---|---|---|
+| 17h15 | 1% | F +2.5 | 31% | 32% | 29% | 63% |
+| 17h30 | 2% | F +7.5 | 34% | 33% | 38% | 96% |
+| 17h45 | 7% | F +9.8 | 67% | 37% | 59% | 97% |
+| 18h00 | 14% | F +10.4 | 71% | 44% | 72% | 97% |
+| 18h30 | 34% | F +9.4 | 81% | 58% | 89% | 100% |
+| 19h00 | 59% | F +7.6 | 93% | 65% | 95% | 100% |
+
 ## 1. Resultado por mercado — começando em Sim "F <4%"
 
 | mercado | estratégia | média | mediana | 10% piores | prejuízo | perde > metade | operou |
@@ -38,6 +58,14 @@ Gerado por `estudos/bateria.py`. Todas começam com US$100; posição comprada a
 | sabe mais que o modelo | Stop no preço (vende se o preço < 15¢) | US$ 110 | US$ 33 | US$ 11 | 61% | 61% | 61% |
 | sabe mais que o modelo | Trade com posição | US$ 105 | US$ 56 | US$ 0 | 65% | 48% | 65% |
 | sabe mais que o modelo | Trade em dinheiro | US$ 99 | US$ 100 | US$ 64 | 12% | 9% | 31% |
+| segue a parcial do TSE | Segurar até o fim | US$ 95 | US$ 0 | US$ 0 | 61% | 61% | 0% |
+| segue a parcial do TSE | Chance ≤ 20% (desde 5%) | US$ 146 | US$ 88 | US$ 83 | 62% | 1% | 62% |
+| segue a parcial do TSE | Chance ≤ 20% (desde 20%) | US$ 143 | US$ 95 | US$ 67 | 62% | 1% | 62% |
+| segue a parcial do TSE | Faixa de 90% sai da sua | US$ 148 | US$ 99 | US$ 84 | 52% | 3% | 62% |
+| segue a parcial do TSE | Escalonada | US$ 146 | US$ 92 | US$ 83 | 62% | 1% | 64% |
+| segue a parcial do TSE | Stop no preço (vende se o preço < 15¢) | US$ 112 | US$ 34 | US$ 32 | 63% | 63% | 63% |
+| segue a parcial do TSE | Trade com posição | US$ 332 | US$ 263 | US$ 247 | 1% | 1% | 65% |
+| segue a parcial do TSE | Trade em dinheiro | US$ 382 | US$ 306 | US$ 266 | 0% | 0% | 100% |
 
 ## 1. Resultado por mercado — começando em Sim "F 4-8%"
 
@@ -75,6 +103,14 @@ Gerado por `estudos/bateria.py`. Todas começam com US$100; posição comprada a
 | sabe mais que o modelo | Stop no preço (vende se o preço < 15¢) | US$ 116 | US$ 39 | US$ 20 | 69% | 69% | 69% |
 | sabe mais que o modelo | Trade com posição | US$ 100 | US$ 27 | US$ 0 | 69% | 59% | 74% |
 | sabe mais que o modelo | Trade em dinheiro | US$ 99 | US$ 100 | US$ 64 | 12% | 9% | 31% |
+| segue a parcial do TSE | Segurar até o fim | US$ 95 | US$ 0 | US$ 0 | 69% | 69% | 0% |
+| segue a parcial do TSE | Chance ≤ 20% (desde 5%) | US$ 165 | US$ 99 | US$ 92 | 54% | 0% | 70% |
+| segue a parcial do TSE | Chance ≤ 20% (desde 20%) | US$ 172 | US$ 116 | US$ 95 | 18% | 0% | 69% |
+| segue a parcial do TSE | Faixa de 90% sai da sua | US$ 167 | US$ 95 | US$ 90 | 52% | 1% | 69% |
+| segue a parcial do TSE | Escalonada | US$ 165 | US$ 100 | US$ 92 | 51% | 0% | 71% |
+| segue a parcial do TSE | Stop no preço (vende se o preço < 15¢) | US$ 117 | US$ 41 | US$ 36 | 71% | 71% | 67% |
+| segue a parcial do TSE | Trade com posição | US$ 364 | US$ 308 | US$ 243 | 2% | 1% | 74% |
+| segue a parcial do TSE | Trade em dinheiro | US$ 382 | US$ 306 | US$ 266 | 0% | 0% | 100% |
 
 ## 2. Por cenário (mercado "mais esperto", Sim "F <4%")
 
@@ -184,24 +220,24 @@ Erro = margem prevista − resultado (> 0: puxa para Flávio). |z| > 1,64 deveri
 
 Resultados: 2º turno de 2022: L <4% (F -1.8), 1º turno de 2026: F <4% (F +2.0).
 
-| apuração | estratégia | como em 4/10 | mais esperto | igual ao modelo | sabe mais que o modelo |
-|---|---|---|---|---|---|
-| 2º turno de 2022 | Segurar até o fim | US$ 0 | US$ 0 | US$ 0 | US$ 0 |
-| 2º turno de 2022 | Chance ≤ 20% (desde 5%) | US$ 98 | US$ 35 | US$ 12 | US$ 8 |
-| 2º turno de 2022 | Chance ≤ 20% (desde 20%) | US$ 43 | US$ 4 | US$ 0 | US$ 0 |
-| 2º turno de 2022 | Faixa de 90% sai da sua | US$ 98 | US$ 44 | US$ 5 | US$ 8 |
-| 2º turno de 2022 | Escalonada | US$ 97 | US$ 33 | US$ 10 | US$ 7 |
-| 2º turno de 2022 | Stop no preço (vende se o preço < 15¢) | US$ 34 | US$ 34 | US$ 21 | US$ 29 |
-| 2º turno de 2022 | Trade com posição | US$ 500 | US$ 73 | US$ 5 | US$ 8 |
-| 2º turno de 2022 | Trade em dinheiro | US$ 513 | US$ 168 | US$ 100 | US$ 100 |
-| 1º turno de 2026 | Segurar até o fim | US$ 247 | US$ 247 | US$ 247 | US$ 247 |
-| 1º turno de 2026 | Chance ≤ 20% (desde 5%) | US$ 247 | US$ 247 | US$ 247 | US$ 247 |
-| 1º turno de 2026 | Chance ≤ 20% (desde 20%) | US$ 247 | US$ 247 | US$ 247 | US$ 247 |
-| 1º turno de 2026 | Faixa de 90% sai da sua | US$ 247 | US$ 247 | US$ 247 | US$ 247 |
-| 1º turno de 2026 | Escalonada | US$ 188 | US$ 186 | US$ 185 | US$ 238 |
-| 1º turno de 2026 | Stop no preço (vende se o preço < 15¢) | US$ 247 | US$ 247 | US$ 2 | US$ 31 |
-| 1º turno de 2026 | Trade com posição | US$ 46 | US$ 69 | US$ 65 | US$ 1 |
-| 1º turno de 2026 | Trade em dinheiro | US$ 54 | US$ 100 | US$ 100 | US$ 0 |
+| apuração | estratégia | como em 4/10 | mais esperto | igual ao modelo | sabe mais que o modelo | segue a parcial do TSE |
+|---|---|---|---|---|---|---|
+| 2º turno de 2022 | Segurar até o fim | US$ 0 | US$ 0 | US$ 0 | US$ 0 | US$ 0 |
+| 2º turno de 2022 | Chance ≤ 20% (desde 5%) | US$ 98 | US$ 35 | US$ 12 | US$ 8 | US$ 87 |
+| 2º turno de 2022 | Chance ≤ 20% (desde 20%) | US$ 43 | US$ 4 | US$ 0 | US$ 0 | US$ 96 |
+| 2º turno de 2022 | Faixa de 90% sai da sua | US$ 98 | US$ 44 | US$ 5 | US$ 8 | US$ 86 |
+| 2º turno de 2022 | Escalonada | US$ 97 | US$ 33 | US$ 10 | US$ 7 | US$ 88 |
+| 2º turno de 2022 | Stop no preço (vende se o preço < 15¢) | US$ 34 | US$ 34 | US$ 21 | US$ 29 | US$ 34 |
+| 2º turno de 2022 | Trade com posição | US$ 500 | US$ 73 | US$ 5 | US$ 8 | US$ 487 |
+| 2º turno de 2022 | Trade em dinheiro | US$ 513 | US$ 168 | US$ 100 | US$ 100 | US$ 565 |
+| 1º turno de 2026 | Segurar até o fim | US$ 247 | US$ 247 | US$ 247 | US$ 247 | US$ 247 |
+| 1º turno de 2026 | Chance ≤ 20% (desde 5%) | US$ 247 | US$ 247 | US$ 247 | US$ 247 | US$ 247 |
+| 1º turno de 2026 | Chance ≤ 20% (desde 20%) | US$ 247 | US$ 247 | US$ 247 | US$ 247 | US$ 247 |
+| 1º turno de 2026 | Faixa de 90% sai da sua | US$ 247 | US$ 247 | US$ 247 | US$ 247 | US$ 247 |
+| 1º turno de 2026 | Escalonada | US$ 188 | US$ 186 | US$ 185 | US$ 238 | US$ 191 |
+| 1º turno de 2026 | Stop no preço (vende se o preço < 15¢) | US$ 247 | US$ 247 | US$ 2 | US$ 31 | US$ 247 |
+| 1º turno de 2026 | Trade com posição | US$ 46 | US$ 69 | US$ 65 | US$ 1 | US$ 428 |
+| 1º turno de 2026 | Trade em dinheiro | US$ 54 | US$ 100 | US$ 100 | US$ 0 | US$ 496 |
 
 ### Noite real do 1º turno com os preços reais da Polymarket (faixas de 5 pontos)
 
@@ -230,13 +266,13 @@ Resultados: 2º turno de 2022: L <4% (F -1.8), 1º turno de 2026: F <4% (F +2.0)
 
 No 1º turno de 2026 o modelo ficou ~2 pontos pró-Flávio por horas (seção 3). Com limiar baixo, o trade compra "F 4-8%" nesse erro; com limiar mais alto, ele espera. Começando em Sim "F <4%" (com posição) ou em dinheiro.
 
-| variante | limiar | simulações, como em 4/10 | simulações, mais esperto | simulações, sabe mais que o modelo | 2º turno de 2022, mais esperto | 1º turno de 2026, como em 4/10 | 1º turno de 2026, sabe mais que o modelo |
-|---|---|---|---|---|---|---|---|
-| Trade em dinheiro | 60% | US$ 354 (3% prejuízo) | US$ 175 (11% prejuízo) | US$ 98 (14% prejuízo) | US$ 168 | US$ 71 | US$ 8 |
-| Trade em dinheiro | 70% | US$ 349 (6% prejuízo) | US$ 159 (10% prejuízo) | US$ 99 (12% prejuízo) | US$ 168 | US$ 54 | US$ 0 |
-| Trade em dinheiro | 80% | US$ 312 (3% prejuízo) | US$ 143 (5% prejuízo) | US$ 103 (5% prejuízo) | US$ 168 | US$ 100 | US$ 100 |
-| Trade em dinheiro | 90% | US$ 222 (1% prejuízo) | US$ 118 (1% prejuízo) | US$ 102 (1% prejuízo) | US$ 158 | US$ 100 | US$ 100 |
-| Trade com posição | 60% | US$ 347 (4% prejuízo) | US$ 163 (31% prejuízo) | US$ 105 (65% prejuízo) | US$ 73 | US$ 76 | US$ 14 |
-| Trade com posição | 70% | US$ 344 (7% prejuízo) | US$ 151 (34% prejuízo) | US$ 105 (65% prejuízo) | US$ 73 | US$ 46 | US$ 1 |
-| Trade com posição | 80% | US$ 303 (12% prejuízo) | US$ 135 (53% prejuízo) | US$ 107 (62% prejuízo) | US$ 73 | US$ 247 | US$ 247 |
-| Trade com posição | 90% | US$ 210 (32% prejuízo) | US$ 112 (62% prejuízo) | US$ 102 (62% prejuízo) | US$ 67 | US$ 247 | US$ 247 |
+| variante | limiar | simulações, como em 4/10 | simulações, mais esperto | simulações, sabe mais que o modelo | simulações, segue a parcial do TSE | 2º turno de 2022, mais esperto | 1º turno de 2026, como em 4/10 | 1º turno de 2026, sabe mais que o modelo |
+|---|---|---|---|---|---|---|---|---|
+| Trade em dinheiro | 60% | US$ 354 (3% prejuízo) | US$ 175 (11% prejuízo) | US$ 98 (14% prejuízo) | US$ 380 (1% prejuízo) | US$ 168 | US$ 71 | US$ 8 |
+| Trade em dinheiro | 70% | US$ 349 (6% prejuízo) | US$ 159 (10% prejuízo) | US$ 99 (12% prejuízo) | US$ 382 (0% prejuízo) | US$ 168 | US$ 54 | US$ 0 |
+| Trade em dinheiro | 80% | US$ 312 (3% prejuízo) | US$ 143 (5% prejuízo) | US$ 103 (5% prejuízo) | US$ 380 (0% prejuízo) | US$ 168 | US$ 100 | US$ 100 |
+| Trade em dinheiro | 90% | US$ 222 (1% prejuízo) | US$ 118 (1% prejuízo) | US$ 102 (1% prejuízo) | US$ 417 (0% prejuízo) | US$ 158 | US$ 100 | US$ 100 |
+| Trade com posição | 60% | US$ 347 (4% prejuízo) | US$ 163 (31% prejuízo) | US$ 105 (65% prejuízo) | US$ 329 (3% prejuízo) | US$ 73 | US$ 76 | US$ 14 |
+| Trade com posição | 70% | US$ 344 (7% prejuízo) | US$ 151 (34% prejuízo) | US$ 105 (65% prejuízo) | US$ 332 (1% prejuízo) | US$ 73 | US$ 46 | US$ 1 |
+| Trade com posição | 80% | US$ 303 (12% prejuízo) | US$ 135 (53% prejuízo) | US$ 107 (62% prejuízo) | US$ 323 (6% prejuízo) | US$ 73 | US$ 247 | US$ 247 |
+| Trade com posição | 90% | US$ 210 (32% prejuízo) | US$ 112 (62% prejuízo) | US$ 102 (62% prejuízo) | US$ 357 (9% prejuízo) | US$ 67 | US$ 247 | US$ 247 |

@@ -8,9 +8,12 @@ Estratégias (todas começam com US$100):
     stop no preço (vende se o preço < 15¢);
   trade com posição: vende e compra a favorita do modelo (estudos/trade.py, regra padrão);
   trade em dinheiro: começa sem posição e só compra no sinal.
-Mercados: os três ritmos de nucleo/mercado_sim.py (o preço vai atrás do modelo) e um "mercado que
-sabe mais": o preço vem de uma estimativa com metade do erro do modelo, sem atraso.
+Mercados: os três ritmos de nucleo/mercado_sim.py (o preço vai atrás do modelo); um "mercado que
+sabe mais": o preço vem de uma estimativa com metade do erro do modelo, sem atraso; e um que "segue a
+parcial do TSE": uma multidão que junta o preço de antes com a parcial, tomando a parcial como ruído
+sem viés (o lado que ela favorece no começo vira preço).
 Testes:
+  0. o que o mercado seguiu na noite real de 4/10: a parcial ou o modelo com atraso;
   1. resultado de cada estratégia em cada mercado;
   2. por cenário de resultado;
   3. viés do modelo por fase da apuração, nas simulações e nas apurações reais;
@@ -28,6 +31,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from scipy import stats
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # raiz do projeto
 from estudos import trade  # noqa: E402
@@ -40,7 +44,10 @@ from nucleo.modelo import NOMES_FAIXAS, carregar_params, faixa_provavel  # noqa:
 
 BANCA = 100.0
 SABE_MAIS = "sabe mais que o modelo"
-MERCADOS = [*RITMOS, SABE_MAIS]
+PARCIAL = "segue a parcial do TSE"
+MERCADOS = [*RITMOS, SABE_MAIS, PARCIAL]
+K_MULTIDAO = 4.0  # ruído que a multidão atribui à parcial: k * sqrt(falta / apurado); ajustado em 4/10
+CENTROS = np.array([-14.0, -10, -6, -2, 2, 6, 10, 14])  # centro de cada faixa do 2º turno (as abertas, em ±14)
 BASE = "mais esperto"  # o mercado de referência das tabelas por cenário e de parâmetros
 VENDA = [(NOME_CURTO[r.nome], r, None) for r in REGRAS_BANCA] + [(NOME_CURTO["stop no preço"], None, 0.15)]
 TRADE = ["Trade com posição", "Trade em dinheiro"]
@@ -49,7 +56,33 @@ FASES = [0, 2, 5, 10, 20, 35, 50, 70, 90, 100.01]
 
 
 # ---------- noites ----------
-def preparar(t, ap, mu, sd, final, gl, nome) -> dict:
+def faixas_normal(mu: np.ndarray, sd: np.ndarray, cortes) -> np.ndarray:
+    cdf = stats.norm.cdf((np.asarray(cortes, float)[None, :] - mu[:, None]) / np.maximum(sd[:, None], 1e-6))
+    n = len(mu)
+    return np.diff(np.hstack([np.zeros((n, 1)), cdf, np.ones((n, 1))]), axis=1)
+
+
+def multidao(parcial: np.ndarray, ap: np.ndarray, m0: float, s0: float, k: float = K_MULTIDAO):
+    """Margem que a multidão estima só com o preço de antes (m0 ± s0) e a parcial do TSE, que ela
+    acha ser ruído sem viés: dp = k * sqrt(falta / apurado). (média, dp) por minuto."""
+    a = np.clip(np.asarray(ap, float), 1e-4, 1.0)
+    s_sig = k * np.sqrt((1 - a) / a)
+    w = (1 / s_sig ** 2) / (1 / s_sig ** 2 + 1 / s0 ** 2)
+    ok = np.isfinite(parcial)
+    mu = np.where(ok, w * np.nan_to_num(parcial) + (1 - w) * m0, m0)
+    sd = np.where(ok, np.sqrt(1 / (1 / s_sig ** 2 + 1 / s0 ** 2)), s0)
+    return mu, sd
+
+
+def a_priori_hoje() -> tuple[float, float]:
+    """Média e dp da margem pelos preços de hoje (centro de cada faixa)."""
+    q = np.array([PRECO_HOJE[f] for f in NOMES_FAIXAS])
+    q = q / q.sum()
+    m0 = float(np.sum(q * CENTROS))
+    return m0, float(np.sqrt(np.sum(q * (CENTROS - m0) ** 2)))
+
+
+def preparar(t, ap, mu, sd, final, gl, nome, parcial) -> dict:
     """Uma noite com as chances do modelo e os preços de cada mercado."""
     probs = trade.probs_linhas(mu, sd, gl)
     mercados = {}
@@ -59,6 +92,10 @@ def preparar(t, ap, mu, sd, final, gl, nome) -> dict:
     # mercado que sabe mais: centro na metade do caminho entre o modelo e o resultado, sem atraso
     inf = trade.probs_linhas(final + 0.5 * (mu - final), sd, gl)
     mercados[SABE_MAIS] = (np.maximum(inf - 0.01, 0.0), np.minimum(inf + 0.01, 1.0))
+    # mercado que segue a parcial do TSE (o que acontece se o mercado só olhar a parcial)
+    m0, s0 = a_priori_hoje()
+    pm = faixas_normal(*multidao(parcial, ap / 100, m0, s0), [-12, -8, -4, 0, 4, 8, 12])
+    mercados[PARCIAL] = (np.maximum(pm - 0.01, 0.0), np.minimum(pm + 0.01, 1.0))
     return {"nome": nome, "t": t, "ap": ap, "mu": mu, "sd": sd, "final": final,
             "fx": trade.faixa_de(final), "probs": probs, "mercados": mercados}
 
@@ -69,7 +106,7 @@ def noites_sim(p) -> list[dict]:
     for sim, g in d.groupby("sim"):
         g = g.sort_values("t")
         out.append(preparar(g["t"].to_numpy(float), g["apurado"].to_numpy(float), g["mu"].to_numpy(float),
-                            g["sd"].to_numpy(float), float(g["final"].iloc[0]), p.gl, sim))
+                            g["sd"].to_numpy(float), float(g["final"].iloc[0]), p.gl, sim, g["ingenuo"].to_numpy(float)))
     return out
 
 
@@ -80,7 +117,7 @@ def noites_reais(p) -> list[dict]:
         d = pd.read_csv(RES / f"{arq}.csv").dropna(subset=["mu"]).sort_values("t")
         d["sd"] = sd_atual(d, p)
         out.append(preparar(d["t"].to_numpy(float), d["apurado"].to_numpy(float), d["mu"].to_numpy(float),
-                            d["sd"].to_numpy(float), float(d["final"].iloc[0]), p.gl, nome))
+                            d["sd"].to_numpy(float), float(d["final"].iloc[0]), p.gl, nome, d["ingenuo"].to_numpy(float)))
     return out
 
 
@@ -243,11 +280,63 @@ def parametros(noites: list[dict], gl: float) -> pd.DataFrame:
     return pd.DataFrame(linhas)
 
 
+def o_que_o_mercado_seguiu() -> str:
+    """Na noite real de 4/10, o preço da Polymarket ficou mais perto da parcial do TSE (lida como
+    ruído sem viés) ou do modelo com atraso? Ajusta os dois e compara o erro em cada fase."""
+    from estudos.comparar_mercado import CORTES as CORTES_1T, FAIXAS as FAIXAS_1T, NOME_PM
+    from nucleo.caminhos import DADOS
+    r = pd.read_csv(RES / "mercado_1t_modelo_antes.csv").sort_values("t")
+    r = r[(r["t"] >= 0) & (r["t"] <= 240)].reset_index(drop=True)
+    t, ap = r["t"].to_numpy(float), r["apurado"].to_numpy(float) / 100
+    parcial = r["parcial_mercado"].to_numpy(float)
+    real = r[[f"pm_{f}" for f in FAIXAS_1T]].to_numpy(float)
+    modelo = r[[f"mod_{f}" for f in FAIXAS_1T]].to_numpy(float)
+    pm = pd.read_parquet(DADOS / "polymarket_1t.parquet")
+    m = pm[(pm["mercado"] == "margem") & pm["faixa"].isin(NOME_PM) & pm["min"].between(-30, 0)].copy()
+    antes = m.assign(faixa=m["faixa"].map(NOME_PM)).groupby("faixa")["preco"].mean().reindex(FAIXAS_1T).to_numpy()
+    antes = antes / antes.sum()
+    centros = np.array([-17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 12.5])
+    m0 = float(np.sum(antes * centros))
+    s0 = float(np.sqrt(np.sum(antes * (centros - m0) ** 2)))
+
+    def erro(p, sel=slice(None)):
+        return float(np.sqrt(np.mean((p[sel] - real[sel]) ** 2)) * 100)
+
+    def atras(t0, tau):
+        lam = np.where(t + ATRASO > t0, 1 - np.exp(-(t + ATRASO - t0) / tau), 0.0)[:, None]
+        return (1 - lam) * antes[None, :] + lam * modelo
+
+    ks = np.arange(0.5, 12.01, 0.5)
+    e_k, k = min((erro(faixas_normal(*multidao(parcial, ap, m0, s0, k), CORTES_1T)), k) for k in ks)
+    e_a, t0, tau = min((erro(atras(t0, tau)), t0, tau) for t0, tau in itertools.product(range(0, 61, 5), range(5, 121, 5)))
+    p_parcial, p_atras = faixas_normal(*multidao(parcial, ap, m0, s0, k), CORTES_1T), atras(t0, tau)
+    e_mix, a = min((erro(a * p_parcial + (1 - a) * p_atras), a) for a in np.arange(0, 1.01, 0.05))
+    fases = []
+    for ini, fim in ((0, 30), (30, 60), (60, 120), (120, 240)):
+        sel = (t >= ini) & (t < fim)
+        fases.append({"trecho": f"{17 + ini // 60}h{ini % 60:02d}–{17 + fim // 60}h{fim % 60:02d}",
+                      "segue a parcial": f"{erro(p_parcial, sel):.1f}¢", "vai atrás do modelo": f"{erro(p_atras, sel):.1f}¢",
+                      "preço parado (de antes)": f"{erro(np.repeat(antes[None, :], len(t), 0), sel):.1f}¢"})
+    momentos = []
+    i5 = FAIXAS_1T.index("F <5%")
+    for tt in (15, 30, 45, 60, 90, 120):
+        j = int(np.searchsorted(t, tt))
+        momentos.append({"hora": f"{17 + tt // 60}h{tt % 60:02d}", "apurado": f"{ap[j]:.0%}", "parcial do TSE": f"F {parcial[j]:+.1f}",
+                         '"F <5%" no mercado': f"{real[j, i5]:.0%}", "se seguisse a parcial": f"{p_parcial[j, i5]:.0%}",
+                         "se fosse atrás do modelo": f"{p_atras[j, i5]:.0%}", "modelo": f"{modelo[j, i5]:.0%}"})
+    return (f"Erro médio do preço de cada faixa, minuto a minuto, de 17h a 21h: **segue a parcial {e_k:.1f}¢** "
+            f"(melhor ajuste: ruído k = {k:.1f}); **vai atrás do modelo {e_a:.1f}¢** (começa {t0} min depois das 17h, "
+            f"τ = {tau} min); a melhor mistura das duas é {a:.0%} parcial + {1 - a:.0%} modelo ({e_mix:.1f}¢). A parcial "
+            "mostrou Flávio +10 por duas horas; quem a lesse assim levaria o preço para \"F 5-10%\". O mercado foi para "
+            "a faixa certa, só que 30 a 60 minutos depois do modelo.\n\n" + md(pd.DataFrame(fases), index=False)
+            + "\n\n" + md(pd.DataFrame(momentos), index=False))
+
+
 def limiares(sims: list[dict], reais: list[dict]) -> pd.DataFrame:
     """O limiar de confiança do trade contra o viés pró-Flávio da noite real do 1º turno de 2026."""
     finais = pd.DataFrame({"final": [n["final"] for n in sims]})
     w = trade.pesos(finais)
-    colunas = [("como em 4/10", None), (BASE, None), (SABE_MAIS, None), (BASE, "2º turno de 2022"),
+    colunas = [("como em 4/10", None), (BASE, None), (SABE_MAIS, None), (PARCIAL, None), (BASE, "2º turno de 2022"),
                ("como em 4/10", "1º turno de 2026"), (SABE_MAIS, "1º turno de 2026")]
     linhas = []
     for variante, inicial in (("Trade em dinheiro", None), ("Trade com posição", "F <4%")):
@@ -304,6 +393,7 @@ def main() -> None:
               "(F <4% a 40,5¢, F 4-8% a 32,5¢). Média, mediana e prejuízo pesam cada noite pela chance que o "
               "mercado dá hoje ao cenário dela. Mercados: os três ritmos (o preço vai atrás do modelo) e um "
               "que sabe mais que o modelo (metade do erro dele, sem atraso)."]
+    partes.append("## 0. O que o mercado seguiu na noite real do 1º turno (4/10)\n\n" + o_que_o_mercado_seguiu())
     for pos in ("F <4%", "F 4-8%"):
         t = tabela_resultados(R, pos)
         partes.append(f"## 1. Resultado por mercado — começando em Sim \"{pos}\"\n\n" + md(fmt_tabela(t), index=False))
