@@ -39,6 +39,7 @@ from nucleo.dados_eleicao import secoes  # noqa: E402
 from nucleo.fonte_tse import URL_OFICIAL, FonteTSE  # noqa: E402
 from nucleo.mercado_sim import PRECO_HOJE, RITMOS, mercado_sim, sortear_margem  # noqa: E402
 from nucleo.modelo import NOMES_FAIXAS, carregar_params, faixa_provavel  # noqa: E402
+from nucleo.polymarket import FontePolymarket  # noqa: E402
 from monitor import (AO_VIVO, BRT, Degrau, Monitor, achar_sessao, carregar_base, conferir_sessao,  # noqa: E402
                      ler_log, retratos)
 from nucleo.replay_tse import GRADE, Replay, passo, responder  # noqa: E402
@@ -206,10 +207,26 @@ class SessaoVivo(Sessao):
         n = mon.retomar(aviso=lambda txt: self._avisar(txt.strip(), "aviso" if "aviso" in txt else "info"))
         self._avisar(f"modelo refeito com {n} retratos em {time.time() - t0:.0f} s; seguindo na mesma pasta")
 
+    def _gravar_mercado(self) -> None:
+        """Grava em mercado.jsonl, na pasta da sessão, os preços lidos desde o último ciclo."""
+        m = self.ctx.mercado
+        if m is None or not self.pasta.is_dir():
+            return
+        with m.lock:
+            novos, self._mercado_n = m.pontos[self._mercado_n:], len(m.pontos)
+        if novos:
+            with open(self.pasta / "mercado.jsonl", "a", encoding="utf-8") as f:
+                for p in novos:
+                    f.write(json.dumps({"hora": p["hora"], "t": round(p["t"], 3), "livros": p["livros"]},
+                                       ensure_ascii=False) + "\n")
+
     def rodar(self) -> None:
+        # o preço vem do leitor da Polymarket do painel (a cada 10 s), não de uma leitura por ciclo
+        mercado = self.ctx.mercado.precos if (self.polymarket and self.ctx.mercado) else self.polymarket
         mon = Monitor(FonteTSE(base_url=self.url), 2026, 1, self.ctx.params, "F <4%", self.pasta,
-                      polymarket=self.polymarket, max_mun=self.ctx.args.max_municipios,
+                      polymarket=mercado, max_mun=self.ctx.args.max_municipios,
                       base_ordem=self.ctx.base_ordem)
+        self._mercado_n = len(self.ctx.mercado.pontos) if self.ctx.mercado else 0
         try:
             if self.retomada:
                 self._retomar(mon)
@@ -221,6 +238,7 @@ class SessaoVivo(Sessao):
                 try:
                     res = mon.ciclo()
                     self.adicionar(res)
+                    self._gravar_mercado()
                     print("[ao vivo] " + linha_terminal(res), flush=True)
                     if res.get("mercado_erro"):
                         self.evento(f"Polymarket indisponível: {res['mercado_erro']}", "aviso")
@@ -232,6 +250,64 @@ class SessaoVivo(Sessao):
             mon.fechar()
         self.estado = "parado"
         self.evento("parado")
+
+
+class MercadoAoVivo:
+    """Lê o livro de ofertas da Polymarket a cada `intervalo` s, à parte do TSE: o preço anda mais
+    rápido que a apuração e já existe antes dela. Guarda as leituras em memória; a sessão ao vivo
+    as grava em disco (mercado.jsonl)."""
+
+    def __init__(self, intervalo: float):
+        self.fonte, self.intervalo = FontePolymarket(), intervalo
+        self.pontos: list[dict] = []
+        self.historico: dict | None = None
+        self.erro: str | None = None
+        self.lock = threading.Lock()
+        self.parar = threading.Event()
+
+    def iniciar(self) -> MercadoAoVivo:
+        threading.Thread(target=self._rodar, daemon=True).start()
+        return self
+
+    def _rodar(self) -> None:
+        try:  # contexto: os últimos 7 dias, de hora em hora
+            h = self.fonte.historico()
+            with self.lock:
+                self.historico = h
+        except Exception as e:
+            self.erro = f"histórico indisponível: {e!r}"
+        while not self.parar.is_set():
+            t0 = time.time()
+            try:
+                livros = {f: {k: x[k] for k in ("bid", "ask", "bid_cotas", "ultimo")}
+                          for f, x in self.fonte.livros().items()}
+                agora = dt.datetime.now(BRT)
+                ponto = {"quando": time.time(), "hora": agora.strftime("%H:%M:%S"),
+                         "t": (agora - agora.replace(hour=17, minute=0, second=0, microsecond=0)).total_seconds() / 60,
+                         "livros": livros}
+                with self.lock:
+                    self.pontos.append(ponto)
+                    self.erro = None
+            except Exception as e:  # rede instável: tenta de novo no próximo
+                self.erro = repr(e)
+            self.parar.wait(max(1.0, self.intervalo - (time.time() - t0)))
+
+    def precos(self) -> dict[str, tuple[float, float]]:
+        """O último preço lido, para o ciclo do monitor (lê agora se o último tiver mais de 1 min)."""
+        with self.lock:
+            p = self.pontos[-1] if self.pontos else None
+        if p is None or time.time() - p["quando"] > 60:
+            return self.fonte.precos()
+        return {f: (x["bid"], x["ask"]) for f, x in p["livros"].items()}
+
+    def json(self, desde: int) -> dict:
+        with self.lock:
+            n = len(self.pontos)
+            if desde <= 0:  # primeira leitura da página: só as últimas 6 h
+                limite = time.time() - 6 * 3600
+                desde = next((i for i, p in enumerate(self.pontos) if p["quando"] >= limite), n)
+            return {"n": n, "desde": desde, "pontos": self.pontos[desde:], "erro": self.erro,
+                    "intervalo": self.intervalo, "historico": self.historico}
 
 
 class SessaoSim(Sessao):
@@ -327,6 +403,8 @@ class Contexto:
         self.vivo: SessaoVivo | None = None
         self.sim: SessaoSim | None = None
         self._retomavel = (0.0, None)
+        # preços da Polymarket a cada intervalo_mercado s, desde já (não esperam o monitor do TSE)
+        self.mercado = None if args.sem_polymarket else MercadoAoVivo(args.intervalo_mercado).iniciar()
 
     def dados_sim(self):
         with self._lock_dados:
@@ -343,7 +421,7 @@ class Contexto:
         return {"faixas": NOMES_FAIXAS, "faixa": a.faixa, "lado": a.lado, "alerta": a.alerta, "plano": plano,
                 "ritmos": list(RITMOS), "preco_hoje": PRECO_HOJE, "cenarios": CENARIOS,
                 "velocidades": VELOCIDADES, "url": a.url, "polymarket": not a.sem_polymarket,
-                "intervalo": a.intervalo}
+                "intervalo": a.intervalo, "intervalo_mercado": a.intervalo_mercado}
 
     def iniciar_vivo(self, retomar: Path | None = None) -> SessaoVivo:
         with self.lock:
@@ -452,6 +530,9 @@ def criar_servidor(ctx: Contexto, porta: int) -> ThreadingHTTPServer:
             if u.path in ("/", "/index.html"):
                 # relido a cada pedido: dá para editar a página e só recarregar
                 self._enviar(200, (AQUI / "painel.html").read_bytes(), "text/html; charset=utf-8")
+            elif u.path == "/api/mercado":
+                q = parse_qs(u.query)
+                self._json(ctx.mercado.json(int(q.get("desde", ["0"])[0])) if ctx.mercado else {"desligado": True})
             elif u.path == "/api/config":
                 self._json(ctx.config())
             elif u.path == "/api/estado":
@@ -527,6 +608,8 @@ def main() -> None:
     a.add_argument("--url", default=URL_OFICIAL, help="divulgação do TSE (ou um replay_tse.py local)")
     a.add_argument("--intervalo", type=float, default=40.0, help="segundos entre ciclos ao vivo")
     a.add_argument("--sem-polymarket", action="store_true", help="não busca os preços da Polymarket")
+    a.add_argument("--intervalo-mercado", type=float, default=10.0,
+                   help="segundos entre leituras do livro de ofertas da Polymarket")
     a.add_argument("--max-municipios", type=int, default=450, help="arquivos de município por ciclo ao vivo")
     a.add_argument("--faixa", default="F <4%", choices=NOMES_FAIXAS, help="posição inicial (dá para trocar na página)")
     a.add_argument("--lado", default="sim", choices=["sim", "nao"])

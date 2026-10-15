@@ -16,6 +16,7 @@
   --line: #d9dee6; --accent: #1d5fc2;
   --term-bg: #0e1520; --term-fg: #d4dbe6; --term-dim: #8390a3; --term-hi: #ffd27a;
   --modelo: #2a78d6; --modelo-banda: rgba(42, 120, 214, 0.16); --mercado: #eb6834;
+  --serie-2: #eb6834; --serie-3: #1baf7a; --serie-4: #8a6bd1;
   --faixa-sua: rgba(27, 175, 122, 0.10); --linha-faixa: #b9c1cd;
   --bom-bg: #e4f4e8; --bom-fg: #135c25;
   --aviso-bg: #fff3d6; --aviso-fg: #6b4a00;
@@ -31,6 +32,7 @@
     --bg: #11151c; --surface: #191e27; --surface-2: #151a22; --ink: #edf1f6; --ink-2: #b3bcc9; --ink-3: #8b95a4;
     --line: #2b323e; --accent: #79aaff; --term-bg: #0a0e15;
     --modelo: #3987e5; --modelo-banda: rgba(57, 135, 229, 0.22); --mercado: #e0703f;
+    --serie-2: #e0703f; --serie-3: #199e70; --serie-4: #a08ff0;
     --faixa-sua: rgba(25, 158, 112, 0.14); --linha-faixa: #4a5363;
     --bom-bg: #173322; --bom-fg: #9fe2b5; --aviso-bg: #3a2f12; --aviso-fg: #f3d58a;
     --ruim-bg: #3c1d19; --ruim-fg: #ffb4a8; --neutro-bg: #222935; --neutro-fg: #c6cfdb;
@@ -41,6 +43,7 @@
   --bg: #11151c; --surface: #191e27; --surface-2: #151a22; --ink: #edf1f6; --ink-2: #b3bcc9; --ink-3: #8b95a4;
   --line: #2b323e; --accent: #79aaff; --term-bg: #0a0e15;
   --modelo: #3987e5; --modelo-banda: rgba(57, 135, 229, 0.22); --mercado: #e0703f;
+  --serie-2: #e0703f; --serie-3: #199e70; --serie-4: #a08ff0;
   --faixa-sua: rgba(25, 158, 112, 0.14); --linha-faixa: #4a5363;
   --bom-bg: #173322; --bom-fg: #9fe2b5; --aviso-bg: #3a2f12; --aviso-fg: #f3d58a;
   --ruim-bg: #3c1d19; --ruim-fg: #ffb4a8; --neutro-bg: #222935; --neutro-fg: #c6cfdb;
@@ -117,6 +120,8 @@ button, input, select { font: inherit; color: inherit; }
 
 /* gráficos */
 .graficos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.larga { grid-column: 1 / -1; }
+.titulo-g { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
 .cartao { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; align-content: start; }
 .cartao > *, details.tela { min-width: 0; }
 td.melhor { font-weight: 700; }
@@ -288,6 +293,16 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       <p class="leg">Linha verde: chance que o modelo dá à sua posição; tracejado laranja: preço pelo qual dá para vender (bid). Linha pontilhada: seu alerta. Riscos verticais: degraus do plano que dispararam.</p>
       <div class="tela-g"><canvas id="g-chance" aria-label="Chance da posição e preço ao longo da apuração" role="img"></canvas></div>
     </figure>
+    <figure class="cartao larga" style="margin:0" id="fig-mercado" hidden>
+      <div class="titulo-g">
+        <h2>Polymarket agora</h2>
+        <div class="seg" id="mk-janela" role="group" aria-label="Janela do gráfico">
+          <button data-h="1">1 h</button><button data-h="6">6 h</button><button data-h="24">24 h</button><button data-h="168">7 dias</button>
+        </div>
+      </div>
+      <p class="leg" id="mk-leg">Preço de cada faixa (meio entre compra e venda).</p>
+      <div class="tela-g"><canvas id="g-mercado" aria-label="Preço das faixas na Polymarket ao longo do tempo" role="img"></canvas></div>
+    </figure>
   </section>
 
   <section class="baixo">
@@ -295,7 +310,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       <h2>Faixas</h2>
       <div class="rolavel">
         <table>
-          <thead><tr><th>Faixa</th><th>Modelo</th><th>Mercado (venda / compra)</th><th>Modelo − venda</th></tr></thead>
+          <thead><tr><th>Faixa</th><th>Modelo</th><th>Mercado (venda / compra)</th><th>Modelo − venda</th><th>Cotas no bid</th></tr></thead>
           <tbody id="tab-faixas"></tbody>
         </table>
       </div>
@@ -642,6 +657,22 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       }),
       plugins: [linhasFaixa],
     });
+    G.mercado = new Chart($("g-mercado"), {
+      type: "line",
+      data: { datasets: [] },
+      options: opcoes({
+        scales: {
+          x: { type: "linear", ticks: { maxRotation: 0, autoSkipPadding: 12, color: cor("--ink-3"), font: { family: "IBM Plex Sans" },
+                 callback: (v) => { const d = new Date(v); return (mkJanela || 168) > 24 ? `${d.getDate()}/${d.getMonth() + 1}` : `${d.getHours()}h${String(d.getMinutes()).padStart(2, "0")}`; } },
+               grid: { color: cor("--line") } },
+          y: { min: 0, ticks: { color: cor("--ink-3"), callback: (v) => Math.round(v * 100) + "¢", font: { family: "IBM Plex Sans" } }, grid: { color: cor("--line") } },
+        },
+        plugins: Object.assign(opcoes({}).plugins, {
+          tooltip: { callbacks: { title: (it) => new Date(it[0].parsed.x).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }),
+                                  label: (it) => ` ${it.dataset.label}: ${cents(it.parsed.y)}` } },
+        }),
+      }),
+    });
     G.carteira = new Chart($("g-carteira"), {
       type: "line",
       data: { datasets: [
@@ -703,10 +734,65 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     const L = A.L, comMu = L.filter((o) => o.tem), [t0, t1] = eixoT(L);
     const gc = G.chance, dc = gc.data.datasets;
     dc[0].data = serie(comMu, (o) => o.p);
-    dc[1].data = serie(L, (o) => o.bid);
+    // ao vivo: o preço do leitor da Polymarket (a cada 10 s) é mais denso que o dos ciclos
+    const vivoMk = aba === "vivo" && M.pontos.length;
+    dc[1].data = vivoMk ? M.pontos.map((p) => { const l = p.livros[pos.faixa];
+      return l ? { x: p.t, y: pos.lado === "sim" ? l.bid : 1 - l.ask } : null; }).filter((p) => p && p.x >= t0 - 1)
+      : serie(L, (o) => o.bid);
     gc.options.scales.x.min = t0; gc.options.scales.x.max = t1;
     gc.$linhas = { alerta: pos.alerta, verticais: A.plano.filter((d) => d.k >= 0).map((d) => ({ x: L[d.k].t, rot: d.texto })) };
     gc.update("none");
+    if (aba === "vivo") atualizarMercado();
+  }
+
+  // ---------- Polymarket ao vivo (aba ao vivo): histórico de hora em hora + livro a cada 10 s ----------
+  const M = { n: 0, pontos: [], historico: null, erro: null, desligado: false, intervalo: 10 };
+  let mkJanela = null;  // horas mostradas no gráfico do mercado
+  async function puxarMercado() {
+    try {
+      const d = await (await fetch(`/api/mercado?desde=${M.n}`, { cache: "no-store" })).json();
+      if (d.desligado) { M.desligado = true; return; }
+      if (d.desde !== M.n) M.pontos = [];  // painel reiniciado: recomeça
+      M.pontos.push(...d.pontos);
+      Object.assign(M, { n: d.n, erro: d.erro, intervalo: d.intervalo || 10 });
+      if (d.historico) M.historico = d.historico;
+    } catch (e) { M.erro = String(e); }
+  }
+  function mercadoAgora() {
+    const p = M.pontos[M.pontos.length - 1];
+    return p ? { livros: p.livros, idade: Date.now() / 1000 - p.quando, hora: p.hora } : null;
+  }
+  const idadeTxt = (s) => (s < 90 ? `${Math.max(0, Math.round(s))} s` : s < 5400 ? `${Math.round(s / 60)} min` : `${Math.round(s / 3600)} h`);
+  const inteiro = (x) => Math.round(x).toLocaleString("pt-BR");
+  [...$("mk-janela").children].forEach((b) => b.addEventListener("click", () => { mkJanela = +b.dataset.h; atualizarMercado(); }));
+
+  function atualizarMercado() {
+    const g = G.mercado;
+    if (!g) return;
+    // padrão: com o monitor rodando, a última hora; antes, os últimos 7 dias
+    if (mkJanela == null && M.n > 0) mkJanela = S.vivo.estado === "rodando" ? 1 : 168;
+    const janela = mkJanela || 168;
+    [...$("mk-janela").children].forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.h === janela)));
+    const agora = mercadoAgora(), meio = (l) => (l.bid + l.ask) / 2;
+    // a sua faixa e as três mais caras agora
+    const ordem = agora ? FAIXAS.filter((f) => agora.livros[f]).sort((a, b) => meio(agora.livros[b]) - meio(agora.livros[a])) : FAIXAS.slice(4, 6);
+    const faixas = [pos.faixa, ...ordem.filter((f) => f !== pos.faixa)].slice(0, 4);
+    const cores = ["--modelo", "--serie-2", "--serie-3", "--serie-4"];
+    const fim = Date.now(), inicio = fim - janela * 3600e3;
+    g.data.datasets = faixas.map((f, i) => {
+      const hist = ((M.historico || {})[f] || []).map(([ts, p]) => ({ x: ts * 1000, y: p }));
+      const prim = M.pontos.length ? M.pontos[0].quando * 1000 : Infinity;
+      const vivo = M.pontos.map((p) => (p.livros[f] ? { x: p.quando * 1000, y: meio(p.livros[f]) } : null)).filter(Boolean);
+      const dados = hist.filter((p) => p.x < prim).concat(vivo).filter((p) => p.x >= inicio - 3600e3);
+      return { label: f + (f === pos.faixa ? " (a sua)" : ""), data: dados, borderColor: cor(cores[i]), backgroundColor: cor(cores[i]),
+               borderWidth: i === 0 ? 2.6 : 1.5, pointRadius: 0, tension: 0 };
+    });
+    g.options.scales.x.min = inicio; g.options.scales.x.max = fim;
+    g.update("none");
+    const leg = M.desligado ? "Polymarket desligada (--sem-polymarket)." :
+      `Preço de cada faixa (meio entre compra e venda). Antes de o painel abrir, o histórico de hora em hora da Polymarket; ` +
+      `depois, o livro de ofertas a cada ${M.intervalo} s.${M.erro ? " Última leitura com erro: " + M.erro : ""}`;
+    setTxt("mk-leg", leg);
   }
 
   // ---------- renderização ----------
@@ -724,9 +810,21 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     setTxt("badge", simulada && s.info.pausado && estado === "rodando" ? "pausado" : parado ? "sem ciclo novo" : estado);
     if (simulada) {
       setTxt("carimbo", s.id == null ? "nenhuma simulação" : `${hora(s.info.relogio ?? -2)} simulado · ${virg(s.info.velocidade ?? 60)}× · semente ${s.info.semente ?? "—"}`);
-    } else if (ult) {
-      setTxt("carimbo", `TSE ${ult.c.gerado || "?"}` + (estado === "rodando" ? ` · atualizado há ${atraso ?? "?"} s` : " · último ciclo"));
-    } else setTxt("carimbo", "—");
+    } else {
+      // quão velhos estão os dados: arquivo do TSE (cache do TSE + ciclo) e livro da Polymarket
+      const partes = [];
+      if (ult) {
+        const c = ult.c, idade = c.idade_tse != null ? c.idade_tse + (atraso || 0) : null;
+        partes.push(idade == null ? `TSE ${c.gerado || "?"}` : idade > 3600 ? `arquivo do TSE gerado às ${String(c.gerado || "").slice(11, 16)}` :
+          `dados do TSE de ${idadeTxt(idade)} atrás`);
+        if (estado === "rodando" && c.duracao != null) partes.push(`ciclo de ${Math.round(c.duracao)} s`);
+        if (estado === "rodando" && c.fila) partes.push(`${inteiro(c.fila)} municípios na fila`);
+        if (estado !== "rodando") partes.push("último ciclo");
+      }
+      const mk = mercadoAgora();
+      if (mk) partes.push(`Polymarket há ${idadeTxt(mk.idade)}`);
+      setTxt("carimbo", partes.join(" · ") || "—");
+    }
     $("ponto-vivo").dataset.on = S.vivo.estado === "rodando" ? "1" : "0";
     $("ponto-sim").dataset.on = S.sim.estado === "rodando" ? "1" : "0";
     $("ponto-trade").dataset.on = S.sim.estado === "rodando" ? "1" : "0";
@@ -753,19 +851,24 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     } else { setTxt("k-parcial", "—"); setTxt("k-apurado", "—"); }
   }
 
-  function renderTabela(ult, um, foco) {
+  // mkA: o livro mais novo da Polymarket (aba ao vivo); sem ele, o preço gravado no último ciclo
+  function renderTabela(ult, um, foco, mkA) {
     const c = ult ? ult.c : null, cm = um ? um.c : null;
     $("tab-faixas").innerHTML = FAIXAS.map((f) => {
-      const p = cm ? cm.probs[f] : null, mk = c && c.mercado ? c.mercado[f] : null;
+      const livro = mkA && mkA.livros[f];
+      const p = cm ? cm.probs[f] : null, mk = livro ? [livro.bid, livro.ask] : c && c.mercado ? c.mercado[f] : null;
       const sua = f === foco, apagada = p != null && p < 0.005 && !sua;
       const dif = p != null && mk ? p - mk[0] : null;
       return `<tr class="${sua ? "sua" : ""}${apagada ? " apagada" : ""}"><td>${sua ? "▶ " : ""}${esc(f)}</td>` +
         `<td>${p == null ? "—" : pct(p, 1)}<span class="barra" style="width:${p == null ? 0 : Math.round(p * 60)}px"></span></td>` +
         `<td>${mk ? `${cents(mk[0])} / ${cents(mk[1])}` : "—"}</td>` +
-        `<td>${dif == null ? "—" : (dif >= 0 ? "+" : "−") + virg(Math.abs(dif * 100).toFixed(1))}</td></tr>`;
+        `<td>${dif == null ? "—" : (dif >= 0 ? "+" : "−") + virg(Math.abs(dif * 100).toFixed(1))}</td>` +
+        `<td>${livro && livro.bid_cotas ? inteiro(livro.bid_cotas) : "—"}</td></tr>`;
     }).join("");
-    setTxt("tab-nota", aba !== "vivo" ? "Mercado simulado: mistura do preço de hoje com a chance do modelo (banca.py), 1¢ de cada lado." :
-      (c && c.mercado ? "Preços da Polymarket (bid / ask do Sim), lidos a cada ciclo. Modelo − venda > 0: o modelo acha que vale mais do que pagam." : "Sem preços da Polymarket neste ciclo."));
+    setTxt("tab-nota", aba !== "vivo" ? "Mercado simulado: mistura do preço de hoje com a chance do modelo (nucleo/mercado_sim.py), 1¢ de cada lado." :
+      mkA ? `Livro de ofertas da Polymarket (venda / compra do Sim), lido a cada ${M.intervalo || 10} s; última leitura há ${idadeTxt(mkA.idade)}. ` +
+            "Cotas no bid: quanto dá para vender até 2¢ abaixo do melhor preço. Modelo − venda > 0: o modelo acha que vale mais do que pagam." :
+      (c && c.mercado ? "Preços da Polymarket gravados no último ciclo." : M.desligado ? "Polymarket desligada (--sem-polymarket)." : "Sem preços da Polymarket ainda."));
   }
 
   function renderEventos(ev, s, vazio) {
@@ -788,10 +891,15 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     renderParcial(ult);
     setTxt("k-chance", um ? pct(um.p, 1) : "—");
     setTxt("k-pos-rot", `Sua posição · ${nomePos}`);
-    const bidAgora = ult ? ult.bid : null;
-    setTxt("k-preco", bidAgora != null ? `venda a ~${cents(bidAgora)} · compra a ~${cents(ult.ask)} (${fonteMk})` : (aba === "vivo" && ult && ult.c.mercado_erro ? "Polymarket indisponível" : "sem preço de mercado"));
-    setTxt("k-dif", um && bidAgora != null ? `modelo − venda: ${(um.p - bidAgora >= 0 ? "+" : "−") + virg(Math.abs((um.p - bidAgora) * 100).toFixed(1))} pontos` : "");
-    let [n, tag, txt] = conselho(um);
+    // ao vivo, o preço mais novo é o do leitor da Polymarket (a cada 10 s), não o do último ciclo
+    const mkA = aba === "vivo" ? mercadoAgora() : null, livro = mkA && mkA.livros[pos.faixa], ladoSim = pos.lado === "sim";
+    const bidAgora = livro ? (ladoSim ? livro.bid : 1 - livro.ask) : ult ? ult.bid : null;
+    const askAgora = livro ? (ladoSim ? livro.ask : 1 - livro.bid) : ult ? ult.ask : null;
+    const fonteTxt = livro ? `Polymarket, há ${idadeTxt(mkA.idade)}` : fonteMk;
+    setTxt("k-preco", bidAgora != null ? `venda a ~${cents(bidAgora)} · compra a ~${cents(askAgora)} (${fonteTxt})` : (aba === "vivo" && ult && ult.c.mercado_erro ? "Polymarket indisponível" : "sem preço de mercado"));
+    const liquidez = livro && ladoSim && livro.bid_cotas ? `~${inteiro(livro.bid_cotas)} cotas no bid (até 2¢ abaixo)` : "";
+    setTxt("k-dif", [um && bidAgora != null ? `modelo − venda: ${(um.p - bidAgora >= 0 ? "+" : "−") + virg(Math.abs((um.p - bidAgora) * 100).toFixed(1))} pontos` : "", liquidez].filter(Boolean).join(" · "));
+    let [n, tag, txt] = conselho(um && bidAgora != null ? Object.assign({}, um, { bid: bidAgora }) : um);
     if (aba === "sim" && s.estado === "fim" && s.info.margem_final != null) {
       const mf = s.info.margem_final, fx = faixaDe(mf);
       const ganha = pos.lado === "sim" ? fx === pos.faixa : fx !== pos.faixa;
@@ -807,7 +915,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       return `<span class="degrau" data-on="${o ? 1 : 0}"><b>${esc(d.texto)}</b> · ${esc(condicao(d))} · ${esc(st)}</span>`;
     }).join("") : '<span class="nota">nenhum degrau — escreva um no campo "Plano de venda" acima</span>');
 
-    renderTabela(ult, um, pos.faixa);
+    renderTabela(ult, um, pos.faixa, mkA);
     $("term").innerHTML = tela(ult, um, pos);
     renderEventos(A.ev, s, "Nada ainda. Aqui aparecem os degraus do plano que dispararem, os alertas e as mudanças da faixa provável.");
 
@@ -849,6 +957,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     $("banca").hidden = aba !== "sim";
     $("carteira").hidden = aba !== "trade";
     $("fig-chance").hidden = aba === "trade";
+    $("fig-mercado").hidden = aba !== "vivo";
     $("fig-carteira").hidden = aba !== "trade";
     if (aba === "vivo") {
       const rodando = s.estado === "rodando" || s.estado === "preparando";
@@ -1271,6 +1380,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       rodada++;
       const atual = sessaoDa(aba), outro = atual === "vivo" ? "sim" : "vivo";
       const tarefas = [puxar(atual)];
+      if (aba === "vivo" && !M.desligado) tarefas.push(puxarMercado());
       // a outra sessão também é lida (mais devagar) para não perder alertas do ao vivo
       if (forcar || rodada % 3 === 0 || S[outro].estado === "rodando") tarefas.push(puxar(outro));
       await Promise.all(tarefas);

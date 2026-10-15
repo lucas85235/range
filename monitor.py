@@ -24,18 +24,17 @@ import time
 from pathlib import Path
 
 import numpy as np
-import requests
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from nucleo.dados_eleicao import DADOS, base_turno, secoes  # noqa: E402
 from nucleo.fonte_tse import URL_OFICIAL, FonteTSE  # noqa: E402
 from nucleo.modelo import (NOMES_FAIXAS, Ordem1T, Params, Transferencia, carregar_params,  # noqa: E402
                            faixa_provavel, faixas_cobertas, ingenuo, prob_faixas)
+from nucleo.polymarket import FontePolymarket  # noqa: E402
 
 UFS = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "MT", "PA", "PB",
        "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO", "ZZ"]
 BRT = dt.timezone(dt.timedelta(hours=-3))
-SLUG = "brazil-presidential-election-second-round-margin-of-victory"
 AO_VIVO = DADOS / "ao_vivo"
 
 
@@ -47,19 +46,24 @@ def minutos_desde_17h(data: str, hora: str) -> float | None:
     return (d - d.replace(hour=17, minute=0, second=0)).total_seconds() / 60
 
 
+_POLYMARKET: FontePolymarket | None = None
+
+
 def precos_polymarket() -> dict[str, tuple[float, float]]:
-    """{faixa: (bid, ask)} pela API pública Gamma (só leitura)."""
-    r = requests.get("https://gamma-api.polymarket.com/events", params={"slug": SLUG}, timeout=10)
-    r.raise_for_status()
-    out = {}
-    for m in r.json()[0]["markets"]:
-        t = m.get("groupItemTitle", "")
-        lado = "F" if t.startswith("Fl") else "L" if t.startswith("Lula") else None
-        if lado is None:
-            continue
-        faixa = f"{lado} {t.split()[-1]}"
-        out[faixa] = (float(m.get("bestBid") or 0), float(m.get("bestAsk") or 0))
-    return out
+    """{faixa: (bid, ask)} pelo livro de ofertas da Polymarket, em tempo real (só leitura)."""
+    global _POLYMARKET
+    if _POLYMARKET is None:
+        _POLYMARKET = FontePolymarket()
+    return _POLYMARKET.precos()
+
+
+def idade_segundos(data: str, hora: str) -> float | None:
+    """Há quantos segundos o TSE gerou o arquivo (pela hora de Brasília)."""
+    try:
+        d = dt.datetime.strptime(f"{data} {hora}", "%d/%m/%Y %H:%M:%S").replace(tzinfo=BRT)
+    except ValueError:
+        return None
+    return (dt.datetime.now(BRT) - d).total_seconds()
 
 
 class Degrau:
@@ -317,11 +321,14 @@ class Monitor:
                 elif m.est > self.est[j] or m.st != self.st[j]:
                     prio[(uf, cd)] = max(m.est - self.est[j], 1.0)
         ordem = sorted(prio, key=prio.get, reverse=True)
+        self.fila = 0
         if self.modelo is not None and self.max_mun:
+            self.fila = max(len(ordem) - self.max_mun, 0)  # mudaram no TSE e ficam para o próximo ciclo
             ordem = ordem[: self.max_mun]
         return ordem
 
     def ciclo(self) -> dict | None:
+        inicio = time.time()
         pedidos = self._pedidos()
         dif_te = 0
         for m in self.fonte.varios(pedidos):
@@ -347,20 +354,25 @@ class Monitor:
         self.ciclos += 1
         res = {"t": t, "gerado": br["gerado"], "secoes_pct": 100 * br["st"] / max(br["ts"], 1),
                "eleitorado_pct": 100 * self.est.sum() / max(self.te.sum(), 1),
-               "baixados": len(pedidos), "F_tse": br["F"], "L_tse": br["L"]}
+               "baixados": len(pedidos), "fila": getattr(self, "fila", 0), "F_tse": br["F"], "L_tse": br["L"]}
         if self.polymarket:
+            # o painel passa uma função com o preço que ele já lê a cada 10 s; o terminal lê agora
             try:
-                res["mercado"] = precos_polymarket()
+                res["mercado"] = (self.polymarket if callable(self.polymarket) else precos_polymarket)()
             except Exception as e:
                 res["mercado_erro"] = str(e)
         if self.F.sum() + self.L.sum() == 0:
             res["msg"] = "sem votos apurados ainda"
+            res["duracao"], res["idade_tse"] = time.time() - inicio, idade_segundos(data, hora)
             return res
         r = self.modelo.prever(self.F, self.L, self.est, t=t)
         probs = prob_faixas(r["mu"], r["sd"], self.params.gl)
         res.update(parcial=ingenuo(self.F, self.L), parcial_tse=ingenuo(br["F"], br["L"]),
                    mu=r["mu"], sd=r["sd"], w=r["w_medio"],
                    probs=dict(zip(NOMES_FAIXAS, np.round(probs, 4).tolist())))
+        # quanto tempo o ciclo levou e quão velho estava o arquivo do TSE quando ele terminou
+        res["duracao"] = time.time() - inicio
+        res["idade_tse"] = idade_segundos(data, hora)
         if self.gravar:
             np.savez_compressed(self.saida / f"retrato_{self.ciclos:04d}.npz", F=self.F, L=self.L,
                                 est=self.est, st=self.st, ts=self.ts, te=self.te, t=t, cd=self.munis.to_numpy())

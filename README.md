@@ -367,9 +367,16 @@ python eleicao/painel.py --faixa "F <4%" --degrau f90@2:100
 
 ![Painel no meio de uma noite simulada (F +4,4, posição Sim em F <4%)](resultados/painel_exemplo.png)
 
-- **Ao vivo (TSE).** O botão "Começar a ler o TSE" liga o monitor: a cada 40 s, com os preços da
-  Polymarket. No dia 25, `--ao-vivo` já abre lendo. Antes disso, um clique serve de pré-voo:
-  mostra "sem votos apurados ainda" e os preços do momento.
+- **Ao vivo (TSE).** O botão "Começar a ler o TSE" liga o monitor: um ciclo a cada 40 s. No dia
+  25, `--ao-vivo` já abre lendo. Antes disso, um clique serve de pré-voo: mostra "sem votos
+  apurados ainda".
+- **Polymarket ao vivo**, desde que o painel abre, sem esperar o TSE:
+  - o livro de ofertas das 8 faixas, lido a cada 10 s: preço de venda e de compra e quantas cotas
+    dá para vender até 2¢ abaixo do melhor preço ("Cotas no bid");
+  - o gráfico "Polymarket agora", com o histórico de hora em hora dos últimos 7 dias e as leituras
+    ao vivo (janelas de 1 h, 6 h, 24 h e 7 dias);
+  - durante a apuração, esses preços entram em cada ciclo e ficam gravados em `mercado.jsonl`, na
+    pasta da sessão.
 - **Simulação.** Gera um 2º turno sintético de 2026 (o mesmo gerador dos testes) e reproduz a
   noite acelerada, de 10× a 300×.
   - Cenário "às cegas": a margem é sorteada pelas chances que o mercado dá hoje. Os outros fixam
@@ -548,12 +555,36 @@ Avisos:
   apurado.
 
 Tudo fica gravado em `eleicao/dados/ao_vivo/<sessão>/`: o log por ciclo, os retratos por
-município e `sessao.json` (URL e base, conferidas ao retomar). Com isso dá para refazer a noite
-depois e retomar a sessão.
+município, `sessao.json` (URL e base, conferidas ao retomar) e, no painel, `mercado.jsonl` (o livro
+da Polymarket a cada 10 s). Com isso dá para refazer a noite depois, comparar modelo e mercado e
+retomar a sessão.
 
-Limites do TSE: cada arquivo leva ~1 s e o servidor aceita ~15 por segundo por cliente; mais
-conexões pioram. O monitor baixa até 450 municípios por ciclo, os mais atrasados primeiro. No
-replay de 2022, até 300 por minuto deixaram o modelo praticamente igual.
+### Quanto atraso tem o painel
+
+Medido em 15/10 contra o TSE e a Polymarket de verdade:
+
+| Etapa | Tempo |
+|---|---|
+| Cache do TSE: quanto um arquivo pode estar velho quando chega | até ~55 s (`max-age` de 52 a 59 s) |
+| Ciclo: 28 arquivos de abrangência (o que mudou em cada município) | ~5 s |
+| Ciclo: até 450 municípios (~23 arquivos/s) | ~19 s |
+| Ciclo: modelo | menos de 1 s |
+| Polymarket: livro de ofertas das 8 faixas | ~0,6 s, a cada 10 s |
+| Página: lê o servidor | a cada 1 s |
+
+- **Os dados do TSE chegam ao painel ~30–90 s depois de o TSE gerá-los** (o cache dele mais o
+  ciclo). O topo da aba ao vivo mostra isso a cada ciclo: a idade dos dados do TSE, quanto o ciclo
+  levou, quantos municípios ficaram na fila e a idade do preço da Polymarket.
+- **No pico, mais de 450 municípios mudam por ciclo.** Vêm primeiro os com mais eleitorado novo;
+  os menores esperam alguns ciclos. No replay de 2022, até 300 por minuto deixaram o modelo
+  praticamente igual. O TSE aceita ~15–25 arquivos/s por cliente, e mais conexões pioram.
+- **O preço da Polymarket vem do livro de ofertas (CLOB), sem cache.** A API Gamma, usada antes,
+  passa por um cache de até 5 min (`max-age=300`; na medição, a resposta tinha 93 s de idade).
+- **Comece antes das 17h.** Se o monitor começar com a apuração andando, o 1º ciclo baixa todos os
+  municípios que mudaram (~5.700, uns 4–6 min) antes da primeira previsão. Depois de uma queda,
+  use `--retomar`.
+- **As contas de banca e trade supõem 5 min de atraso**, mais que o real (~1–1,5 min): nisso
+  elas são conservadoras.
 
 ## Estrutura do projeto
 
@@ -571,7 +602,8 @@ eleicao/
 │   ├── simulacao.py         gera 2ºs turnos sintéticos seção a seção, com horários
 │   ├── fonte_tse.py         lê os JSON públicos do TSE
 │   ├── replay_tse.py        servidor local que imita o TSE, para ensaiar
-│   └── mercado_sim.py       preço de mercado das noites simuladas (preço de hoje → modelo)
+│   ├── mercado_sim.py       preço de mercado das noites simuladas (preço de hoje → modelo)
+│   └── polymarket.py        preços ao vivo da Polymarket (livro de ofertas da CLOB)
 ├── coleta/                  baixa os dados públicos
 │   ├── baixar_bu.py         boletins de urna, com hora de chegada (--cargo 11 = prefeito)
 │   ├── baixar_secao.py      votação por seção (Presidente, todos os anos)
