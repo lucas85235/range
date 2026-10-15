@@ -295,6 +295,61 @@ Noite real do 1º turno, US$100 comprados às 17h a preço real:
   devolvia US$93; chance ≤ 20% desde 5%, US$52; desde 20%, US$24.
 - "Flávio <5%" (ganhou), a 29¢: nenhuma regra vendeu, e a banca virou US$342.
 
+### Bateria de testes: qual estratégia é melhor (`estudos/bateria.py`)
+
+Todas as estratégias nas mesmas noites (100 simuladas e 2 apurações reais), em quatro mercados:
+os três ritmos e um que **sabe mais que o modelo** (metade do erro dele, sem atraso: o caso em que
+o mercado tem informação melhor). Relatório completo: [resultados/bateria.md](resultados/bateria.md).
+
+Começando com US$100 em Sim "F <4%" (média ponderada pelas chances de hoje; entre parênteses, a
+chance de terminar com prejuízo):
+
+| Estratégia | como em 4/10 | mais esperto | igual ao modelo | sabe mais que o modelo |
+|---|---|---|---|---|
+| Segurar até o fim | US$ 95 (61%) | US$ 95 (61%) | US$ 95 (61%) | US$ 95 (61%) |
+| Faixa de 90% sai da sua (só vende) | US$ 137 (62%) | US$ 114 (62%) | US$ 98 (62%) | US$ 99 (62%) |
+| Chance ≤ 20% desde 5% (só vende) | US$ 151 (62%) | US$ 117 (62%) | US$ 104 (62%) | US$ 106 (62%) |
+| Trade com posição, limiar 70% | US$ 344 (7%) | US$ 151 (34%) | US$ 104 (65%) | US$ 105 (65%) |
+| Trade em dinheiro, limiar 70% | US$ 349 (6%) | US$ 159 (10%) | US$ 100 (0%) | US$ 99 (12%) |
+| Trade em dinheiro, limiar 80% | US$ 312 (3%) | US$ 143 (5%) | US$ 100 (0%) | US$ 103 (5%) |
+
+**Vieses encontrados:**
+
+- **O modelo puxa para Flávio no começo.** Nas simulações, até 2% apurado erra +0,6 ponto em média
+  (74% das vezes para Flávio); some depois de ~5%. Na apuração real do 1º turno de 2026 (base de
+  2022, o teste mais difícil), ficou ~2 pontos pró-Flávio de 2% a 35% apurado e confiante demais:
+  o erro passou de 1,64 desvio em quase toda a noite.
+- **Esse erro derruba o trade com limiar de 70%.** Naquele caminho real, com faixas de 4 pontos e
+  o mercado "como em 4/10", as duas variantes compravam "F 4-8%" às 17h38 e vendiam com perda às
+  18h30. Com limiar de 80% elas esperam: o trade em dinheiro fica com os US$ 100 e o com posição
+  segura "F <4%" (US$ 247), sem perder o acerto do 2º turno de 2022.
+- **A simulação favorece quem troca de faixa.** O preço simulado vai atrás do próprio modelo. No
+  mercado que sabe mais, o trade com posição perde em 2 de cada 3 noites, e o ganho do trade some.
+  As regras que só vendem perdem a pequena vantagem, mas não ficam abaixo de segurar: vendem pelo
+  preço do mercado, que nesse caso é melhor que o modelo.
+- **O peso dos cenários muda o placar de quem segura.** Com todas as noites iguais, segurar vai a
+  US$ 123: o lote tem muitas noites perto de 4. As médias acima usam as chances de hoje.
+- **Parâmetros escolhidos nas simulações** (limiar de 60%) parecem bons também na metade das noites
+  que ficou de fora da escolha, mas caem no erro de 2026, como os de 70%. Só limiar de 80% ou mais
+  escapa dele.
+- **Para que lado as estratégias erram nas simulações:** sem lado preferido (o trade em dinheiro
+  erra a faixa 4% das vezes para Flávio e 4% para Lula). O viés aparece no caso real.
+
+**Veredito:**
+
+- **Para a sua posição** (só dá para vender): **"faixa de 90% sai da sua, desde 2%"**
+  (`f90@2:100`). Fica perto das melhores nas simulações e foi a melhor na noite real com preço
+  real: na faixa perdedora ("Lula <5%") vendia às 17h33 a 50¢ (US$ 84 de US$ 100) e na vencedora
+  não vendia. Nos dois caminhos reais, nunca vendeu a faixa que ganhou. "Chance ≤ 20% desde 5%"
+  rende parecido nas simulações, mas na noite real saiu 12 minutos depois e pela metade do preço.
+  O stop no preço vende em quedas passageiras: no caminho real de 2026, com o mercado igual ao
+  modelo, vendeu "F <4%" (que ganhou) quase de graça.
+- **Para o trade simulado:** **começar em dinheiro, com limiar de 80%.** Nunca perde muito
+  quando o mercado é eficiente (não compra), ganha quando ele anda atrás do modelo e, junto com a
+  de 90%, foi a única que passou pelos dois caminhos reais sem prejuízo em nenhum mercado (a de
+  90% rende bem menos nas simulações). Começar com posição perde com mais frequência em todos os
+  mercados: de 7% a 65% das noites, contra 0% a 12%.
+
 ### Duas perguntas sobre o mercado e o modelo
 
 **O mercado corre atrás da parcial inflada no começo?** Na noite real do 1º turno, não. Entre
@@ -637,7 +692,8 @@ eleicao/
 │   ├── comparar_mercado.py  modelo × Polymarket na noite do 1º turno
 │   ├── estrategia.py        regras de venda nas simulações e na noite real
 │   ├── banca.py             quanto sobra de US$100 com cada regra
-│   └── trade.py             carteira que troca de faixa (a aba Trade do painel)
+│   ├── trade.py             carteira que troca de faixa (a aba Trade do painel)
+│   └── bateria.py           todas as estratégias nas mesmas noites, e onde cada uma tem viés
 ├── guia/                    guia visual publicado (guia_dados.py → guia_pagina.py)
 ├── dados/                   dados baixados (fora do git, menos ao_vivo/ e polymarket_1t)
 │   └── ao_vivo/             cada sessão do monitor/painel: log, retratos e sessao.json
