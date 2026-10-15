@@ -451,18 +451,38 @@ simulação: nada aqui envia ordens.
 - **"Testar esta regra nas 100 noites simuladas salvas"** roda só a regra automática nas noites de
   `estudos/banca.py`, nos três ritmos de mercado. É o mesmo cálculo de `python eleicao/estudos/trade.py`.
 
-Com a regra padrão, começando em Sim "F <4%" a 40,5¢ com US$100 (média ponderada pelas chances
-que o mercado dá hoje):
+Com a regra padrão, começando em Sim "F <4%" a 40,5¢ com US$100. Cada noite pesa pela chance que
+o mercado dá hoje ao cenário dela:
 
-| Ritmo do mercado | Segurar | Com trocas | Noites com lucro (com trocas) |
-|---|---|---|---|
-| como em 4/10 | US$ 95 | US$ 344 | 89% |
-| mais esperto | US$ 95 | US$ 151 | 61% |
-| igual ao modelo | US$ 95 | US$ 104 | 42% |
+| Ritmo do mercado | Com trocas: média | Mediana | 10% piores ficam abaixo de | Noites com prejuízo | Perdem mais da metade | Segurar: média |
+|---|---|---|---|---|---|---|
+| como em 4/10 | US$ 344 | US$ 291 | US$ 158 | 7% | 2% | US$ 95 |
+| mais esperto | US$ 151 | US$ 134 | US$ 48 | 34% | 11% | US$ 95 |
+| igual ao modelo | US$ 104 | US$ 61 | US$ 0 | 65% | 46% | US$ 95 |
 
-O ganho das trocas vem todo do mercado andar atrás do modelo. Se o mercado reage tão rápido
-quanto o modelo ("igual ao modelo"), trocar quase não acrescenta nada. Numa noite real, a
-liquidez para comprar uma faixa que está subindo também pode ser bem menor que a simulada.
+**Esses lucros vêm quase todos de uma premissa.** O preço simulado é feito a partir do próprio
+modelo: o mercado vai até a chance que o modelo dá, com atraso. Ele nunca sabe algo que o modelo
+não sabe nem se mexe antes dele. O teste mede quanto vale esse atraso, não se o modelo acerta.
+
+- Se o mercado reagir tão rápido quanto o modelo, trocar perde dinheiro em 2 de cada 3 noites. A
+  média de US$ 104 se sustenta em poucas noites com ganho enorme: faixas compradas a 5–10¢ que
+  pagam US$ 1.
+- As noites simuladas vêm de um gerador parecido com o modelo, então ele acerta mais nelas do que
+  na vida real. Na noite real do 1º turno, a margem prevista errou ~2 pontos às 18h. Com faixas de
+  4 pontos, a faixa certa teria caído para 34%: perto de a regra trocar para a errada.
+- Numa noite real, a liquidez para comprar uma faixa que está subindo pode ser bem menor que a
+  simulada.
+
+**Na noite real do 1º turno (4/10), com os preços de verdade da Polymarket,** o atraso existiu.
+Começando em "Lula <5%" (a favorita do mercado antes da apuração), a regra vendia a 50¢ às 17h33 e
+comprava "Flávio <5%" a 40¢: US$ 100 viravam ~US$ 209 (US$ 191 com 3¢ de cada lado), contra zero
+de quem segurou. Às 17h40 passavam US$ 50–220 por minuto nessa faixa, o bastante para US$ 100.
+Mas é uma noite só, e o ritmo "como em 4/10" saiu justamente dela. A aba Trade mostra essas
+tabelas para a regra que estiver na tela.
+
+Para planejar, o "mais esperto" é o cenário mais razoável e "como em 4/10" é o teto. Na noite, a
+coluna "Modelo − venda" do painel, nos primeiros 20–30 min, mostra se o mercado está andando atrás
+do modelo.
 
 ### No terminal
 

@@ -345,10 +345,13 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     </div>
     <ul class="vendas" id="tr-ops"></ul>
     <details class="tela">
-      <summary>Testar esta regra nas 100 noites simuladas salvas</summary>
-      <div class="acoes" style="margin-top:10px"><button class="btn primario" id="tr-rodar">Rodar</button><span class="nota" id="tr-lote-estado">As mesmas noites de banca.py, nos três ritmos de mercado. Só a regra automática (sem os botões).</span></div>
+      <summary>Testar esta regra nas 100 noites simuladas e na noite real do 1º turno</summary>
+      <div class="acoes" style="margin-top:10px"><button class="btn primario" id="tr-rodar">Rodar</button><span class="nota" id="tr-lote-estado">As mesmas noites de estudos/banca.py, nos três ritmos de mercado, e a noite de 4/10 com os preços reais. Só a regra automática (sem os botões).</span></div>
       <div class="rolavel"><table id="tr-t-ritmos"></table></div>
       <div class="rolavel"><table id="tr-t-cenarios"></table></div>
+      <h3 style="font-size:1rem;margin-top:14px">Noite real do 1º turno (4/10), com os preços de verdade da Polymarket</h3>
+      <p class="nota" id="tr-real-nota">Aparece depois de rodar.</p>
+      <div class="rolavel"><table id="tr-t-real"></table></div>
     </details>
   </section>
 
@@ -1102,20 +1105,36 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     $("tr-rodar").disabled = true; setTxt("tr-lote-estado", "rodando nos três ritmos de mercado...");
     try {
       const res = {};
-      for (const ritmo of CFG.ritmos) res[ritmo] = await post("/api/trade/lote", { ...r, ritmo });
+      for (const [i, ritmo] of CFG.ritmos.entries()) res[ritmo] = await post("/api/trade/lote", { ...r, ritmo, noite_real: i === 0 });
       const V = [["segurar", "Segurar"], ["rebalancear", "Com trocas"]];
       const melhor = (o) => (o.rebalancear > o.segurar ? "rebalancear" : "segurar");
-      $("tr-t-ritmos").innerHTML = "<thead><tr><th>Ritmo do mercado</th>" + V.map(([, nome]) => `<th>${nome}</th>`).join("") + "</tr></thead><tbody>" +
-        CFG.ritmos.map((rt) => { const d = res[rt], m = melhor(d.media);
-          return `<tr><td>${esc(rt)}</td>` + V.map(([v]) => `<td class="${v === m ? "melhor" : ""}">${usd(d.media[v])}<span class="nota" style="display:block">lucro em ${pct(d.lucro_noites[v])} das noites</span></td>`).join("") + "</tr>"; }).join("") +
-        "</tbody>";
-      const base = res[CFG.ritmos[0]];
+      // média sozinha engana: os ganhos grandes vêm de poucas noites
+      $("tr-t-ritmos").innerHTML = "<thead><tr><th>Ritmo do mercado</th><th>Com trocas: média</th><th>Mediana</th>" +
+        "<th>10% piores ficam abaixo de</th><th>Noites com prejuízo</th><th>Perdem mais da metade</th><th>Segurar: média</th></tr></thead><tbody>" +
+        CFG.ritmos.map((rt) => { const x = res[rt].dist.rebalancear, s = res[rt].dist.segurar, m = melhor(res[rt].media);
+          return `<tr><td>${esc(rt)}</td><td class="${m === "rebalancear" ? "melhor" : ""}">${usd(x.media)}</td><td>${usd(x.mediana)}</td>` +
+            `<td>${usd(x.p10)}</td><td>${pct(x.prejuizo)}</td><td>${pct(x.perde_metade)}</td>` +
+            `<td class="${m === "segurar" ? "melhor" : ""}">${usd(s.media)}</td></tr>`; }).join("") + "</tbody>";
+      const base = res[CFG.ritmos[0]], real = base.noite_real;
+      if (real) {
+        const op = (o) => `${hora(o.t)} ${o.op === "vende" ? "vende" : "compra"} "${esc(o.faixa)}" a ${cents(o.preco)}`;
+        $("tr-t-real").innerHTML = "<thead><tr><th>Começando em</th><th>Preço pago</th><th>Diferença compra/venda</th>" +
+          '<th>Com trocas</th><th>Segurar</th><th style="text-align:left">O que a regra fez</th></tr></thead><tbody>' +
+          real.linhas.map((l) => `<tr><td>${esc(l.inicio)}${l.sua ? " (a sua)" : ""}${l.favorita ? " (favorita do mercado)" : ""}</td>` +
+            `<td>${cents(l.entrada)}</td><td>±${virg(Math.round(l.spread * 100))}¢</td>` +
+            `<td class="${l.com_trocas > l.segurar ? "melhor" : ""}">${usd(l.com_trocas)}</td><td class="${l.segurar > l.com_trocas ? "melhor" : ""}">${usd(l.segurar)}</td>` +
+            `<td style="white-space:normal;text-align:left">${l.ops.length ? l.ops.map(op).join(" → ") : "não trocou"}</td></tr>`).join("") + "</tbody>";
+        setTxt("tr-real-nota", `Faixas de 5 pontos naquele mercado: a sua posição vira a faixa equivalente. Venceu "${real.final}". ` +
+          `Modelo com os parâmetros de antes daquela noite, decidindo com 5 min de atraso; compra inicial pelo preço das ${hora(real.t_entrada)}. ` +
+          `O ritmo "como em 4/10" saiu desta noite: ela mostra que o mercado já andou atrás do modelo uma vez, não que vai repetir no 2º turno.`);
+      }
       $("tr-t-cenarios").innerHTML = `<thead><tr><th>Cenário (mercado "${esc(CFG.ritmos[0])}")</th><th>Noites</th><th>Chance hoje</th>` +
         V.map(([, nome]) => `<th>${nome}</th>`).join("") + "<th>Termina na faixa certa</th></tr></thead><tbody>" +
         base.cenarios.map((c) => { const m = melhor(c);
           return `<tr><td>${esc(c.cenario)}</td><td>${c.noites}</td><td>${pct(c.chance_hoje)}</td>` +
             V.map(([v]) => `<td class="${v === m ? "melhor" : ""}">${usd(c[v])}</td>`).join("") + `<td>${pct(c.acertou_faixa)}</td></tr>`; }).join("") + "</tbody>";
-      setTxt("tr-lote-estado", `${base.n} noites, começando em Sim "${r.inicial}" a ${cents(r.entrada)} com ${usd(r.banca)}. Média ponderada pelas chances que o mercado dá hoje a cada cenário.`);
+      setTxt("tr-lote-estado", `${base.n} noites, começando em Sim "${r.inicial}" a ${cents(r.entrada)} com ${usd(r.banca)}. ` +
+        "Cada noite pesa pela chance que o mercado dá hoje ao cenário dela (média, mediana e prejuízo).");
     } catch (e) { setTxt("tr-lote-estado", "Erro: " + e.message); }
     finally { $("tr-rodar").disabled = false; }
   }

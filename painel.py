@@ -398,8 +398,10 @@ class Contexto:
                             apurado_min=numero(d.get("apurado_min"), 2.0),
                             max_trocas=int(numero(d.get("max_trocas"), 2)))
         av = trade.lote(self._noites, regra, ritmo, self.params.gl)
-        return limpo({**trade.resumo(av, regra.banca), "ritmo": ritmo,
-                      "noites": av.round(4).to_dict(orient="records")})
+        out = {**trade.resumo(av, regra.banca), "ritmo": ritmo, "noites": av.round(4).to_dict(orient="records")}
+        if d.get("noite_real"):  # a mesma para os três ritmos: preços reais
+            out["noite_real"] = trade.noite_real_1t(regra)
+        return limpo(out)
 
     def iniciar_sim(self, margem, semente, vel, ritmo) -> SessaoSim:
         with self.lock:
