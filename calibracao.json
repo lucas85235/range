@@ -1,0 +1,39 @@
+{
+ "congelado_em": "2026-10-15",
+ "nota": "parâmetros do modelo usados no monitor; mudar só com novo backtest",
+ "params": {
+  "s0_D": 0.03,
+  "s1_D": 0.5,
+  "s0_S": 0.02,
+  "s1_S": 0.4,
+  "tau_reg": 0.02,
+  "tau_uf": 0.02,
+  "tau_b": 0.5,
+  "psi": 0.8,
+  "k": 1.0,
+  "gl": 6.0,
+  "dispersao": true,
+  "n0_disp": 200.0,
+  "ws": [
+   0.0,
+   0.25,
+   0.5,
+   0.75,
+   1.0,
+   1.25,
+   1.5,
+   1.75,
+   2.0
+  ],
+  "w_media": 0.65,
+  "w_dp": 0.45,
+  "preq_lag": 10.0,
+  "preq_tau": 0.03,
+  "preq_temp": 3.0,
+  "sis_a": 0.3,
+  "sis_b": 0.7,
+  "sis_r0": 0.8,
+  "kappa_comp": 1.0,
+  "tau_tam": 0.0
+ }
+}

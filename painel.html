@@ -1,0 +1,1303 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel da apuração</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%231d5fc2'/%3E%3Cpath d='M3 11l3-4 3 2 4-5' stroke='white' stroke-width='1.6' fill='none'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: faixa de controles no topo; 4 cartões (modelo, posição, conselho, parcial); plano; dois gráficos lado a lado; tabela de faixas + linha do tempo; banca simulada. */
+:root {
+  --bg: #f4f6f9; --surface: #ffffff; --surface-2: #f8f9fb;
+  --ink: #121722; --ink-2: #485263; --ink-3: #6f7889;
+  --line: #d9dee6; --accent: #1d5fc2;
+  --term-bg: #0e1520; --term-fg: #d4dbe6; --term-dim: #8390a3; --term-hi: #ffd27a;
+  --modelo: #2a78d6; --modelo-banda: rgba(42, 120, 214, 0.16); --mercado: #eb6834;
+  --faixa-sua: rgba(27, 175, 122, 0.10); --linha-faixa: #b9c1cd;
+  --bom-bg: #e4f4e8; --bom-fg: #135c25;
+  --aviso-bg: #fff3d6; --aviso-fg: #6b4a00;
+  --ruim-bg: #fde6e3; --ruim-fg: #8a1f12;
+  --neutro-bg: #eceff4; --neutro-fg: #3b4453;
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", "Segoe UI", sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --surface: #191e27; --surface-2: #151a22; --ink: #edf1f6; --ink-2: #b3bcc9; --ink-3: #8b95a4;
+    --line: #2b323e; --accent: #79aaff; --term-bg: #0a0e15;
+    --modelo: #3987e5; --modelo-banda: rgba(57, 135, 229, 0.22); --mercado: #e0703f;
+    --faixa-sua: rgba(25, 158, 112, 0.14); --linha-faixa: #4a5363;
+    --bom-bg: #173322; --bom-fg: #9fe2b5; --aviso-bg: #3a2f12; --aviso-fg: #f3d58a;
+    --ruim-bg: #3c1d19; --ruim-fg: #ffb4a8; --neutro-bg: #222935; --neutro-fg: #c6cfdb;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #191e27; --surface-2: #151a22; --ink: #edf1f6; --ink-2: #b3bcc9; --ink-3: #8b95a4;
+  --line: #2b323e; --accent: #79aaff; --term-bg: #0a0e15;
+  --modelo: #3987e5; --modelo-banda: rgba(57, 135, 229, 0.22); --mercado: #e0703f;
+  --faixa-sua: rgba(25, 158, 112, 0.14); --linha-faixa: #4a5363;
+  --bom-bg: #173322; --bom-fg: #9fe2b5; --aviso-bg: #3a2f12; --aviso-fg: #f3d58a;
+  --ruim-bg: #3c1d19; --ruim-fg: #ffb4a8; --neutro-bg: #222935; --neutro-fg: #c6cfdb;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--f-body); }
+h1, h2, h3 { font-family: var(--f-display); line-height: 1.15; margin: 0; }
+p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+.num { font-variant-numeric: tabular-nums; }
+.pagina { max-width: 1320px; margin: 0 auto; padding: 18px 20px 56px; display: grid; gap: 16px; }
+
+/* topo */
+.topo { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+.marca { display: grid; gap: 2px; margin-right: auto; min-width: 0; flex: 1 1 300px; }
+.marca h1 { font-size: 1.55rem; }
+.marca span { color: var(--ink-3); font-size: 0.88rem; }
+.abas { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
+.abas button { border: 0; background: transparent; padding: 9px 16px; cursor: pointer; font-weight: 600; color: var(--ink-2); display: inline-flex; gap: 8px; align-items: center; }
+.abas button + button { border-left: 1px solid var(--line); }
+.abas button[aria-selected="true"] { background: var(--ink); color: var(--bg); }
+.ponto { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); opacity: 0.5; }
+.ponto[data-on="1"] { background: #22b46b; opacity: 1; box-shadow: 0 0 0 3px rgba(34, 180, 107, 0.2); }
+.status { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; color: var(--ink-2); font-size: 0.9rem; }
+.badge { font: 700 0.72rem/1 var(--f-body); letter-spacing: 0.06em; text-transform: uppercase; padding: 6px 9px; border-radius: 999px; background: var(--neutro-bg); color: var(--neutro-fg); }
+.badge[data-n="bom"] { background: var(--bom-bg); color: var(--bom-fg); }
+.badge[data-n="aviso"] { background: var(--aviso-bg); color: var(--aviso-fg); }
+.badge[data-n="ruim"] { background: var(--ruim-bg); color: var(--ruim-fg); }
+.btn { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 7px 12px; cursor: pointer; font-weight: 500; }
+.btn:hover { border-color: var(--ink-3); }
+.btn.primario { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.btn:focus-visible, .abas button:focus-visible, .seg button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* faixas de controle */
+.controle { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: end; }
+.campo { display: grid; gap: 5px; min-width: 0; }
+.campo > span { font: 600 0.72rem/1 var(--f-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.campo input, .campo select { border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 7px 9px; min-width: 0; }
+.campo input[type=number] { width: 96px; }
+.campo .plano-in { width: 220px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; justify-self: start; }
+.seg button { border: 0; background: transparent; padding: 7px 11px; cursor: pointer; color: var(--ink-2); font-weight: 500; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.nota { color: var(--ink-3); font-size: 0.86rem; max-width: 70ch; }
+.nota.erro { color: var(--ruim-fg); }
+.grow { flex: 1 1 240px; }
+
+/* cartões */
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.rot { font: 600 0.72rem/1.2 var(--f-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.kpi b.grande { font: 700 2rem/1.05 var(--f-display); font-variant-numeric: tabular-nums; }
+.kpi .sub { color: var(--ink-2); font-size: 0.9rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 600 0.78rem/1 var(--f-body); padding: 5px 8px; border-radius: 999px; background: var(--neutro-bg); color: var(--neutro-fg); }
+.chip.sua { background: var(--bom-bg); color: var(--bom-fg); }
+.conselho { border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; background: var(--neutro-bg); color: var(--neutro-fg); }
+.conselho .tag { font: 700 0.74rem/1.2 var(--f-body); letter-spacing: 0.07em; text-transform: uppercase; }
+.conselho p { font-size: 0.95rem; }
+.conselho[data-n="bom"] { background: var(--bom-bg); color: var(--bom-fg); }
+.conselho[data-n="aviso"] { background: var(--aviso-bg); color: var(--aviso-fg); }
+.conselho[data-n="ruim"] { background: var(--ruim-bg); color: var(--ruim-fg); }
+
+/* plano */
+.plano { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.plano .rot { margin-right: 4px; }
+.degrau { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 12px; font-size: 0.88rem; }
+.degrau[data-on="1"] { background: var(--ruim-bg); color: var(--ruim-fg); border-color: transparent; font-weight: 600; }
+
+/* gráficos */
+.graficos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.cartao { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.cartao > *, details.tela { min-width: 0; }
+td.melhor { font-weight: 700; }
+.cartao h2 { font-size: 1.08rem; }
+.cartao .leg { color: var(--ink-3); font-size: 0.84rem; }
+.tela-g { position: relative; height: 290px; }
+.vazio { color: var(--ink-3); font-size: 0.92rem; padding: 18px 0; }
+
+/* tabela e linha do tempo */
+.baixo { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 12px; }
+.rolavel { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 7px 8px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font: 600 0.74rem/1.2 var(--f-body); letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+tr.sua td { background: var(--faixa-sua); font-weight: 600; }
+tr.apagada td { color: var(--ink-3); }
+.barra { display: inline-block; height: 8px; border-radius: 4px; background: var(--modelo); vertical-align: middle; margin-left: 8px; }
+.eventos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: 330px; overflow-y: auto; }
+.eventos li { display: grid; grid-template-columns: 58px 1fr; gap: 10px; padding: 7px 10px; border-radius: 8px; background: var(--neutro-bg); color: var(--neutro-fg); font-size: 0.9rem; }
+.eventos li[data-n="ruim"] { background: var(--ruim-bg); color: var(--ruim-fg); }
+.eventos li[data-n="aviso"] { background: var(--aviso-bg); color: var(--aviso-fg); }
+.eventos li[data-n="bom"] { background: var(--bom-bg); color: var(--bom-fg); }
+.eventos li b { font-variant-numeric: tabular-nums; }
+.sistema { color: var(--ink-3); font-size: 0.84rem; display: grid; gap: 2px; }
+
+/* tela do monitor */
+details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
+.term { background: var(--term-bg); color: var(--term-fg); border-radius: 10px; padding: 14px 16px; font: 0.84rem/1.55 var(--f-mono); overflow-x: auto; white-space: pre; margin-top: 10px; }
+.term .d { color: var(--term-dim); }
+.term .h { color: var(--term-hi); font-weight: 600; }
+
+/* banca */
+.banca-res { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.res { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px; background: var(--surface-2); }
+.res b { font: 700 1.5rem/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.res span { color: var(--ink-2); font-size: 0.86rem; }
+.vendas { margin: 0; padding-left: 18px; color: var(--ink-2); font-size: 0.9rem; }
+.revelado { border-radius: 10px; padding: 10px 14px; background: var(--neutro-bg); color: var(--neutro-fg); }
+.revelado[data-n="bom"] { background: var(--bom-bg); color: var(--bom-fg); }
+.revelado[data-n="ruim"] { background: var(--ruim-bg); color: var(--ruim-fg); }
+.rodape { color: var(--ink-3); font-size: 0.84rem; }
+[hidden] { display: none !important; }
+
+@media (max-width: 1100px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .graficos, .baixo { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 620px) {
+  .pagina { padding: 14px 16px 48px; }
+  .kpis, .banca-res { grid-template-columns: minmax(0, 1fr); }
+  .tela-g { height: 240px; }
+  .campo .plano-in { width: 100%; }
+  .campo, .grow { flex: 1 1 100%; }
+}
+</style>
+</head>
+<body>
+<div class="pagina">
+  <header class="topo">
+    <div class="marca">
+      <h1>Painel da apuração</h1>
+      <span>2º turno · 25/10/2026 · Flávio Bolsonaro × Lula · margem de vitória na Polymarket</span>
+    </div>
+    <nav class="abas" role="tablist" aria-label="Modo">
+      <button role="tab" id="aba-vivo" aria-selected="true"><span class="ponto" id="ponto-vivo"></span>Ao vivo (TSE)</button>
+      <button role="tab" id="aba-sim" aria-selected="false"><span class="ponto" id="ponto-sim"></span>Simulação</button>
+      <button role="tab" id="aba-trade" aria-selected="false" title="Noite simulada com uma carteira que troca para a faixa que o modelo aponta"><span class="ponto" id="ponto-trade"></span>Trade (simulação)</button>
+    </nav>
+    <div class="status">
+      <span class="badge" id="badge">—</span>
+      <span class="num" id="carimbo">—</span>
+      <button class="btn" id="som" aria-pressed="false" title="Toca um aviso quando um degrau do plano dispara ou a chance cai abaixo do alerta">Som desligado</button>
+    </div>
+  </header>
+
+  <!-- controles do modo ao vivo -->
+  <section class="controle" id="ctl-vivo" aria-label="Monitor ao vivo">
+    <div class="grow">
+      <p id="vivo-txt">O monitor ao vivo não está rodando.</p>
+      <p class="nota" id="vivo-nota">No dia 25/10, comece às 16h50. Antes disso serve só de teste de conexão: o TSE ainda não tem votos do 2º turno.</p>
+    </div>
+    <div class="acoes">
+      <button class="btn primario" id="vivo-retomar" hidden>Retomar a última sessão</button>
+      <button class="btn primario" id="vivo-iniciar">Começar a ler o TSE</button>
+      <button class="btn" id="vivo-parar" hidden>Parar</button>
+    </div>
+  </section>
+
+  <!-- controles da simulação -->
+  <section class="controle" id="ctl-sim" aria-label="Simulação" hidden>
+    <label class="campo"><span>Cenário</span><select id="sim-cenario"></select></label>
+    <label class="campo" id="sim-margem-campo" hidden><span>Margem final (F − L)</span><input id="sim-margem" type="number" step="0.1" value="4.0"></label>
+    <label class="campo"><span>Semente</span><input id="sim-semente" type="number" placeholder="aleatória"></label>
+    <label class="campo"><span>Mercado simulado</span><select id="sim-ritmo"></select></label>
+    <button class="btn primario" id="sim-iniciar">Nova simulação</button>
+    <div class="campo"><span>Velocidade</span><div class="seg" id="sim-vel" role="group" aria-label="Velocidade"></div></div>
+    <div class="acoes">
+      <button class="btn" id="sim-pausar" disabled>Pausar</button>
+      <button class="btn" id="sim-revelar" disabled>Revelar resultado</button>
+      <button class="btn" id="sim-parar" disabled>Parar</button>
+    </div>
+    <p class="nota grow" id="sim-nota">Gera uma apuração sintética do 2º turno (mesmo gerador dos testes) e reproduz a noite acelerada. A margem fica escondida até o fim ou até você revelar.</p>
+  </section>
+
+  <!-- trade: carteira que troca para a faixa do modelo -->
+  <section class="controle" id="ctl-trade" aria-label="Regra da carteira" hidden>
+    <label class="campo"><span>Começa em (Sim)</span><select id="tr-inicial"></select></label>
+    <label class="campo"><span>Preço pago (¢)</span><input id="tr-entrada" type="number" min="1" max="99" step="0.5"></label>
+    <label class="campo"><span>Banca (US$)</span><input id="tr-banca" type="number" min="1" step="1" value="100"></label>
+    <label class="campo"><span>Trocar com chance ≥ (%)</span><input id="tr-limiar" type="number" min="1" max="99" step="1" value="70"></label>
+    <label class="campo"><span>Comprar com vantagem ≥ (pts)</span><input id="tr-vantagem" type="number" min="0" max="50" step="1" value="5"></label>
+    <label class="campo"><span>Desde (% apurado)</span><input id="tr-apurado" type="number" min="0" max="100" step="1" value="2"></label>
+    <label class="campo"><span>Máx. de trocas</span><input id="tr-trocas" type="number" min="0" max="10" step="1" value="2"></label>
+    <div class="campo"><span>Automático</span><div class="seg" role="group" aria-label="Automático"><button id="tr-auto-on" aria-pressed="true">Ligado</button><button id="tr-auto-off" aria-pressed="false">Desligado</button></div></div>
+    <p class="nota grow">A cada ciclo, a partir do % apurado: se a faixa favorita do modelo não é a da carteira e tem pelo menos o limiar, vende tudo; depois compra a favorita se a chance do modelo passar o preço de compra pela vantagem pedida (senão espera em dinheiro).</p>
+  </section>
+
+  <!-- posição -->
+  <section class="controle" id="ctl-pos" aria-label="Sua posição">
+    <label class="campo"><span>Sua faixa</span><select id="pos-faixa"></select></label>
+    <div class="campo"><span>Lado</span><div class="seg" role="group" aria-label="Lado"><button id="pos-sim" aria-pressed="true">Sim</button><button id="pos-nao" aria-pressed="false">Não</button></div></div>
+    <label class="campo"><span>Alerta abaixo de (%)</span><input id="pos-alerta" type="number" min="1" max="99" step="1" value="50"></label>
+    <label class="campo"><span>Plano de venda</span><input id="pos-plano" class="plano-in" placeholder="ex.: f90@2:100" spellcheck="false"></label>
+    <p class="nota grow" id="pos-nota">Plano: degraus CHANCE@APURADO:FRAÇÃO separados por espaço. <code>f90@2:100</code> = vender tudo quando a faixa provável de 90% sair da sua, a partir de 2% apurado. <code>20@20:50</code> = vender metade se a chance ficar ≤ 20%, a partir de 20%.</p>
+  </section>
+
+  <section class="kpis" aria-label="Resumo">
+    <article class="kpi">
+      <span class="rot">Modelo · margem final prevista</span>
+      <b class="grande" id="k-mu">—</b>
+      <span class="sub num" id="k-sd">—</span>
+      <span class="sub num" id="k-f90">—</span>
+      <div class="chips" id="k-cobre"></div>
+    </article>
+    <article class="kpi">
+      <span class="rot" id="k-pos-rot">Sua posição</span>
+      <b class="grande" id="k-chance">—</b>
+      <span class="sub num" id="k-preco">—</span>
+      <span class="sub num" id="k-dif"></span>
+    </article>
+    <article class="conselho" id="k-conselho" data-n="neutro" aria-live="polite">
+      <span class="tag" id="k-tag">O que a regra testada diz</span>
+      <p id="k-txt">—</p>
+    </article>
+    <article class="kpi">
+      <span class="rot">Parcial do TSE</span>
+      <b class="grande" id="k-parcial">—</b>
+      <span class="sub num" id="k-apurado">—</span>
+      <span class="sub" id="k-parcial-nota">A parcial puxa para quem é apurado primeiro; o modelo corrige isso.</span>
+    </article>
+  </section>
+
+  <section class="plano" id="plano" aria-label="Plano de venda"></section>
+
+  <section class="graficos">
+    <figure class="cartao" style="margin:0">
+      <h2>Margem final prevista</h2>
+      <p class="leg">Linha azul: previsão do modelo; faixa azul: faixa provável de 90%; tracejado: parcial do TSE. A área verde é a sua faixa; as linhas finas são as divisas das faixas da Polymarket.</p>
+      <div class="tela-g"><canvas id="g-margem" aria-label="Margem prevista ao longo da apuração" role="img"></canvas></div>
+    </figure>
+    <figure class="cartao" style="margin:0" id="fig-carteira" hidden>
+      <h2>Valor da carteira</h2>
+      <p class="leg">Linha azul: a carteira que troca de faixa, no preço de venda de cada momento; tracejado cinza: segurar a posição inicial. Riscos verticais: as trocas.</p>
+      <div class="tela-g"><canvas id="g-carteira" aria-label="Valor da carteira ao longo da apuração" role="img"></canvas></div>
+    </figure>
+    <figure class="cartao" style="margin:0" id="fig-chance">
+      <h2 id="g-chance-tit">Chance da sua posição × preço</h2>
+      <p class="leg">Linha verde: chance que o modelo dá à sua posição; tracejado laranja: preço pelo qual dá para vender (bid). Linha pontilhada: seu alerta. Riscos verticais: degraus do plano que dispararam.</p>
+      <div class="tela-g"><canvas id="g-chance" aria-label="Chance da posição e preço ao longo da apuração" role="img"></canvas></div>
+    </figure>
+  </section>
+
+  <section class="baixo">
+    <div class="cartao">
+      <h2>Faixas</h2>
+      <div class="rolavel">
+        <table>
+          <thead><tr><th>Faixa</th><th>Modelo</th><th>Mercado (venda / compra)</th><th>Modelo − venda</th></tr></thead>
+          <tbody id="tab-faixas"></tbody>
+        </table>
+      </div>
+      <p class="leg" id="tab-nota"></p>
+      <details class="tela"><summary>Tela do monitor (igual ao terminal)</summary><div class="term" id="term"></div></details>
+    </div>
+    <div class="cartao">
+      <h2>Linha do tempo</h2>
+      <ul class="eventos" id="eventos"></ul>
+      <div class="sistema" id="sistema"></div>
+    </div>
+  </section>
+
+  <section class="cartao" id="banca" hidden aria-label="Banca simulada">
+    <h2>Banca simulada</h2>
+    <div class="controle" style="padding:0;border:0">
+      <label class="campo"><span>Banca (US$)</span><input id="b-banca" type="number" min="1" step="1" value="100"></label>
+      <label class="campo"><span>Preço de entrada (¢)</span><input id="b-entrada" type="number" min="1" max="99" step="0.5"></label>
+      <div class="acoes">
+        <button class="btn" data-vender="0.25">Vender 25%</button>
+        <button class="btn" data-vender="0.5">Vender 50%</button>
+        <button class="btn" data-vender="1">Vender o resto</button>
+      </div>
+      <p class="nota grow" id="b-nota">Venda no preço simulado do momento. Compare com seguir o plano e com segurar até o fim.</p>
+    </div>
+    <div class="revelado" id="b-revelado" hidden></div>
+    <div class="banca-res">
+      <div class="res"><span>Você (vendas manuais)</span><b id="b-voce">—</b><span id="b-voce-s"></span></div>
+      <div class="res"><span>Seguindo o plano</span><b id="b-plano">—</b><span id="b-plano-s"></span></div>
+      <div class="res"><span>Segurando até o fim</span><b id="b-segurar">—</b><span id="b-segurar-s"></span></div>
+    </div>
+    <ul class="vendas" id="b-vendas"></ul>
+  </section>
+
+  <section class="cartao" id="carteira" hidden aria-label="Carteira">
+    <h2>Carteira</h2>
+    <div class="acoes">
+      <button class="btn" id="tr-favorita">Trocar agora para a favorita</button>
+      <button class="btn" id="tr-dinheiro">Vender tudo (ficar em dinheiro)</button>
+      <span class="nota">"Vender tudo" também desliga o automático. Com ele ligado, a regra continua agindo depois de "Trocar agora".</span>
+    </div>
+    <div class="revelado" id="tr-revelado" hidden></div>
+    <div class="banca-res">
+      <div class="res"><span>Carteira (com trocas)</span><b id="tr-valor">—</b><span id="tr-valor-s"></span></div>
+      <div class="res"><span>Segurando a posição inicial</span><b id="tr-segurar">—</b><span id="tr-segurar-s"></span></div>
+      <div class="res"><span>Diferença</span><b id="tr-dif">—</b><span id="tr-dif-s"></span></div>
+    </div>
+    <ul class="vendas" id="tr-ops"></ul>
+    <details class="tela">
+      <summary>Testar esta regra nas 100 noites simuladas salvas</summary>
+      <div class="acoes" style="margin-top:10px"><button class="btn primario" id="tr-rodar">Rodar</button><span class="nota" id="tr-lote-estado">As mesmas noites de banca.py, nos três ritmos de mercado. Só a regra automática (sem os botões).</span></div>
+      <div class="rolavel"><table id="tr-t-ritmos"></table></div>
+      <div class="rolavel"><table id="tr-t-cenarios"></table></div>
+    </details>
+  </section>
+
+  <p class="rodape">Só leitura: o painel lê o TSE e os preços públicos da Polymarket e mostra o que as regras testadas fariam. Não envia ordens, e nada aqui é recomendação de investimento; a decisão de vender é sua.</p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  const BORDAS = [-Infinity, -12, -8, -4, 0, 4, 8, 12, Infinity];
+  let FAIXAS = ["L 12%+", "L 8-12%", "L 4-8%", "L <4%", "F <4%", "F 4-8%", "F 8-12%", "F 12%+"];
+  let CFG = null;
+  const $ = (id) => document.getElementById(id);
+  const raiz = document.documentElement;
+  const cor = (n) => getComputedStyle(raiz).getPropertyValue(n).trim();
+
+  // ---------- formatação ----------
+  const virg = (s) => String(s).replace(".", ",");
+  const pct = (x, d = 0) => (x == null ? "—" : virg((x * 100).toFixed(d)) + "%");
+  const cents = (x) => (x == null ? "—" : virg((x * 100).toFixed(1)) + "¢");
+  const usd = (x) => "US$ " + virg(x.toFixed(2));
+  const margem = (x, d = 2) => (x == null ? "—" : (x >= 0 ? "F +" : "L +") + virg(Math.abs(x).toFixed(d)));
+  const hora = (t) => { const m = Math.round(17 * 60 + t); return Math.floor(m / 60) + "h" + String(((m % 60) + 60) % 60).padStart(2, "0"); };
+  const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const lista = (a) => (a.length <= 1 ? a.join("") : a.slice(0, -1).join(", ") + " e " + a[a.length - 1]);
+  const faixasCobertas = (lo, hi) => FAIXAS.filter((f, i) => hi >= BORDAS[i] && lo < BORDAS[i + 1]);
+  const faixaDe = (m) => FAIXAS.find((f, i) => m >= BORDAS[i] && m < BORDAS[i + 1]);
+  const limites = (f) => { const i = FAIXAS.indexOf(f); return [BORDAS[i], BORDAS[i + 1]]; };
+
+  // ---------- posição (fica salva neste navegador) ----------
+  let pos = { faixa: "F <4%", lado: "sim", alerta: 0.5, plano: [] };
+  function salvarPos() { try { localStorage.setItem("painel-posicao", JSON.stringify(pos)); } catch (e) { /* sem armazenamento */ } }
+  function lerPosSalva() { try { return JSON.parse(localStorage.getItem("painel-posicao") || "null"); } catch (e) { return null; } }
+
+  function lerDegrau(txt) {
+    const m = String(txt).trim().match(/^(f90|\d+(?:[.,]\d+)?)@(\d+(?:[.,]\d+)?)(?::(\d+(?:[.,]\d+)?))?$/i);
+    if (!m) return null;
+    const n = (s) => parseFloat(s.replace(",", "."));
+    const f90 = m[1].toLowerCase() === "f90";
+    return { texto: String(txt).trim(), f90, chance: f90 ? null : n(m[1]) / 100, apurado: n(m[2]), fracao: m[3] ? n(m[3]) : 100 };
+  }
+  const separarPlano = (txt) => String(txt).replace(/,\s+/g, " ").split(/[\s;]+/).filter(Boolean);
+  const condicao = (d) => (d.f90 ? "faixa de 90% sair da posição" : `chance ≤ ${virg(+(d.chance * 100).toFixed(1))}%`) +
+    `, desde ${virg(d.apurado)}% apurado → vender ${virg(d.fracao)}%`;
+
+  // ---------- estado das duas sessões ----------
+  const nova = () => ({ id: null, estado: "parado", erro: null, ciclos: [], eventos: [], info: {}, vistos: new Set(), carregada: false,
+                        ultimoNovo: 0, vendas: [], ok: true, retomavel: null,
+                        vistosTrade: new Set(), carregadaTrade: false, manuais: [], autoInicio: null });
+  const S = { vivo: nova(), sim: nova() };
+  // a aba Trade usa a mesma noite simulada da aba Simulação
+  let aba = location.hash === "#sim" ? "sim" : location.hash === "#trade" ? "trade" : "vivo";
+  const sessaoDa = (a) => (a === "vivo" ? "vivo" : "sim");
+
+  async function puxar(tipo) {
+    const s = S[tipo];
+    const q = new URLSearchParams({ tipo, desde: String(s.ciclos.length), id: s.id == null ? "" : String(s.id) });
+    try {
+      const r = await fetch("/api/estado?" + q.toString(), { cache: "no-store" });
+      const d = await r.json();
+      // noite nova: a carteira começa com o automático como está agora na tela
+      if (d.id !== s.id) { Object.assign(s, nova()); s.id = d.id; s.autoInicio = trade.auto; }
+      if (d.desde === 0 || d.desde == null) s.ciclos = (d.ciclos || []).slice();
+      else if (d.desde === s.ciclos.length) s.ciclos.push(...d.ciclos);
+      if (d.ciclos && d.ciclos.length) s.ultimoNovo = Date.now();
+      Object.assign(s, { estado: d.estado, erro: d.erro, eventos: d.eventos || [], info: d.info || {}, ok: true, retomavel: d.retomavel || null });
+    } catch (e) {
+      s.ok = false;
+    }
+  }
+
+  // ---------- avaliação (tudo derivado dos ciclos + posição) ----------
+  function avaliar(s) {
+    const f = pos.faixa, sim = pos.lado === "sim";
+    const L = s.ciclos.map((c) => {
+      const o = { t: c.t, ap: c.eleitorado_pct || 0, tem: c.mu != null, c };
+      const mk = c.mercado && c.mercado[f];
+      o.bid = mk ? (sim ? mk[0] : 1 - mk[1]) : null;
+      o.ask = mk ? (sim ? mk[1] : 1 - mk[0]) : null;
+      if (o.tem) {
+        const pf = c.probs[f];
+        o.p = sim ? pf : 1 - pf;
+        o.cobre = faixasCobertas(c.lo90, c.hi90);
+        o.fora = sim ? !o.cobre.includes(f) : (o.cobre.length === 1 && o.cobre[0] === f);
+      }
+      return o;
+    });
+    const chave = `${f}|${pos.lado}`;
+    const plano = pos.plano.map(lerDegrau).filter(Boolean).map((d) => {
+      let k = -1;
+      for (let i = 0; i < L.length; i++) {
+        const o = L[i];
+        if (!o.tem || o.ap < d.apurado) continue;
+        if (d.f90 ? o.fora : o.p <= d.chance) { k = i; break; }
+      }
+      return Object.assign(d, { k });
+    });
+    const ev = [];
+    plano.forEach((d) => {
+      if (d.k < 0) return;
+      const o = L[d.k];
+      ev.push({ chave: `plano|${chave}|${d.texto}`, k: d.k, t: o.t, nivel: "ruim", som: "plano",
+                texto: `Plano: degrau ${d.texto} disparou — vender ${virg(d.fracao)}% da posição (chance ${pct(o.p, 1)}, ${virg(o.ap.toFixed(1))}% apurado${o.bid != null ? ", venda a ~" + cents(o.bid) : ""}).` });
+    });
+    let ultimo = 1.0, foraAntes = false;
+    L.forEach((o, k) => {
+      if (!o.tem || o.ap < 1) return;
+      if (o.p < pos.alerta && pos.alerta <= ultimo)
+        ev.push({ chave: `alerta|${chave}|${pos.alerta}|${k}`, k, t: o.t, nivel: "aviso", som: "alerta",
+                  texto: `Alerta: a chance da posição caiu para ${pct(o.p, 1)} (abaixo de ${pct(pos.alerta)}).` });
+      ultimo = o.p;
+      if (o.ap >= 2 && o.fora && !foraAntes)
+        ev.push({ chave: `fora|${chave}|${k}`, k, t: o.t, nivel: "ruim", som: "alerta",
+                  texto: sim ? `A faixa provável de 90% (${margem(o.c.lo90, 1)} a ${margem(o.c.hi90, 1)}) saiu de "${f}".`
+                             : `A faixa provável de 90% ficou inteira dentro de "${f}": o Não está perdendo.` });
+      if (o.ap >= 2 && !o.fora && foraAntes)
+        ev.push({ chave: `volta|${chave}|${k}`, k, t: o.t, nivel: "bom", som: null,
+                  texto: `A faixa provável de 90% voltou a favorecer a posição (${margem(o.c.lo90, 1)} a ${margem(o.c.hi90, 1)}).` });
+      if (o.ap >= 2) foraAntes = o.fora;
+    });
+    ev.sort((a, b) => a.k - b.k);
+    return { L, plano, ev };
+  }
+
+  function conselho(o) {
+    if (!o || !o.tem) return ["neutro", "Espere", "Ainda não há votos apurados."];
+    const f = pos.faixa, sim = pos.lado === "sim", c = o.c;
+    const ft = `${margem(c.lo90, 1)} a ${margem(c.hi90, 1)}`;
+    const preco = o.bid != null ? ` Dá para vender a ~${cents(o.bid)} agora.` : "";
+    if (o.ap < 2) return ["neutro", "Cedo demais", `Só ${virg(o.ap.toFixed(1))}% apurado. O modelo ainda é quase só palpite e muda muito de um minuto para o outro. As regras testadas só agem a partir de 2%.`];
+    if (sim) {
+      if (o.fora) return ["ruim", "A regra testada vende aqui", `A faixa provável (${ft}) não toca mais "${f}": chance de ${pct(o.p)}. Nas simulações perto da fronteira, vender neste ponto acertou 96–98% das vezes.` + preco];
+      if (o.cobre.length === 1) return ["bom", "Segure", `A faixa provável (${ft}) está inteira dentro de "${f}" (${pct(o.p)}). Vender só vale se alguém pagar mais que isso.` + preco];
+    } else {
+      if (o.fora) return ["ruim", "A regra testada vende aqui", `A faixa provável (${ft}) está inteira dentro de "${f}": o Não só ganha se o resultado sair dela (chance ${pct(o.p)}).` + preco];
+      if (!o.cobre.includes(f)) return ["bom", "Segure", `A faixa provável (${ft}) não toca "${f}": o Não está com ${pct(o.p)}.` + preco];
+    }
+    if (o.ap < 20) return ["aviso", "Indefinido: não venda pela chance", `A faixa provável (${ft}) ainda cobre ${lista(o.cobre)}. Chance de ${pct(o.p)} sozinha não é motivo para vender: nas simulações, vender por chance antes de 20% apurado tirou o dobro de posições vencedoras. Só compensa se o preço de venda estiver uns 20 pontos acima de ${pct(o.p)}.` + preco];
+    if (o.p <= 0.2) return ["ruim", "Venda se ainda der", `Já passou de 20% apurado e a chance da posição está em ${pct(o.p)}. Nas simulações, vender a partir daqui errou ~4% das vezes perto da fronteira.` + preco];
+    return ["aviso", "Compare com o preço", `Faixa provável ${ft}, cobrindo ${lista(o.cobre)}. A posição está com ${pct(o.p)}: se o preço de venda passar disso em mais de ~5 pontos, vender vale mais; senão, segure.` + preco];
+  }
+
+  // ---------- som e aviso no título ----------
+  let audio = null, som = false;
+  function bip(tipo) {
+    if (!som || !audio) return;
+    const tons = tipo === "plano" ? [880, 1320, 880] : [740, 740];
+    tons.forEach((fq, i) => {
+      const t0 = audio.currentTime + i * 0.28, o = audio.createOscillator(), g = audio.createGain();
+      o.type = "sine"; o.frequency.value = fq;
+      g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.24);
+      o.connect(g).connect(audio.destination); o.start(t0); o.stop(t0 + 0.26);
+    });
+  }
+  $("som").addEventListener("click", () => {
+    som = !som;
+    if (som && !audio) { try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { som = false; } }
+    if (audio && audio.state === "suspended") audio.resume();
+    $("som").setAttribute("aria-pressed", String(som));
+    $("som").textContent = som ? "Som ligado" : "Som desligado";
+    if (som) bip("alerta");
+  });
+  const TITULO = document.title;
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) document.title = TITULO; });
+
+  // tipo: "vivo", "sim" ou "trade" (trade = trocas da carteira na noite simulada)
+  function novidades(tipo, ev) {
+    const s = S[sessaoDa(tipo)], trade = tipo === "trade";
+    const vistos = trade ? s.vistosTrade : s.vistos, flag = trade ? "carregadaTrade" : "carregada";
+    const novos = ev.filter((e) => !vistos.has(e.chave));
+    novos.forEach((e) => vistos.add(e.chave));
+    if (!s[flag]) { s[flag] = true; return; }
+    // o ao vivo avisa em qualquer aba; simulação e trade, só na própria aba
+    if (tipo !== "vivo" && tipo !== aba) return;
+    const tocar = novos.find((e) => e.som === "plano") || novos.find((e) => e.som);
+    if (tocar) {
+      bip(tocar.som);
+      if (document.hidden) document.title = `(!) ${tipo === "vivo" ? "AO VIVO" : tipo === "trade" ? "trade" : "simulação"} — ${TITULO}`;
+    }
+  }
+
+  // ---------- gráficos ----------
+  const G = {};
+  const temChart = () => typeof window.Chart !== "undefined";
+  const nomeBorda = (b) => (b === 0 ? "empate" : (b > 0 ? "F " : "L ") + Math.abs(b) + "%");
+  const linhasFaixa = {
+    id: "linhasFaixa",
+    // sua faixa, divisas, alerta e degraus disparados ficam por baixo das linhas...
+    beforeDatasetsDraw(chart) {
+      const op = chart.$linhas || {};
+      const { ctx, chartArea: a, scales: { x, y } } = chart;
+      ctx.save();
+      if (op.sua) {
+        const [lo, hi] = op.sua;
+        const y0 = y.getPixelForValue(Math.min(Math.max(hi, y.min), y.max)), y1 = y.getPixelForValue(Math.max(Math.min(lo, y.max), y.min));
+        ctx.fillStyle = cor("--faixa-sua"); ctx.fillRect(a.left, y0, a.right - a.left, y1 - y0);
+      }
+      ctx.strokeStyle = cor("--linha-faixa"); ctx.lineWidth = 1;
+      (op.bordas || []).forEach((b) => {
+        if (b < y.min || b > y.max) return;
+        const py = y.getPixelForValue(b);
+        ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke();
+      });
+      (op.verticais || []).forEach((v) => {
+        if (v.x < x.min || v.x > x.max) return;
+        const px = x.getPixelForValue(v.x);
+        ctx.strokeStyle = cor("--ruim-fg"); ctx.setLineDash([4, 3]);
+        ctx.beginPath(); ctx.moveTo(px, a.top); ctx.lineTo(px, a.bottom); ctx.stroke();
+      });
+      if (op.alerta != null && op.alerta >= y.min && op.alerta <= y.max) {
+        const py = y.getPixelForValue(op.alerta);
+        ctx.strokeStyle = cor("--aviso-fg"); ctx.setLineDash([2, 3]);
+        ctx.beginPath(); ctx.moveTo(a.left, py); ctx.lineTo(a.right, py); ctx.stroke();
+      }
+      ctx.restore();
+    },
+    // ...e os rótulos, por cima delas, com fundo para continuarem legíveis
+    afterDatasetsDraw(chart) {
+      const op = chart.$linhas || {};
+      const { ctx, chartArea: a, scales: { x, y } } = chart;
+      ctx.save();
+      ctx.font = "11px IBM Plex Sans, sans-serif"; ctx.textBaseline = "bottom";
+      const rotulo = (txt, x0, py, corTxt) => {
+        const w = ctx.measureText(txt).width;
+        ctx.globalAlpha = 0.85; ctx.fillStyle = cor("--surface"); ctx.fillRect(x0 - 3, py - 14, w + 6, 15);
+        ctx.globalAlpha = 1; ctx.fillStyle = corTxt; ctx.fillText(txt, x0, py);
+      };
+      (op.bordas || []).forEach((b) => {
+        if (b < y.min || b > y.max) return;
+        const txt = nomeBorda(b);
+        rotulo(txt, a.right - 4 - ctx.measureText(txt).width, y.getPixelForValue(b) - 2, cor("--ink-3"));
+      });
+      let fimRotulo = -Infinity;
+      (op.verticais || []).forEach((v) => {
+        if (v.x < x.min || v.x > x.max) return;
+        const w = ctx.measureText(v.rot).width, x0 = Math.min(x.getPixelForValue(v.x) + 4, a.right - 4 - w);
+        if (x0 < fimRotulo + 8) return;  // colado no rótulo anterior: fica só o risco
+        rotulo(v.rot, x0, a.top + 15, cor("--ruim-fg"));
+        fimRotulo = x0 + w;
+      });
+      ctx.restore();
+    },
+  };
+  function eixoX() {
+    return { type: "linear", ticks: { stepSize: 30, includeBounds: false, maxRotation: 0, autoSkipPadding: 10, color: cor("--ink-3"), callback: (v) => hora(v), font: { family: "IBM Plex Sans" } }, grid: { color: cor("--line") } };
+  }
+  function opcoes(extra) {
+    return Object.assign({
+      responsive: true, maintainAspectRatio: false, animation: false, parsing: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { labels: { color: cor("--ink-2"), boxWidth: 14, font: { family: "IBM Plex Sans" },
+                                     filter: (it, d) => !it.text.startsWith("_") && d.datasets[it.datasetIndex].data.length > 0 } } },
+    }, extra);
+  }
+  function criarGraficos() {
+    if (!temChart()) return;
+    Object.values(G).forEach((g) => g.destroy());
+    G.margem = new Chart($("g-margem"), {
+      type: "line",
+      data: { datasets: [
+        { label: "_topo", data: [], borderWidth: 0, pointRadius: 0, fill: "+1", backgroundColor: cor("--modelo-banda") },
+        { label: "_base", data: [], borderWidth: 0, pointRadius: 0, fill: false },
+        { label: "Modelo (margem final)", data: [], borderColor: cor("--modelo"), backgroundColor: cor("--modelo"), borderWidth: 2.2, pointRadius: 0 },
+        { label: "Parcial do TSE", data: [], borderColor: cor("--ink-3"), backgroundColor: cor("--ink-3"), borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0 },
+        { label: "Resultado final", data: [], borderColor: cor("--bom-fg"), backgroundColor: cor("--bom-fg"), borderWidth: 1.5, borderDash: [2, 3], pointRadius: 0 },
+      ] },
+      options: opcoes({
+        scales: { x: eixoX(), y: { ticks: { includeBounds: false, color: cor("--ink-3"), callback: (v) => (v === 0 ? "0" : (v > 0 ? "F +" : "L +") + Math.abs(v)), font: { family: "IBM Plex Sans" } }, grid: { color: cor("--line") } } },
+        plugins: Object.assign(opcoes({}).plugins, {
+          tooltip: { filter: (it) => !it.dataset.label.startsWith("_"), callbacks: { title: (it) => hora(it[0].parsed.x), label: (it) => ` ${it.dataset.label}: ${margem(it.parsed.y)}` } },
+        }),
+      }),
+      plugins: [linhasFaixa],
+    });
+    G.margem.$linhas = { bordas: [-12, -8, -4, 0, 4, 8, 12] };
+    G.chance = new Chart($("g-chance"), {
+      type: "line",
+      data: { datasets: [
+        { label: "Chance da posição (modelo)", data: [], borderColor: cor("--bom-fg"), backgroundColor: cor("--bom-fg"), borderWidth: 2.2, pointRadius: 0 },
+        { label: "Preço de venda (bid)", data: [], borderColor: cor("--mercado"), backgroundColor: cor("--mercado"), borderWidth: 1.8, borderDash: [6, 4], pointRadius: 0 },
+      ] },
+      options: opcoes({
+        scales: { x: eixoX(), y: { min: 0, max: 1, ticks: { color: cor("--ink-3"), callback: (v) => Math.round(v * 100) + "%", font: { family: "IBM Plex Sans" } }, grid: { color: cor("--line") } } },
+        plugins: Object.assign(opcoes({}).plugins, {
+          tooltip: { callbacks: { title: (it) => hora(it[0].parsed.x), label: (it) => ` ${it.dataset.label}: ${pct(it.parsed.y, 1)}` } },
+        }),
+      }),
+      plugins: [linhasFaixa],
+    });
+    G.carteira = new Chart($("g-carteira"), {
+      type: "line",
+      data: { datasets: [
+        { label: "Carteira (com trocas)", data: [], borderColor: cor("--modelo"), backgroundColor: cor("--modelo"), borderWidth: 2.2, pointRadius: 0 },
+        { label: "Segurando a posição inicial", data: [], borderColor: cor("--ink-3"), backgroundColor: cor("--ink-3"), borderWidth: 1.6, borderDash: [5, 4], pointRadius: 0 },
+      ] },
+      options: opcoes({
+        scales: { x: eixoX(), y: { min: 0, ticks: { color: cor("--ink-3"), callback: (v) => "US$ " + v, font: { family: "IBM Plex Sans" } }, grid: { color: cor("--line") } } },
+        plugins: Object.assign(opcoes({}).plugins, {
+          tooltip: { callbacks: { title: (it) => hora(it[0].parsed.x), label: (it) => ` ${it.dataset.label}: ${usd(it.parsed.y)}` } },
+        }),
+      }),
+      plugins: [linhasFaixa],
+    });
+  }
+  // mais de 5 min sem ciclo (queda do painel, sessão retomada, TSE parado): a linha se interrompe
+  const serie = (L, f) => {
+    const out = [];
+    L.forEach((o) => {
+      const y = f(o);
+      if (y == null || !Number.isFinite(y)) return;
+      const ant = out[out.length - 1];
+      if (ant && o.t - ant.x > 5) out.push({ x: (ant.x + o.t) / 2, y: null });
+      out.push({ x: o.t, y });
+    });
+    return out;
+  };
+
+  // antes das 16h30 o TSE ainda serve o arquivo de teste (hora da manhã): fica fora do gráfico
+  const eixoT = (L) => [L.length ? Math.max(Math.min(L[0].t, 0), -30) : 0, L.length ? Math.max(L[L.length - 1].t + 10, 60) : 60];
+
+  // gráfico da margem; foco = faixa pintada de verde (null = nenhuma, ex.: carteira em dinheiro)
+  function atualizarMargem(s, L, foco) {
+    const comMu = L.filter((o) => o.tem), [t0, t1] = eixoT(L);
+    const gm = G.margem, ds = gm.data.datasets;
+    ds[0].data = serie(comMu, (o) => o.c.hi90);
+    ds[1].data = serie(comMu, (o) => o.c.lo90);
+    ds[2].data = serie(comMu, (o) => o.c.mu);
+    ds[3].data = serie(comMu, (o) => o.c.parcial_tse);
+    const mf = s.info && s.info.margem_final;
+    ds[4].data = mf != null ? [{ x: t0, y: mf }, { x: t1, y: mf }] : [];
+    // eixo y: segue a faixa de 90% a partir de 2% apurado (o começo, largo demais, é cortado)
+    const firmes = comMu.filter((o) => o.ap >= 2);
+    let lo = Infinity, hi = -Infinity;
+    (firmes.length ? firmes : comMu).forEach((o) => { lo = Math.min(lo, o.c.lo90); hi = Math.max(hi, o.c.hi90); });
+    const [fa, fb] = foco ? limites(foco) : [NaN, NaN];
+    if (!Number.isFinite(lo)) { lo = -2; hi = 10; }
+    lo = Math.min(lo, Number.isFinite(fa) ? fa : lo) - 1; hi = Math.max(hi, Number.isFinite(fb) ? fb : hi) + 1;
+    if (mf != null) { lo = Math.min(lo, mf - 1); hi = Math.max(hi, mf + 1); }
+    gm.options.scales.y.min = Math.max(Math.floor(lo), -20); gm.options.scales.y.max = Math.min(Math.ceil(hi), 20);
+    gm.options.scales.x.min = t0; gm.options.scales.x.max = t1;
+    gm.$linhas.sua = foco ? [Number.isFinite(fa) ? fa : -40, Number.isFinite(fb) ? fb : 40] : null;
+    gm.update("none");
+  }
+
+  function atualizarGraficos(s, A) {
+    if (!temChart()) return;
+    atualizarMargem(s, A.L, pos.faixa);
+    const L = A.L, comMu = L.filter((o) => o.tem), [t0, t1] = eixoT(L);
+    const gc = G.chance, dc = gc.data.datasets;
+    dc[0].data = serie(comMu, (o) => o.p);
+    dc[1].data = serie(L, (o) => o.bid);
+    gc.options.scales.x.min = t0; gc.options.scales.x.max = t1;
+    gc.$linhas = { alerta: pos.alerta, verticais: A.plano.filter((d) => d.k >= 0).map((d) => ({ x: L[d.k].t, rot: d.texto })) };
+    gc.update("none");
+  }
+
+  // ---------- renderização ----------
+  function setTxt(id, t) { const e = $(id); if (e.textContent !== t) e.textContent = t; }
+
+  // partes comuns às três abas
+  function renderTopo(s, ult) {
+    const simulada = aba !== "vivo";
+    const estado = s.ok ? s.estado : "sem conexão";
+    // ao vivo: sem ciclo novo por 2,5 intervalos = rede ou TSE com problema
+    const atraso = s.ultimoNovo ? Math.round((Date.now() - s.ultimoNovo) / 1000) : null;
+    const parado = aba === "vivo" && estado === "rodando" && atraso != null && atraso > 2.5 * (s.info.intervalo || 40);
+    const nivel = !s.ok || estado === "erro" ? "ruim" : parado ? "aviso" : estado === "rodando" ? "bom" : estado === "gerando" || estado === "preparando" ? "aviso" : "neutro";
+    $("badge").dataset.n = nivel;
+    setTxt("badge", simulada && s.info.pausado && estado === "rodando" ? "pausado" : parado ? "sem ciclo novo" : estado);
+    if (simulada) {
+      setTxt("carimbo", s.id == null ? "nenhuma simulação" : `${hora(s.info.relogio ?? -2)} simulado · ${virg(s.info.velocidade ?? 60)}× · semente ${s.info.semente ?? "—"}`);
+    } else if (ult) {
+      setTxt("carimbo", `TSE ${ult.c.gerado || "?"}` + (estado === "rodando" ? ` · atualizado há ${atraso ?? "?"} s` : " · último ciclo"));
+    } else setTxt("carimbo", "—");
+    $("ponto-vivo").dataset.on = S.vivo.estado === "rodando" ? "1" : "0";
+    $("ponto-sim").dataset.on = S.sim.estado === "rodando" ? "1" : "0";
+    $("ponto-trade").dataset.on = S.sim.estado === "rodando" ? "1" : "0";
+  }
+
+  function renderModelo(um, ult, foco) {
+    if (um) {
+      const c = um.c;
+      setTxt("k-mu", margem(c.mu));
+      setTxt("k-sd", `± ${virg(c.sd.toFixed(2))} (desvio)`);
+      setTxt("k-f90", `faixa provável (90%): ${margem(c.lo90, 1)} a ${margem(c.hi90, 1)}`);
+      $("k-cobre").innerHTML = um.cobre.map((f) => `<span class="chip${f === foco ? " sua" : ""}">${esc(f)}</span>`).join("");
+    } else {
+      setTxt("k-mu", "—");
+      setTxt("k-sd", ult && ult.c.msg ? ult.c.msg : "sem dados ainda");
+      setTxt("k-f90", ""); $("k-cobre").innerHTML = "";
+    }
+  }
+
+  function renderParcial(ult) {
+    if (ult) {
+      setTxt("k-parcial", ult.c.parcial_tse != null ? margem(ult.c.parcial_tse) : "—");
+      setTxt("k-apurado", `${virg((ult.ap || 0).toFixed(1))}% do eleitorado · ${virg((ult.c.secoes_pct || 0).toFixed(1))}% das seções · ${hora(ult.t)}`);
+    } else { setTxt("k-parcial", "—"); setTxt("k-apurado", "—"); }
+  }
+
+  function renderTabela(ult, um, foco) {
+    const c = ult ? ult.c : null, cm = um ? um.c : null;
+    $("tab-faixas").innerHTML = FAIXAS.map((f) => {
+      const p = cm ? cm.probs[f] : null, mk = c && c.mercado ? c.mercado[f] : null;
+      const sua = f === foco, apagada = p != null && p < 0.005 && !sua;
+      const dif = p != null && mk ? p - mk[0] : null;
+      return `<tr class="${sua ? "sua" : ""}${apagada ? " apagada" : ""}"><td>${sua ? "▶ " : ""}${esc(f)}</td>` +
+        `<td>${p == null ? "—" : pct(p, 1)}<span class="barra" style="width:${p == null ? 0 : Math.round(p * 60)}px"></span></td>` +
+        `<td>${mk ? `${cents(mk[0])} / ${cents(mk[1])}` : "—"}</td>` +
+        `<td>${dif == null ? "—" : (dif >= 0 ? "+" : "−") + virg(Math.abs(dif * 100).toFixed(1))}</td></tr>`;
+    }).join("");
+    setTxt("tab-nota", aba !== "vivo" ? "Mercado simulado: mistura do preço de hoje com a chance do modelo (banca.py), 1¢ de cada lado." :
+      (c && c.mercado ? "Preços da Polymarket (bid / ask do Sim), lidos a cada ciclo. Modelo − venda > 0: o modelo acha que vale mais do que pagam." : "Sem preços da Polymarket neste ciclo."));
+  }
+
+  function renderEventos(ev, s, vazio) {
+    const lista = ev.slice().reverse();
+    $("eventos").innerHTML = lista.length ? lista.map((e) => `<li data-n="${e.nivel}"><b>${hora(e.t)}</b><span>${esc(e.texto)}</span></li>`).join("")
+      : `<li><b>—</b><span>${esc(vazio)}</span></li>`;
+    $("sistema").innerHTML = s.eventos.slice(-4).reverse().map((e) => `<span>${esc(e.quando)} · ${esc(e.texto)}</span>`).join("");
+  }
+
+  function renderizar() {
+    if (aba === "trade") { renderizarTrade(); return; }
+    const s = S[aba], A = avaliar(s), L = A.L;
+    const ult = L.length ? L[L.length - 1] : null;
+    const um = [...L].reverse().find((o) => o.tem) || null;
+    const nomePos = `${pos.lado === "sim" ? "Sim" : "Não"} em "${pos.faixa}"`;
+    const fonteMk = aba === "sim" ? "preço simulado" : "Polymarket";
+
+    renderTopo(s, ult);
+    renderModelo(um, ult, pos.faixa);
+    renderParcial(ult);
+    setTxt("k-chance", um ? pct(um.p, 1) : "—");
+    setTxt("k-pos-rot", `Sua posição · ${nomePos}`);
+    const bidAgora = ult ? ult.bid : null;
+    setTxt("k-preco", bidAgora != null ? `venda a ~${cents(bidAgora)} · compra a ~${cents(ult.ask)} (${fonteMk})` : (aba === "vivo" && ult && ult.c.mercado_erro ? "Polymarket indisponível" : "sem preço de mercado"));
+    setTxt("k-dif", um && bidAgora != null ? `modelo − venda: ${(um.p - bidAgora >= 0 ? "+" : "−") + virg(Math.abs((um.p - bidAgora) * 100).toFixed(1))} pontos` : "");
+    let [n, tag, txt] = conselho(um);
+    if (aba === "sim" && s.estado === "fim" && s.info.margem_final != null) {
+      const mf = s.info.margem_final, fx = faixaDe(mf);
+      const ganha = pos.lado === "sim" ? fx === pos.faixa : fx !== pos.faixa;
+      [n, tag, txt] = [ganha ? "bom" : "ruim", "Apuração encerrada",
+        `Resultado: ${margem(mf)}, faixa "${fx}". ${nomePos} ${ganha ? "paga US$ 1 por cota" : "não paga nada"}. Veja na banca simulada como terminou cada jeito de vender.`];
+    }
+    $("k-conselho").dataset.n = n; setTxt("k-tag", tag); setTxt("k-txt", txt);
+
+    // plano
+    $("plano").innerHTML = '<span class="rot">Plano</span>' + (A.plano.length ? A.plano.map((d) => {
+      const o = d.k >= 0 ? L[d.k] : null;
+      const st = o ? `disparou às ${hora(o.t)} (chance ${pct(o.p, 1)}${o.bid != null ? ", venda ~" + cents(o.bid) : ""})` : "aguardando";
+      return `<span class="degrau" data-on="${o ? 1 : 0}"><b>${esc(d.texto)}</b> · ${esc(condicao(d))} · ${esc(st)}</span>`;
+    }).join("") : '<span class="nota">nenhum degrau — escreva um no campo "Plano de venda" acima</span>');
+
+    renderTabela(ult, um, pos.faixa);
+    $("term").innerHTML = tela(ult, um, pos);
+    renderEventos(A.ev, s, "Nada ainda. Aqui aparecem os degraus do plano que dispararem, os alertas e as mudanças da faixa provável.");
+
+    // controles por modo
+    renderizarControles(s);
+    if (aba === "sim") renderizarBanca(s, A);
+    atualizarGraficos(s, A);
+  }
+
+  // foco: {faixa, lado} da posição mostrada na última linha (null = carteira em dinheiro)
+  function tela(ult, um, foco) {
+    if (!ult) return '<span class="d">(sem ciclos)</span>';
+    const c = ult.c, Lh = [];
+    Lh.push(`<span class="d">[${esc(c.gerado || "?")}] +${Math.round(c.t)}min | seções ${(c.secoes_pct || 0).toFixed(1)}% | eleitorado ${(c.eleitorado_pct || 0).toFixed(1)}% | baixados ${c.baixados ?? 0}</span>`);
+    if (!um || um !== ult) { Lh.push("  " + esc(c.msg || "")); return Lh.join("\n"); }
+    const sg = (x) => (x >= 0 ? "+" : "-") + Math.abs(x).toFixed(2);
+    Lh.push(`  parcial (TSE): F ${sg(c.parcial_tse)}   |   MODELO: F ${sg(c.mu)} ± ${c.sd.toFixed(2)} (w ${(c.w ?? 0).toFixed(2)})`);
+    Lh.push(`  faixa provável (90%): F ${sg(c.lo90)} a F ${sg(c.hi90)}  -> ` + (um.cobre.length === 1 ? `só ${esc(um.cobre[0])}` : `cobre ${esc(um.cobre.join(", "))}`));
+    const mk = c.mercado || {}, f0 = foco ? foco.faixa : null;
+    FAIXAS.forEach((f) => {
+      const p = c.probs[f];
+      if (p < 0.0005 && f !== f0 && !mk[f]) return;
+      const m = mk[f] ? `   mercado ${(mk[f][0] * 100).toFixed(1).padStart(4)}/${(mk[f][1] * 100).toFixed(1).padStart(4)}` : "";
+      const linha = `  ${f === f0 ? ">>" : "  "} ${f.padEnd(8)} ${(p * 100).toFixed(1).padStart(5)}%${m}`;
+      Lh.push(f === f0 ? `<span class="h">${esc(linha)}</span>` : esc(linha));
+    });
+    if (!foco) { Lh.push('<span class="h">  carteira em dinheiro</span>'); return Lh.join("\n"); }
+    const sim = foco.lado === "sim", pf = c.probs[foco.faixa], p = sim ? pf : 1 - pf;
+    const b = mk[foco.faixa] ? (sim ? mk[foco.faixa][0] : 1 - mk[foco.faixa][1]) : null;
+    Lh.push(`<span class="h">  ${aba === "trade" ? "carteira" : "posição"} ${sim ? "Sim" : "Não"} em '${esc(foco.faixa)}': chance de pagar ${(p * 100).toFixed(1)}%${b != null ? ` | dá para vender a ~${(b * 100).toFixed(1)}¢` : ""}</span>`);
+    return Lh.join("\n");
+  }
+
+  function renderizarControles(s) {
+    $("ctl-vivo").hidden = aba !== "vivo";
+    $("ctl-sim").hidden = aba === "vivo";
+    $("ctl-pos").hidden = aba === "trade";
+    $("ctl-trade").hidden = aba !== "trade";
+    $("banca").hidden = aba !== "sim";
+    $("carteira").hidden = aba !== "trade";
+    $("fig-chance").hidden = aba === "trade";
+    $("fig-carteira").hidden = aba !== "trade";
+    if (aba === "vivo") {
+      const rodando = s.estado === "rodando" || s.estado === "preparando";
+      const ret = rodando ? null : s.retomavel, inf = s.info;
+      $("vivo-iniciar").hidden = rodando; $("vivo-parar").hidden = !rodando; $("vivo-retomar").hidden = !ret;
+      // com uma sessão gravada para retomar, retomar vira o botão principal
+      $("vivo-iniciar").classList.toggle("primario", !ret);
+      setTxt("vivo-iniciar", ret ? "Começar uma sessão nova" : "Começar a ler o TSE");
+      if (ret) setTxt("vivo-retomar", `Retomar ${ret.pasta}`);
+      if (rodando) {
+        setTxt("vivo-txt", s.estado === "preparando" && inf.retomada
+          ? `Retomando ${inf.pasta}: refazendo o modelo com os retratos gravados${inf.retratos ? ` (${inf.retratos}, ~${Math.max(1, Math.round(inf.retratos * 0.1))} s)` : ""}. O histórico abaixo é o de antes da queda.`
+          : `Lendo ${inf.url || "o TSE"} a cada ${inf.intervalo || 40} s${inf.polymarket ? " + preços da Polymarket" : ""}.`);
+        setTxt("vivo-nota", (inf.retomada ? `Sessão retomada: ${inf.antes} ciclos de antes da queda. ` : "") +
+          `Log desta sessão em ${inf.pasta || "dados/ao_vivo/"}. Deixe esta aba aberta e o som ligado.`);
+      } else {
+        setTxt("vivo-txt", s.estado === "erro" ? `O monitor parou com erro: ${s.erro}` : "O monitor ao vivo não está rodando.");
+        setTxt("vivo-nota", ret
+          ? `Sessão gravada: ${ret.pasta}, ${ret.ciclos} ciclos, até ${ret.gerado || "?"} (${virg((ret.eleitorado_pct || 0).toFixed(1))}% apurado). Se o painel caiu no meio da apuração, retome-a: o histórico volta e o modelo é refeito com os retratos gravados.`
+          : "No dia 25/10, comece às 16h50. Antes disso serve só de teste de conexão: o TSE ainda não tem votos do 2º turno.");
+      }
+      $("vivo-nota").classList.toggle("erro", s.estado === "erro" && !ret);
+    } else {
+      const ativa = s.estado === "rodando" || s.estado === "gerando" || s.estado === "preparando";
+      $("sim-pausar").disabled = !ativa; $("sim-parar").disabled = !ativa;
+      $("sim-revelar").disabled = s.id == null || !!s.info.revelado;
+      setTxt("sim-pausar", s.info.pausado ? "Retomar" : "Pausar");
+      // fora de uma simulação ativa, a velocidade marcada é a da próxima
+      const v = ativa ? s.info.velocidade : velEscolhida;
+      [...$("sim-vel").children].forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.v === +v)));
+      const nota = s.estado === "gerando" ? "Gerando a apuração sintética (alguns segundos)..." :
+        s.estado === "erro" ? `Erro: ${s.erro}` :
+        s.estado === "fim" ? `A apuração simulada terminou. Veja ${aba === "trade" ? "como a carteira terminou" : "o resultado e a banca"} abaixo; clique em Nova simulação para outra noite.` :
+        s.estado === "parado" && s.id != null ? "Simulação parada. Clique em Nova simulação para outra noite (ou Revelar resultado para ver como terminaria)." :
+        aba === "trade" ? "A mesma noite simulada da aba Simulação, agora com uma carteira que troca de faixa sozinha quando o modelo aponta outra." :
+        "Gera uma apuração sintética do 2º turno (mesmo gerador dos testes) e reproduz a noite acelerada. A margem fica escondida até o fim ou até você revelar.";
+      setTxt("sim-nota", nota);
+      $("sim-nota").classList.toggle("erro", s.estado === "erro");
+    }
+  }
+
+  // ---------- trade: carteira que troca para a faixa que o modelo aponta ----------
+  // Mesma regra de trade.py (que a testa nas noites salvas), mais os botões manuais.
+  let trade = { inicial: "F <4%", entrada: 40.5, banca: 100, limiar: 70, vantagem: 5, apurado: 2, trocas: 2, auto: true };
+  function salvarTrade() { try { localStorage.setItem("painel-trade", JSON.stringify(trade)); } catch (e) { /* sem armazenamento */ } }
+  function lerTradeSalvo() { try { return JSON.parse(localStorage.getItem("painel-trade") || "null"); } catch (e) { return null; } }
+  const precoHoje = (f) => (CFG ? +(CFG.preco_hoje[f] * 100).toFixed(1) : 40);
+  const regraTrade = () => ({ inicial: trade.inicial, entrada: trade.entrada / 100, banca: trade.banca, limiar: trade.limiar / 100,
+                              vantagem: trade.vantagem / 100, apurado_min: trade.apurado, max_trocas: trade.trocas });
+
+  // manuais: o que você fez na noite, em ordem — {k, acao: "favorita" | "dinheiro" | "auto", valor}.
+  // Ligar/desligar o automático vale dali para a frente (não reescreve a noite).
+  function jogarTrade(C, r, manuais, autoInicio) {
+    let h = FAIXAS.indexOf(r.inicial), cotas = r.banca / r.entrada, caixa = 0, vendas = 0, auto = autoInicio;
+    const i0 = h, cotas0 = cotas, ops = [], hs = [], valor = [], seg = [], porK = {};
+    manuais.forEach((m) => { (porK[m.k] = porK[m.k] || []).push(m); });
+    C.forEach((c, k) => {
+      const mk = c.mercado || {};
+      const bid = (i) => (mk[FAIXAS[i]] || [0, 1])[0], ask = (i) => (mk[FAIXAS[i]] || [0, 1])[1];
+      const p = c.probs ? FAIXAS.map((f) => c.probs[f]) : null;
+      let fav = null;
+      if (p) { fav = 0; p.forEach((x, i) => { if (x > p[fav]) fav = i; }); }
+      const vende = (manual) => {
+        ops.push({ k, t: c.t, op: "vende", faixa: FAIXAS[h], preco: bid(h), valor: cotas * bid(h), cotas, manual });
+        caixa += cotas * bid(h); cotas = 0; h = null; vendas++;
+      };
+      const compra = (i, manual) => {
+        h = i; cotas = caixa / ask(i);
+        ops.push({ k, t: c.t, op: "compra", faixa: FAIXAS[i], preco: ask(i), valor: caixa, cotas, manual });
+        caixa = 0;
+      };
+      (porK[k] || []).forEach((m) => {
+        if (m.acao === "auto") auto = m.valor;
+        if (m.acao === "dinheiro" && h !== null) vende(true);
+        if (m.acao === "favorita" && fav !== null && h !== fav) { if (h !== null) vende(true); if (ask(fav) > 0) compra(fav, true); }
+      });
+      if (auto && p && (c.eleitorado_pct || 0) >= r.apurado_min) {
+        const confiante = p[fav] >= r.limiar;
+        if (h !== null && fav !== h && confiante && vendas < r.max_trocas) vende(false);
+        if (h === null && confiante && p[fav] - ask(fav) >= r.vantagem && ask(fav) > 0) compra(fav, false);
+      }
+      hs.push(h);
+      valor.push(caixa + (h !== null ? cotas * bid(h) : 0));
+      seg.push(cotas0 * bid(i0));
+    });
+    return { ops, hs, valor, seg, h, cotas, caixa, cotas0, i0, vendas, auto };
+  }
+
+  function avaliarTrade(s) {
+    const r = regraTrade(), R = jogarTrade(s.ciclos, r, s.manuais || [], s.autoInicio ?? trade.auto);
+    const mf = s.info && s.info.margem_final, final = mf != null ? faixaDe(mf) : null;
+    const L = s.ciclos.map((c, k) => {
+      const h = R.hs[k], f = h == null ? null : FAIXAS[h];
+      const o = { t: c.t, ap: c.eleitorado_pct || 0, tem: c.mu != null, c, faixa: f, valor: R.valor[k], seg: R.seg[k] };
+      const mk = f && c.mercado ? c.mercado[f] : null;
+      o.bid = mk ? mk[0] : null; o.ask = mk ? mk[1] : null;
+      if (o.tem) {
+        o.cobre = faixasCobertas(c.lo90, c.hi90);
+        o.fav = FAIXAS.reduce((a, x) => (c.probs[x] > c.probs[a] ? x : a), FAIXAS[0]);
+        o.p = f ? c.probs[f] : null;
+      }
+      return o;
+    });
+    const chave = JSON.stringify(r);
+    const ev = R.ops.map((op) => ({
+      chave: `trade|${chave}|${op.k}|${op.op}|${op.faixa}|${op.manual ? 1 : 0}`, k: op.k, t: op.t,
+      nivel: op.op === "compra" ? "bom" : "aviso", som: "plano",
+      texto: op.op === "vende"
+        ? `${op.manual ? "Você vendeu" : "Vendeu"} "${op.faixa}" a ${cents(op.preco)}: ${usd(op.valor)} em caixa.`
+        : `${op.manual ? "Você comprou" : "Comprou"} "${op.faixa}" a ${cents(op.preco)}: ${virg(op.cotas.toFixed(1))} cotas com ${usd(op.valor)}.` }));
+    (s.manuais || []).forEach((m, i) => {
+      if (m.acao !== "auto" || !s.ciclos[m.k]) return;
+      ev.push({ chave: `auto|${i}|${m.k}|${m.valor}`, k: m.k, t: s.ciclos[m.k].t, nivel: "neutro", som: null,
+                texto: m.valor ? "Você ligou o automático." : "Você desligou o automático." });
+    });
+    ev.sort((a, b) => a.k - b.k);
+    const valorFinal = final ? R.caixa + (R.h !== null && FAIXAS[R.h] === final ? R.cotas : 0) : null;
+    const segFinal = final ? (FAIXAS[R.i0] === final ? R.cotas0 : 0) : null;
+    const ultV = R.valor.length ? R.valor[R.valor.length - 1] : r.banca, ultS = R.seg.length ? R.seg[R.seg.length - 1] : r.banca;
+    return { L, ev, R, regra: r, final, foco: R.h == null ? null : FAIXAS[R.h], vendas: R.vendas, auto: R.auto,
+             valorAgora: final ? valorFinal : ultV, segAgora: final ? segFinal : ultS };
+  }
+
+  function conselhoTrade(T, um, s) {
+    const r = T.regra, mf = s.info.margem_final;
+    if (s.estado === "fim" && mf != null) {
+      const fx = faixaDe(mf);
+      return [T.valorAgora >= T.segAgora ? "bom" : "ruim", "Apuração encerrada",
+        `Resultado: ${margem(mf)}, faixa "${fx}". A carteira terminou ${T.foco ? `em "${T.foco}"` : "em dinheiro"} com ${usd(T.valorAgora)}; segurar "${r.inicial}" daria ${usd(T.segAgora)}.`];
+    }
+    if (!um) return ["neutro", "Espere", `Ainda não há votos apurados. A carteira começa em Sim "${r.inicial}".`];
+    const c = um.c, fav = um.fav, pfav = c.probs[fav], foco = T.foco;
+    const desl = T.auto ? "" : " O automático está desligado: a regra só observa.";
+    if (um.ap < r.apurado_min) return ["neutro", "Cedo demais", `Só ${virg(um.ap.toFixed(1))}% apurado; a regra só age a partir de ${virg(r.apurado_min)}%. A favorita do modelo agora é "${fav}" (${pct(pfav)}).`];
+    if (foco === fav) return ["bom", "Na favorita", `A carteira está em "${fav}", a faixa que o modelo mais aponta (${pct(pfav)}).` + desl];
+    if (foco !== null) {
+      if (pfav < r.limiar) return ["aviso", "Mantém", `O modelo prefere "${fav}" (${pct(pfav)}), abaixo dos ${pct(r.limiar)} para trocar. A carteira segue em "${foco}" (${pct(c.probs[foco])}).` + desl];
+      if (T.vendas >= r.max_trocas) return ["ruim", "Sem trocas sobrando", `O modelo dá ${pct(pfav)} a "${fav}", mas a carteira já usou as ${r.max_trocas} trocas da noite e segue em "${foco}".`];
+      return ["aviso", "Trocaria agora", `O modelo dá ${pct(pfav)} a "${fav}": com o automático ligado, a carteira venderia "${foco}" e iria para ela.` + desl];
+    }
+    const mkf = c.mercado && c.mercado[fav], ask = mkf ? mkf[1] : null, vant = ask != null ? pfav - ask : null;
+    if (pfav < r.limiar) return ["aviso", "Em dinheiro, esperando", `Nenhuma faixa passa de ${pct(r.limiar)} no modelo (a favorita, "${fav}", tem ${pct(pfav)}).` + desl];
+    if (vant != null && vant < r.vantagem) return ["aviso", "Em dinheiro, esperando", `O modelo dá ${pct(pfav)} a "${fav}", mas comprar custa ${cents(ask)}: vantagem de ${virg((vant * 100).toFixed(1))} pontos, abaixo dos ${virg(Math.round(r.vantagem * 100))} pedidos.` + desl];
+    return ["aviso", "Compraria agora", `O modelo dá ${pct(pfav)} a "${fav}" e a compra custa ${cents(ask)}.` + desl];
+  }
+
+  function renderizarTrade() {
+    const s = S.sim, T = avaliarTrade(s), L = T.L, r = T.regra;
+    const ult = L.length ? L[L.length - 1] : null;
+    const um = [...L].reverse().find((o) => o.tem) || null;
+    renderTopo(s, ult);
+    renderModelo(um, ult, T.foco);
+    renderParcial(ult);
+    setTxt("k-pos-rot", `Carteira · ${T.foco ? `Sim em "${T.foco}"` : "em dinheiro"}`);
+    setTxt("k-chance", usd(T.valorAgora));
+    if (ult && T.foco) {
+      const mk = ult.c.mercado && ult.c.mercado[T.foco];
+      setTxt("k-preco", `${virg(T.R.cotas.toFixed(1))} cotas` + (um ? ` · modelo dá ${pct(um.c.probs[T.foco], 1)}` : "") + (mk ? ` · venda a ~${cents(mk[0])}` : ""));
+    } else setTxt("k-preco", ult ? `${usd(T.R.caixa)} em caixa` : `começa com ${usd(r.banca)} em Sim "${r.inicial}" a ${cents(r.entrada)}`);
+    setTxt("k-dif", ult ? `segurar "${r.inicial}": ${usd(T.segAgora)}` : "");
+    const [n, tag, txt] = conselhoTrade(T, um, s);
+    $("k-conselho").dataset.n = n; setTxt("k-tag", tag); setTxt("k-txt", txt);
+    $("plano").innerHTML = '<span class="rot">Regra</span>' + [
+      `troca quando a favorita do modelo tem ≥ ${pct(r.limiar)}`,
+      `compra com vantagem ≥ ${virg(Math.round(r.vantagem * 100))} pts`,
+      `desde ${virg(r.apurado_min)}% apurado`,
+      `${T.vendas} de ${r.max_trocas} trocas usadas`,
+      T.auto ? "automático ligado" : "automático desligado",
+    ].map((t) => `<span class="degrau">${esc(t)}</span>`).join("");
+    renderTabela(ult, um, T.foco);
+    $("term").innerHTML = tela(ult, um, T.foco ? { faixa: T.foco, lado: "sim" } : null);
+    renderEventos(T.ev, s, "Nada ainda. Aqui aparecem as vendas e compras da carteira.");
+    renderizarControles(s);
+    renderCarteira(s, T, um);
+    if (!temChart()) return;
+    atualizarMargem(s, L, T.foco);
+    const g = G.carteira, [t0, t1] = eixoT(L);
+    g.data.datasets[0].data = serie(L, (o) => o.valor);
+    g.data.datasets[1].data = serie(L, (o) => o.seg);
+    g.options.scales.x.min = t0; g.options.scales.x.max = t1;
+    const compras = new Set(T.R.ops.filter((o) => o.op === "compra").map((o) => o.k));
+    g.$linhas = { verticais: T.R.ops.filter((o) => o.op === "compra" || !compras.has(o.k))
+      .map((o) => ({ x: o.t, rot: o.op === "compra" ? "→ " + o.faixa : "vendeu" })) };
+    g.update("none");
+  }
+
+  function renderCarteira(s, T, um) {
+    const r = T.regra, L = T.L;
+    const suf = s.estado === "fim" ? " (final)" : T.final ? " (com o resultado revelado)" : " (a preço de venda de agora)";
+    const res = (id, v) => { setTxt(id, usd(v)); setTxt(id + "-s", `${v >= r.banca ? "+" : "−"}${usd(Math.abs(v - r.banca))} sobre a banca${suf}`); };
+    if (L.length) {
+      res("tr-valor", T.valorAgora); res("tr-segurar", T.segAgora);
+      const d = T.valorAgora - T.segAgora;
+      setTxt("tr-dif", (d >= 0 ? "+" : "−") + usd(Math.abs(d)));
+      setTxt("tr-dif-s", Math.abs(d) < 0.005 ? "igual a segurar" : d > 0 ? "trocar rendeu mais que segurar" : "segurar rendeu mais que trocar");
+    } else ["tr-valor", "tr-segurar", "tr-dif"].forEach((id) => { setTxt(id, "—"); setTxt(id + "-s", "comece uma simulação"); });
+    $("tr-ops").innerHTML = T.R.ops.length
+      ? T.R.ops.map((o) => `<li>${hora(o.t)} · ${o.manual ? "você " : ""}${o.op === "vende" ? "vendeu" : "comprou"} "${esc(o.faixa)}" a ${cents(o.preco)}${o.op === "vende" ? ` → ${usd(o.valor)}` : ` (${virg(o.cotas.toFixed(1))} cotas)`}</li>`).join("")
+      : "<li>Nenhuma troca ainda.</li>";
+    const rv = $("tr-revelado"), mf = s.info.margem_final;
+    if (mf != null) {
+      rv.hidden = false; rv.dataset.n = T.valorAgora >= T.segAgora ? "bom" : "ruim";
+      rv.textContent = `Resultado: ${margem(mf)} → faixa "${faixaDe(mf)}". A carteira ${s.estado === "fim" ? "terminou" : "está"} ${T.foco ? `em "${T.foco}"` : "em dinheiro"}; segurar "${r.inicial}" ${T.final === r.inicial ? "ganha" : "perde"}.`;
+    } else rv.hidden = true;
+    const pode = s.estado === "rodando" && L.length > 0 && !!L[L.length - 1].c.mercado;
+    $("tr-favorita").disabled = !pode || !um || um.fav === T.foco;
+    $("tr-dinheiro").disabled = !pode || T.foco === null;
+  }
+
+  function mostrarAuto() {
+    $("tr-auto-on").setAttribute("aria-pressed", String(trade.auto)); $("tr-auto-off").setAttribute("aria-pressed", String(!trade.auto));
+  }
+  // o que você faz durante a noite fica gravado no ciclo em que clicou (vale dali para a frente)
+  function acao(a, valor) {
+    const s = S.sim;
+    if (a === "auto") { trade.auto = valor; salvarTrade(); mostrarAuto(); }
+    if (s.estado === "rodando" && s.ciclos.length) {
+      const k = s.ciclos.length - 1;
+      // "ficar em dinheiro" também desliga o automático, senão a regra recompraria no mesmo ciclo
+      if (a === "dinheiro" && trade.auto) { trade.auto = false; salvarTrade(); mostrarAuto(); s.manuais.push({ k, acao: "auto", valor: false }); }
+      s.manuais.push({ k, acao: a, valor });
+    } else if (a === "auto" && !s.ciclos.length) s.autoInicio = valor;  // antes de a noite começar
+    avaliarTrade(s).ev.forEach((e) => s.vistosTrade.add(e.chave));  // foi você: não toca
+    renderizar();
+  }
+  $("tr-favorita").addEventListener("click", () => acao("favorita"));
+  $("tr-dinheiro").addEventListener("click", () => acao("dinheiro"));
+  $("tr-auto-on").addEventListener("click", () => acao("auto", true));
+  $("tr-auto-off").addEventListener("click", () => acao("auto", false));
+
+  function lerTrade() {
+    const n = (id, d) => { const v = parseFloat(String($(id).value).replace(",", ".")); return Number.isFinite(v) ? v : d; };
+    const inicial = $("tr-inicial").value, novaFaixa = inicial !== trade.inicial;
+    trade = { inicial, entrada: novaFaixa ? precoHoje(inicial) : Math.min(Math.max(n("tr-entrada", precoHoje(inicial)), 1), 99),
+              banca: Math.max(n("tr-banca", 100), 1), limiar: Math.min(Math.max(n("tr-limiar", 70), 1), 99),
+              vantagem: Math.max(n("tr-vantagem", 5), 0), apurado: Math.max(n("tr-apurado", 2), 0),
+              trocas: Math.max(Math.round(n("tr-trocas", 2)), 0), auto: trade.auto };
+    if (novaFaixa) $("tr-entrada").value = trade.entrada;
+    salvarTrade();
+    avaliarTrade(S.sim).ev.forEach((e) => S.sim.vistosTrade.add(e.chave));  // regra nova: o que já passou não toca
+    renderizar();
+  }
+  function mostrarTrade() {
+    $("tr-inicial").value = trade.inicial; $("tr-entrada").value = trade.entrada; $("tr-banca").value = trade.banca;
+    $("tr-limiar").value = trade.limiar; $("tr-vantagem").value = trade.vantagem; $("tr-apurado").value = trade.apurado;
+    $("tr-trocas").value = trade.trocas;
+    mostrarAuto();
+  }
+  ["tr-inicial", "tr-entrada", "tr-banca", "tr-limiar", "tr-vantagem", "tr-apurado", "tr-trocas"].forEach((id) => $(id).addEventListener("change", lerTrade));
+
+  // a regra automática nas noites simuladas salvas (trade.py), nos três ritmos de mercado
+  async function loteTrade() {
+    const r = regraTrade();
+    $("tr-rodar").disabled = true; setTxt("tr-lote-estado", "rodando nos três ritmos de mercado...");
+    try {
+      const res = {};
+      for (const ritmo of CFG.ritmos) res[ritmo] = await post("/api/trade/lote", { ...r, ritmo });
+      const V = [["segurar", "Segurar"], ["rebalancear", "Com trocas"]];
+      const melhor = (o) => (o.rebalancear > o.segurar ? "rebalancear" : "segurar");
+      $("tr-t-ritmos").innerHTML = "<thead><tr><th>Ritmo do mercado</th>" + V.map(([, nome]) => `<th>${nome}</th>`).join("") + "</tr></thead><tbody>" +
+        CFG.ritmos.map((rt) => { const d = res[rt], m = melhor(d.media);
+          return `<tr><td>${esc(rt)}</td>` + V.map(([v]) => `<td class="${v === m ? "melhor" : ""}">${usd(d.media[v])}<span class="nota" style="display:block">lucro em ${pct(d.lucro_noites[v])} das noites</span></td>`).join("") + "</tr>"; }).join("") +
+        "</tbody>";
+      const base = res[CFG.ritmos[0]];
+      $("tr-t-cenarios").innerHTML = `<thead><tr><th>Cenário (mercado "${esc(CFG.ritmos[0])}")</th><th>Noites</th><th>Chance hoje</th>` +
+        V.map(([, nome]) => `<th>${nome}</th>`).join("") + "<th>Termina na faixa certa</th></tr></thead><tbody>" +
+        base.cenarios.map((c) => { const m = melhor(c);
+          return `<tr><td>${esc(c.cenario)}</td><td>${c.noites}</td><td>${pct(c.chance_hoje)}</td>` +
+            V.map(([v]) => `<td class="${v === m ? "melhor" : ""}">${usd(c[v])}</td>`).join("") + `<td>${pct(c.acertou_faixa)}</td></tr>`; }).join("") + "</tbody>";
+      setTxt("tr-lote-estado", `${base.n} noites, começando em Sim "${r.inicial}" a ${cents(r.entrada)} com ${usd(r.banca)}. Média ponderada pelas chances que o mercado dá hoje a cada cenário.`);
+    } catch (e) { setTxt("tr-lote-estado", "Erro: " + e.message); }
+    finally { $("tr-rodar").disabled = false; }
+  }
+  $("tr-rodar").addEventListener("click", loteTrade);
+
+  // ---------- banca simulada ----------
+  function entradaPadrao() {
+    const p = CFG ? CFG.preco_hoje[pos.faixa] : 0.4;
+    return +(((pos.lado === "sim" ? p : 1 - p) * 100).toFixed(1));
+  }
+  function valorEstrategia(vendas, L, cotas, ganha) {
+    let receita = 0, vendido = 0;
+    const linhas = [];
+    vendas.forEach((v) => {
+      const o = L[v.k];
+      const frac = Math.min(v.frac, 1 - vendido);
+      if (!o || frac <= 1e-9 || o.bid == null) return;
+      receita += frac * cotas * o.bid; vendido += frac;
+      linhas.push(`${hora(o.t)} · ${virg(Math.round(frac * 100))}% a ${cents(o.bid)} = ${usd(frac * cotas * o.bid)}`);
+    });
+    const ult = L[L.length - 1];
+    const marca = ganha == null ? (ult && ult.bid != null ? ult.bid : 0) : (ganha ? 1 : 0);
+    return { valor: receita + (1 - vendido) * cotas * marca, vendido, linhas };
+  }
+  function renderizarBanca(s, A) {
+    const banca = Math.max(+$("b-banca").value || 100, 1);
+    let ent = +$("b-entrada").value;
+    if (!(ent > 0 && ent < 100)) { ent = entradaPadrao(); $("b-entrada").value = ent; }
+    const cotas = banca / (ent / 100);
+    const mf = s.info.margem_final;
+    const ganha = mf == null ? null : (pos.lado === "sim" ? faixaDe(mf) === pos.faixa : faixaDe(mf) !== pos.faixa);
+    const L = A.L;
+    const voce = valorEstrategia(s.vendas, L, cotas, ganha);
+    const plano = valorEstrategia(A.plano.filter((d) => d.k >= 0).sort((a, b) => a.k - b.k).map((d) => ({ k: d.k, frac: d.fracao / 100 })), L, cotas, ganha);
+    const segurar = valorEstrategia([], L, cotas, ganha);
+    const sufixo = ganha == null ? " (a preço de agora)" : " (final)";
+    const res = (id, r) => {
+      setTxt(id, usd(r.valor));
+      setTxt(id + "-s", `${r.valor >= banca ? "+" : "−"}${usd(Math.abs(r.valor - banca))} · vendeu ${virg(Math.round(r.vendido * 100))}%${sufixo}`);
+    };
+    if (L.length) { res("b-voce", voce); res("b-plano", plano); res("b-segurar", segurar); }
+    else ["b-voce", "b-plano", "b-segurar"].forEach((id) => { setTxt(id, "—"); setTxt(id + "-s", "comece uma simulação"); });
+    $("b-vendas").innerHTML = voce.linhas.map((l) => `<li>${esc(l)}</li>`).join("");
+    const rv = $("b-revelado");
+    if (mf != null) {
+      const c = s.info.cenario || {};
+      rv.hidden = false; rv.dataset.n = ganha ? "bom" : "ruim";
+      rv.textContent = `Resultado: ${margem(mf)} → faixa "${faixaDe(mf)}". ${pos.lado === "sim" ? "Sim" : "Não"} em "${pos.faixa}" ${ganha ? "ganha" : "perde"}. ` +
+        `Cenário: horários do ${c.horarios || "?"}; gradiente de ordem ${c.gradiente_ordem != null ? virg(c.gradiente_ordem.toFixed(3)) : "?"}; ` +
+        `dispersão regional ${c.sd_regiao != null ? virg(c.sd_regiao.toFixed(3)) : "?"}.`;
+    } else rv.hidden = true;
+    setTxt("b-nota", `${virg(cotas.toFixed(1))} cotas de ${pos.lado === "sim" ? "Sim" : "Não"} em "${pos.faixa}" a ${virg(ent)}¢. Venda no preço simulado do momento; compare com seguir o plano e com segurar até o fim.`);
+    const podeVender = s.estado === "rodando" && L.length && L[L.length - 1].bid != null && voce.vendido < 0.999;
+    document.querySelectorAll("[data-vender]").forEach((b) => { b.disabled = !podeVender; });
+  }
+  document.querySelectorAll("[data-vender]").forEach((b) => b.addEventListener("click", () => {
+    const s = S.sim;
+    if (!s.ciclos.length) return;
+    const ja = s.vendas.reduce((a, v) => a + v.frac, 0);
+    const frac = Math.min(+b.dataset.vender, 1 - ja);
+    if (frac > 1e-9) s.vendas.push({ k: s.ciclos.length - 1, frac });
+    renderizar();
+  }));
+  ["b-banca", "b-entrada"].forEach((id) => $(id).addEventListener("input", renderizar));
+
+  // ---------- ações ----------
+  async function post(url, corpo) {
+    const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(corpo || {}) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.erro || r.statusText);
+    return d;
+  }
+  const falha = (e) => { setTxt(aba === "vivo" ? "vivo-nota" : "sim-nota", "Erro: " + e.message); };
+  $("vivo-iniciar").addEventListener("click", () => post("/api/vivo/iniciar").then(() => ciclo(true)).catch(falha));
+  $("vivo-retomar").addEventListener("click", () => {
+    const ret = S.vivo.retomavel;
+    if (ret) post("/api/vivo/iniciar", { retomar: ret.pasta }).then(() => ciclo(true)).catch(falha);
+  });
+  $("vivo-parar").addEventListener("click", () => post("/api/vivo/parar").then(() => ciclo(true)).catch(falha));
+  let velEscolhida = 60;
+  $("sim-iniciar").addEventListener("click", () => {
+    const i = +$("sim-cenario").value;
+    const cen = CFG.cenarios[i];
+    const margemSim = cen ? cen.margem : +$("sim-margem").value;
+    const semente = $("sim-semente").value.trim();
+    post("/api/sim/iniciar", { margem: margemSim, semente: semente === "" ? null : +semente, velocidade: velEscolhida, ritmo: $("sim-ritmo").value })
+      .then(() => ciclo(true)).catch(falha);
+  });
+  $("sim-pausar").addEventListener("click", () => post("/api/sim/controle", { pausado: !S.sim.info.pausado }).then(() => ciclo(true)).catch(falha));
+  $("sim-revelar").addEventListener("click", () => post("/api/sim/controle", { revelar: true }).then(() => ciclo(true)).catch(falha));
+  $("sim-parar").addEventListener("click", () => post("/api/sim/controle", { parar: true }).then(() => ciclo(true)).catch(falha));
+  $("sim-cenario").addEventListener("change", () => { $("sim-margem-campo").hidden = $("sim-cenario").value !== "outro"; });
+
+  function trocarAba(nova) {
+    aba = nova;
+    ["vivo", "sim", "trade"].forEach((a) => $("aba-" + a).setAttribute("aria-selected", String(aba === a)));
+    history.replaceState(null, "", aba === "vivo" ? location.pathname : "#" + aba);
+    renderizar();
+    // o gráfico da carteira nasce escondido: mede de novo quando a aba aparece
+    if (aba === "trade" && G.carteira) G.carteira.resize();
+  }
+  $("aba-vivo").addEventListener("click", () => trocarAba("vivo"));
+  $("aba-sim").addEventListener("click", () => trocarAba("sim"));
+  $("aba-trade").addEventListener("click", () => trocarAba("trade"));
+
+  function aplicarPosicao() {
+    const plano = separarPlano($("pos-plano").value);
+    const ruins = plano.filter((t) => !lerDegrau(t));
+    $("pos-plano").setAttribute("aria-invalid", String(ruins.length > 0));
+    $("pos-nota").classList.toggle("erro", ruins.length > 0);
+    if (ruins.length) { setTxt("pos-nota", `Degrau inválido: ${ruins.join(", ")}. Formato CHANCE@APURADO:FRAÇÃO, ex.: f90@2:100 ou 20@20:50.`); return; }
+    setTxt("pos-nota", "Plano: degraus CHANCE@APURADO:FRAÇÃO separados por espaço. f90@2:100 = vender tudo quando a faixa provável de 90% sair da sua, a partir de 2% apurado. 20@20:50 = vender metade se a chance ficar ≤ 20%, a partir de 20%.");
+    const alerta = Math.min(Math.max(+$("pos-alerta").value || 50, 1), 99) / 100;
+    const mudouPos = pos.faixa !== $("pos-faixa").value || pos.lado !== ($("pos-sim").getAttribute("aria-pressed") === "true" ? "sim" : "nao");
+    pos = { faixa: $("pos-faixa").value, lado: $("pos-sim").getAttribute("aria-pressed") === "true" ? "sim" : "nao", alerta, plano };
+    salvarPos();
+    if (mudouPos) { $("b-entrada").value = entradaPadrao(); S.sim.vendas = []; }  // vendas eram da outra posição
+    // eventos recalculados para a nova posição não tocam som
+    ["vivo", "sim"].forEach((t) => { avaliar(S[t]).ev.forEach((e) => S[t].vistos.add(e.chave)); });
+    renderizar();
+  }
+  $("pos-faixa").addEventListener("change", aplicarPosicao);
+  $("pos-alerta").addEventListener("change", aplicarPosicao);
+  $("pos-plano").addEventListener("change", aplicarPosicao);
+  $("pos-sim").addEventListener("click", () => { $("pos-sim").setAttribute("aria-pressed", "true"); $("pos-nao").setAttribute("aria-pressed", "false"); aplicarPosicao(); });
+  $("pos-nao").addEventListener("click", () => { $("pos-nao").setAttribute("aria-pressed", "true"); $("pos-sim").setAttribute("aria-pressed", "false"); aplicarPosicao(); });
+
+  // ---------- laço de atualização ----------
+  let rodada = 0, ocupado = false;
+  async function ciclo(forcar) {
+    if (ocupado && !forcar) return;
+    ocupado = true;
+    try {
+      rodada++;
+      const atual = sessaoDa(aba), outro = atual === "vivo" ? "sim" : "vivo";
+      const tarefas = [puxar(atual)];
+      // a outra sessão também é lida (mais devagar) para não perder alertas do ao vivo
+      if (forcar || rodada % 3 === 0 || S[outro].estado === "rodando") tarefas.push(puxar(outro));
+      await Promise.all(tarefas);
+      novidades("vivo", avaliar(S.vivo).ev);
+      novidades("sim", avaliar(S.sim).ev);
+      novidades("trade", avaliarTrade(S.sim).ev);
+      renderizar();
+    } finally { ocupado = false; }
+  }
+
+  async function iniciar() {
+    try { CFG = await (await fetch("/api/config", { cache: "no-store" })).json(); }
+    catch (e) { setTxt("vivo-nota", "Não consegui falar com o servidor do painel (python eleicao/painel.py está rodando?)."); return; }
+    FAIXAS = CFG.faixas;
+    const salva = lerPosSalva();
+    pos = { faixa: CFG.faixa, lado: CFG.lado, alerta: CFG.alerta, plano: CFG.plano };
+    if (salva && FAIXAS.includes(salva.faixa)) pos = Object.assign(pos, salva);
+    $("pos-faixa").innerHTML = FAIXAS.map((f) => `<option${f === pos.faixa ? " selected" : ""}>${esc(f)}</option>`).join("");
+    $("pos-sim").setAttribute("aria-pressed", String(pos.lado === "sim"));
+    $("pos-nao").setAttribute("aria-pressed", String(pos.lado !== "sim"));
+    $("pos-alerta").value = Math.round(pos.alerta * 100);
+    $("pos-plano").value = (pos.plano || []).join(" ");
+    $("sim-cenario").innerHTML = CFG.cenarios.map((c, i) => `<option value="${i}">${esc(c.nome)}</option>`).join("") + '<option value="outro">Outra margem…</option>';
+    $("sim-ritmo").innerHTML = CFG.ritmos.map((r) => `<option>${esc(r)}</option>`).join("");
+    $("sim-vel").innerHTML = CFG.velocidades.map((v) => `<button data-v="${v}" aria-pressed="${v === velEscolhida}">${v}×</button>`).join("");
+    [...$("sim-vel").children].forEach((b) => b.addEventListener("click", () => {
+      velEscolhida = +b.dataset.v;
+      if (S.sim.id != null && ["rodando", "gerando", "preparando"].includes(S.sim.estado)) post("/api/sim/controle", { velocidade: velEscolhida }).then(() => ciclo(true)).catch(falha);
+      else renderizar();
+    }));
+    $("b-entrada").value = entradaPadrao();
+    $("tr-inicial").innerHTML = FAIXAS.map((f) => `<option>${esc(f)}</option>`).join("");
+    const tsalvo = lerTradeSalvo();
+    trade = Object.assign(trade, { inicial: pos.faixa, entrada: precoHoje(pos.faixa) },
+                          tsalvo && FAIXAS.includes(tsalvo.inicial) ? tsalvo : {});
+    mostrarTrade();
+    if (!temChart()) setTxt("tab-nota", "Os gráficos precisam da internet (Chart.js); o resto do painel funciona sem eles.");
+    criarGraficos();
+    const tema = window.matchMedia("(prefers-color-scheme: dark)");
+    if (tema.addEventListener) tema.addEventListener("change", () => { criarGraficos(); renderizar(); });
+    trocarAba(aba);
+    await ciclo(true);
+    setInterval(() => ciclo(false), 1000);
+  }
+  iniciar();
+})();
+</script>
+</body>
+</html>

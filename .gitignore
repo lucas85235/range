@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+# Dados baixados do TSE (reprodutíveis via baixar_bu.py / baixar_secao.py)
+dados/bu_partes/
+dados/bu_zip/
+dados/bu_*.parquet
+dados/secao_*.parquet
+dados/log_*.txt
+
+# Mantém o que não dá pra rebaixar: capturas ao vivo e snapshot do mercado
+# (dados/ao_vivo/ e dados/polymarket_1t.parquet seguem versionados)
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

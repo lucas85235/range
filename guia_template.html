@@ -1,0 +1,640 @@
+<title>Guia da apuração 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: uma coluna de leitura (~860px); o ensaio é um painel com controles, tela do monitor e conselho lado a lado, gráfico embaixo. */
+:root {
+  --bg: #f4f6f9;
+  --surface: #ffffff;
+  --ink: #121722;
+  --ink-2: #485263;
+  --ink-3: #6f7889;
+  --line: #d9dee6;
+  --accent: #1d5fc2;
+  --term-bg: #0e1520;
+  --term-fg: #d4dbe6;
+  --term-dim: #8390a3;
+  --term-hi: #ffd27a;
+  --term-alert: #ff9273;
+  --term-good: #7fd6a4;
+  --modelo: #2a78d6;
+  --mercado: #eb6834;
+  --faixa-a: #1baf7a;
+  --faixa-b: #4a3aa7;
+  --bom-bg: #e4f4e8; --bom-fg: #135c25;
+  --aviso-bg: #fff3d6; --aviso-fg: #6b4a00;
+  --ruim-bg: #fde6e3; --ruim-fg: #8a1f12;
+  --neutro-bg: #eceff4; --neutro-fg: #3b4453;
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", "Segoe UI", sans-serif;
+  --f-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --surface: #191e27; --ink: #edf1f6; --ink-2: #b3bcc9; --ink-3: #8b95a4;
+    --line: #2b323e; --accent: #79aaff; --term-bg: #0a0e15; --term-fg: #d4dbe6;
+    --modelo: #3987e5; --mercado: #d95926; --faixa-a: #199e70; --faixa-b: #9085e9;
+    --bom-bg: #173322; --bom-fg: #9fe2b5; --aviso-bg: #3a2f12; --aviso-fg: #f3d58a;
+    --ruim-bg: #3c1d19; --ruim-fg: #ffb4a8; --neutro-bg: #222935; --neutro-fg: #c6cfdb;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --surface: #191e27; --ink: #edf1f6; --ink-2: #b3bcc9; --ink-3: #8b95a4;
+  --line: #2b323e; --accent: #79aaff; --term-bg: #0a0e15; --term-fg: #d4dbe6;
+  --modelo: #3987e5; --mercado: #d95926; --faixa-a: #199e70; --faixa-b: #9085e9;
+  --bom-bg: #173322; --bom-fg: #9fe2b5; --aviso-bg: #3a2f12; --aviso-fg: #f3d58a;
+  --ruim-bg: #3c1d19; --ruim-fg: #ffb4a8; --neutro-bg: #222935; --neutro-fg: #c6cfdb;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--f-body); }
+.pagina { max-width: 880px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--f-display); line-height: 1.15; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2rem, 5vw, 2.9rem); letter-spacing: -0.01em; }
+h2 { font-size: 1.65rem; }
+h3 { font-size: 1.15rem; }
+p { margin: 0; max-width: 66ch; }
+.secao { display: grid; gap: 18px; }
+.rotulo { font: 600 0.75rem/1 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); }
+.lead { font-size: 1.12rem; color: var(--ink-2); }
+.num { font-variant-numeric: tabular-nums; }
+.destaques { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.destaque { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 6px; min-width: 0; }
+.destaque b { font: 700 1.5rem/1.1 var(--f-display); font-variant-numeric: tabular-nums; }
+.destaque span { color: var(--ink-2); font-size: 0.92rem; }
+/* tela do monitor */
+.term { background: var(--term-bg); color: var(--term-fg); border-radius: 10px; padding: 16px 18px; font: 0.86rem/1.55 var(--f-mono); overflow-x: auto; white-space: pre; min-width: 0; }
+.term .d { color: var(--term-dim); }
+.term .m { color: #ffffff; font-weight: 600; }
+.term .h { color: var(--term-hi); font-weight: 600; }
+.term .a { color: var(--term-alert); font-weight: 600; }
+.term .g { color: var(--term-good); }
+.term .n { display: inline-block; min-width: 1.4em; height: 1.4em; border-radius: 50%; background: var(--term-hi); color: var(--term-bg); font: 700 0.72rem/1.4em var(--f-body); text-align: center; margin-left: 10px; }
+.anotada { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.legenda-tela { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.legenda-tela li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+.legenda-tela .n { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--bg); font: 700 0.78rem/24px var(--f-body); text-align: center; }
+/* painel do ensaio */
+.painel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; display: grid; gap: 18px; }
+.controles { display: flex; flex-wrap: wrap; gap: 14px 24px; align-items: end; }
+.grupo { display: grid; gap: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.seg button { font: 500 0.9rem var(--f-body); color: var(--ink-2); background: transparent; border: 0; padding: 8px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.seg button:focus-visible, input[type=range]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.relogio { display: grid; gap: 6px; flex: 1 1 260px; min-width: 0; }
+.relogio-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.relogio-topo b { font: 700 1.6rem/1 var(--f-display); font-variant-numeric: tabular-nums; }
+.relogio-topo span { color: var(--ink-3); font-size: 0.9rem; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.tela-conselho { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 16px; align-items: stretch; }
+.conselho { border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.conselho .tag { font: 700 0.72rem/1 var(--f-body); letter-spacing: 0.08em; text-transform: uppercase; }
+.conselho p { font-size: 0.98rem; }
+.conselho[data-n="bom"] { background: var(--bom-bg); color: var(--bom-fg); }
+.conselho[data-n="aviso"] { background: var(--aviso-bg); color: var(--aviso-fg); }
+.conselho[data-n="ruim"] { background: var(--ruim-bg); color: var(--ruim-fg); }
+.conselho[data-n="neutro"] { background: var(--neutro-bg); color: var(--neutro-fg); }
+.verdade { font-size: 0.85rem; color: var(--ink-3); }
+.grafico { position: relative; height: 280px; min-width: 0; }
+.grafico.alto { height: 320px; }
+.dupla { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.cartao { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: grid; gap: 12px; min-width: 0; }
+.cartao h3 { font-size: 1.05rem; }
+.nota { font-size: 0.88rem; color: var(--ink-3); }
+.tabela-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font: 600 0.78rem/1.2 var(--f-body); color: var(--ink-3); letter-spacing: 0.02em; }
+td.mod { color: var(--modelo); font-weight: 600; }
+td.mer { color: var(--mercado); font-weight: 600; }
+.corrida { display: grid; gap: 10px; }
+.corrida-linha { display: grid; grid-template-columns: 4.5rem 1fr; gap: 12px; align-items: center; }
+.corrida-linha > span { font: 600 0.9rem var(--f-body); color: var(--ink-2); }
+.barra { position: relative; height: 34px; border-radius: 6px; background: var(--neutro-bg); }
+.marca { position: absolute; top: 3px; bottom: 3px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font: 600 0.82rem var(--f-body); color: #fff; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.marca.mod { background: var(--modelo); }
+.marca.mer { background: var(--mercado); }
+.regras { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; counter-reset: r; }
+.regras li { display: grid; grid-template-columns: 30px 1fr; gap: 12px; counter-increment: r; }
+.regras li::before { content: counter(r); width: 26px; height: 26px; border-radius: 6px; background: var(--ink); color: var(--bg); font: 700 0.85rem/26px var(--f-body); text-align: center; }
+.limites { display: grid; gap: 10px; margin: 0; padding-left: 1.1rem; color: var(--ink-2); }
+.campo { font: 500 1rem var(--f-body); font-variant-numeric: tabular-nums; width: 7.5rem; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.campo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+table.banca td small { display: block; font-size: 0.78rem; font-weight: 500; }
+table.banca td .ganho { color: var(--bom-fg); }
+table.banca td .perda { color: var(--ruim-fg); }
+table.banca tr.media td { font-weight: 700; border-top: 2px solid var(--ink-3); }
+table.banca th:first-child, table.banca td:first-child { white-space: normal; min-width: 11rem; }
+.cen-ganha { color: var(--bom-fg); font-size: 0.8rem; }
+.cen-perde { color: var(--ruim-fg); font-size: 0.8rem; }
+a { color: var(--accent); }
+@media (max-width: 720px) {
+  .anotada, .tela-conselho { grid-template-columns: 1fr; }
+  .term { font-size: 0.78rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+
+<main class="pagina">
+  <header class="secao">
+    <span class="rotulo">Polymarket · margem do 2º turno · 25/10/2026</span>
+    <h1>Guia da apuração</h1>
+    <p class="lead">Como ler o monitor na noite do 2º turno, um ensaio com duas noites simuladas e o teste com dinheiro de verdade: o modelo contra a Polymarket na noite do 1º turno.</p>
+    <div class="destaques">
+      <div class="destaque"><b id="d-80">17h21 × 18h30</b><span>Na noite real do 1º turno, a faixa vencedora passou de 80% no modelo às 17h21 e no mercado às 18h30.</span></div>
+      <div class="destaque"><b>5% × 56%</b><span>Às 17h30 o modelo dava 5% para "Lula &lt;5%", a faixa favorita do mercado. Ela perdeu.</span></div>
+      <div class="destaque"><b>~1 em 6</b><span>Noites simuladas com margem a menos de 0,5 ponto de uma fronteira em que o modelo chega a dar ≥80% à faixa errada antes de corrigir.</span></div>
+    </div>
+  </header>
+
+  <section class="secao" aria-labelledby="t-ler">
+    <span class="rotulo">Parte 1</span>
+    <h2 id="t-ler">Como ler a tela</h2>
+    <p>O monitor imprime um bloco destes a cada ~40 segundos. Este é da noite simulada A, às 17h32, para quem tem <b>Sim em "F &lt;4%"</b>.</p>
+    <div class="anotada">
+      <div class="term" id="tela-exemplo" aria-label="Exemplo de tela do monitor"></div>
+      <ol class="legenda-tela">
+        <li><span class="n">1</span><span><b>Cabeçalho.</b> Hora, minutos depois das 17h, % de seções que o TSE já totalizou e % do eleitorado que o monitor já leu. Use o % apurado, não o relógio.</span></li>
+        <li><span class="n">2</span><span><b>Parcial do TSE.</b> O placar de agora. No começo vem inflado para Flávio, porque o Sul, as cidades pequenas e as seções mais bolsonaristas chegam antes. Não decida por ela.</span></li>
+        <li><span class="n">3</span><span><b>Modelo.</b> A margem final prevista e o desvio. O "w" é um detalhe técnico; pode ignorar.</span></li>
+        <li><span class="n">4</span><span><b>Faixa provável.</b> Onde o resultado deve cair com 90% de chance, e quais faixas da Polymarket esse intervalo toca. Enquanto ele tocar duas faixas, nada está decidido. Quando sair inteiro da sua, a chance dela cai abaixo de ~5%.</span></li>
+        <li><span class="n">5</span><span><b>Faixas.</b> Chance de cada faixa da Polymarket. As setas <code>&gt;&gt;</code> marcam a sua.</span></li>
+        <li><span class="n">6</span><span><b>Sua posição.</b> Chance de ela pagar US$1. Com <code>--polymarket</code> aparece também o preço de venda e um <code>!!</code> quando o preço passa da chance do modelo.</span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="secao" aria-labelledby="t-ensaio">
+    <span class="rotulo">Parte 2 · simulação</span>
+    <h2 id="t-ensaio">Ensaio: duas noites perto da fronteira de 4 pontos</h2>
+    <p>Duas apurações sintéticas do 2º turno, geradas a partir das seções reais do 1º turno de 2026. Nas duas, a margem final cai perto de 4, que é a fronteira entre "F &lt;4%" e "F 4-8%". Arraste o relógio para ver o que o monitor mostraria minuto a minuto.</p>
+    <div class="painel">
+      <div class="controles">
+        <div class="grupo">
+          <span class="rotulo" id="r-noite">Noite</span>
+          <div class="seg" role="group" aria-labelledby="r-noite">
+            <button type="button" id="b-noite-a" aria-pressed="true">A · final +4,39</button>
+            <button type="button" id="b-noite-b" aria-pressed="false">B · final +3,70</button>
+          </div>
+        </div>
+        <div class="grupo">
+          <span class="rotulo" id="r-pos">Sua posição</span>
+          <div class="seg" role="group" aria-labelledby="r-pos">
+            <button type="button" id="b-pos-menor" aria-pressed="true">Sim em F &lt;4%</button>
+            <button type="button" id="b-pos-4a8" aria-pressed="false">Sim em F 4-8%</button>
+          </div>
+        </div>
+        <div class="relogio">
+          <div class="relogio-topo"><b id="hora">17h32</b><span id="apurado">5% apurado</span></div>
+          <input type="range" id="slider" min="5" max="150" step="1" value="32" aria-label="Hora da noite">
+        </div>
+      </div>
+      <div class="tela-conselho">
+        <div class="term" id="tela" aria-live="polite"></div>
+        <div class="conselho" id="conselho" data-n="neutro">
+          <span class="tag" id="conselho-tag">O que fazer</span>
+          <p id="conselho-txt"></p>
+          <p class="verdade" id="verdade"></p>
+        </div>
+      </div>
+      <div class="grafico"><canvas id="g-ensaio" aria-label="Chance das faixas F menor que 4% e F 4 a 8% ao longo da noite"></canvas></div>
+      <p class="nota">As horas já incluem 5 minutos de atraso (publicação do TSE e download do monitor). Na noite B, o modelo inclina cedo para a faixa errada e só corrige depois de ~30% apurado. Em noites simuladas com o final logo abaixo de 4, ele passou de 65% na faixa errada em mais da metade delas, e de 80% em cerca de 1 em 6.</p>
+    </div>
+  </section>
+
+  <section class="secao" aria-labelledby="t-real">
+    <span class="rotulo">Parte 3 · noite real de 4/10/2026</span>
+    <h2 id="t-real">Modelo × Polymarket no 1º turno</h2>
+    <p>Reconstruí a apuração do 1º turno minuto a minuto, pela hora em que cada boletim de urna chegou ao TSE, e rodei o modelo como se fosse ao vivo. Ele só usou o que existia naquela noite: a base de 2022 e a ordem das seções de 2022. Comparei com o preço do mercado de margem do 1º turno, que tem faixas de 5 pontos. O resultado foi Flávio +1,86, faixa "Flávio &lt;5%".</p>
+    <div class="cartao">
+      <h3>Quando cada um passou a dar 80% e 90% para a faixa vencedora</h3>
+      <div class="corrida" id="corrida"></div>
+      <p class="nota">Linha de 17h a 19h30. O modelo foi atrasado em 5 minutos para descontar o tempo de publicação e de download.</p>
+    </div>
+    <div class="dupla">
+      <div class="cartao">
+        <h3>Chance de "Flávio &lt;5%" (venceu)</h3>
+        <div class="grafico"><canvas id="g-vence" aria-label="Chance da faixa vencedora: modelo e mercado"></canvas></div>
+      </div>
+      <div class="cartao">
+        <h3>Chance de "Lula &lt;5%" (favorita do mercado, perdeu)</h3>
+        <div class="grafico"><canvas id="g-perde" aria-label="Chance da faixa Lula menor que 5%: modelo e mercado"></canvas></div>
+      </div>
+    </div>
+    <div class="cartao">
+      <h3>Momentos-chave</h3>
+      <div class="tabela-wrap">
+        <table>
+          <thead><tr><th>Hora</th><th>Apurado</th><th>Parcial TSE</th><th>Margem pelo modelo</th><th>Flávio &lt;5%: modelo</th><th>mercado</th><th>Lula &lt;5%: modelo</th><th>mercado</th></tr></thead>
+          <tbody id="tab-momentos"></tbody>
+        </table>
+      </div>
+      <p class="nota">Margens na definição do mercado (sobre todos os votos válidos). Preço do mercado normalizado para as faixas somarem 100%.</p>
+    </div>
+    <div class="dupla">
+      <div class="cartao">
+        <h3>Se você tinha Sim em "Lula &lt;5%"</h3>
+        <p>Às 17h30 o modelo dava 5% para essa faixa. Nos negócios reais daquele minuto ela ainda era vendida a <b class="num">50–54¢</b>. Às 18h valia ~13¢, às 18h30, 6¢, e no fim, zero.</p>
+        <p class="nota">Entre 17h27 e 17h32 foram negociadas ~1.400 cotas dessa faixa: dava para vender algumas centenas de dólares sem derrubar o preço.</p>
+      </div>
+      <div class="cartao">
+        <h3>Se você tinha Sim em "Flávio &lt;5%"</h3>
+        <p>Às 17h30 essa faixa negociava a <b class="num">34¢</b> e o modelo dava 91%. Quem vendesse ali por medo (as pesquisas davam Lula na frente) perderia a cota que pagou US$1 no fim.</p>
+        <p class="nota">Como o Brasil é close-only, o que o modelo oferece é isso: vender cedo o que vai perder e não vender o que vai ganhar.</p>
+      </div>
+    </div>
+    <div class="cartao">
+      <h3>A margem prevista também errou</h3>
+      <div class="grafico alto"><canvas id="g-margem" aria-label="Margem: parcial do TSE, previsão do modelo com faixa de 95% e resultado final"></canvas></div>
+      <p class="nota">Por volta das 18h o modelo previa ~+3,9 e o resultado foi +1,86: errou ~2 pontos. Acertou a faixa porque ela ia de 0 a 5. No 2º turno a fronteira de 4 pontos é mais apertada, e um erro desses mudaria a resposta. Por isso o ensaio acima importa mais que o placar contra o mercado.</p>
+    </div>
+  </section>
+
+  <section class="secao" aria-labelledby="t-regras">
+    <span class="rotulo">Parte 4 · regras de venda testadas</span>
+    <h2 id="t-regras">Quando vender</h2>
+    <p>Como o Brasil é close-only, a única decisão é segurar ou vender. Testei regras de venda em 47 noites simuladas com a margem final a menos de 1 ponto de 4 (o seu caso), em 53 noites longe dela e na noite real do 1º turno, com os preços reais. Cada noite simulada conta duas vezes: para quem tem "F &lt;4%" e para quem tem "F 4-8%". Uma regra boa vende cedo quando a sua faixa vai perder e quase nunca vende quando ela vai ganhar.</p>
+    <div class="cartao">
+      <div class="tabela-wrap">
+        <table>
+          <thead><tr><th>Regra</th><th>Perto de 4: vendeu por engano</th><th>Perto de 4: 1ª venda</th><th>Longe de 4: 1ª venda</th><th>Noite real, "Lula &lt;5%": valor por cota</th></tr></thead>
+          <tbody>
+            <tr><td><b>Vender tudo quando a faixa de 90% sai da sua</b> (desde 2%)</td><td>2%</td><td>18h33</td><td>17h21</td><td>US$ 0,51</td></tr>
+            <tr><td>Metade quando a faixa de 90% sai + resto se chance ≤ 20% (desde 20%)</td><td>4%</td><td>18h03</td><td>17h21</td><td>US$ 0,32</td></tr>
+            <tr><td>Tudo se chance ≤ 20%, desde 20% apurado</td><td>4%</td><td>18h03</td><td>17h55</td><td>US$ 0,13</td></tr>
+            <tr><td>Tudo se chance ≤ 20%, desde 5% apurado</td><td>9%</td><td>17h41</td><td>17h31</td><td>US$ 0,28</td></tr>
+            <tr><td>Escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5% (desde 5%)</td><td>17%</td><td>17h31</td><td>17h31</td><td>US$ 0,28</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="nota">"Vendeu por engano": noites em que a faixa ia ganhar e a regra vendeu ao menos parte. Horários com 5 minutos de atraso e no ritmo do 2º turno de 2022. Em todas as regras, quando a faixa perdia, a venda acabava acontecendo; a diferença é a hora e o preço. Na noite real ninguém vendeu "Flávio &lt;5%", que ganhou.</p>
+    </div>
+    <p>A primeira regra se saiu melhor nos testes porque se adapta sozinha. Quando o resultado está claro, a faixa provável sai da sua faixa cedo e ela vende cedo. Quando está colado em 4, a faixa provável continua cobrindo as duas faixas e ela espera. Vender pela chance sozinha (20%, 30%) antecipa a venda, mas tira mais posições vencedoras.</p>
+    <ol class="regras">
+      <li><span>Antes das 17h, escolha o plano e rode o pré-voo. Ex.: <code>python eleicao/monitor.py --faixa "F &lt;4%" --polymarket --degrau f90@2:100</code>. O monitor avisa com bipe quando o degrau dispara; não vende nada.</span></li>
+      <li><span>Até 2% apurado (~17h20), não aja.</span></li>
+      <li><span>Enquanto a faixa provável cobrir a sua faixa e a vizinha, não venda pela chance. Exceção: se o preço de venda estiver uns 20 pontos acima da chance do modelo (5 pontos depois de 20% apurado), vender vale mais que segurar.</span></li>
+      <li><span>Enquanto a faixa provável estiver inteira dentro da sua faixa, segure.</span></li>
+      <li><span>Guie-se pelo % apurado, não pelo relógio. O livro de ofertas pode sumir em minutos; a venda sai ao preço que houver.</span></li>
+    </ol>
+    <p class="nota">Isto descreve regras e resultados de teste, não é recomendação de investimento: não sou consultor financeiro licenciado, e a decisão e o tamanho da posição são seus.</p>
+  </section>
+
+  <section class="secao" aria-labelledby="t-banca">
+    <span class="rotulo">Parte 5 · em dinheiro</span>
+    <h2 id="t-banca">Quanto sobra de uma banca</h2>
+    <p>Exemplo: US$100 em "F &lt;4%" a 41¢ compram 244 cotas. Cada cota paga US$1 se "F &lt;4%" ganhar. Quem segura até o fim termina com US$244 ou com zero. Quem segue uma regra de venda recebe, quando ela manda vender, o preço daquele momento por cota.</p>
+    <p>Nas noites simuladas não existe preço de mercado, então ele foi modelado. O preço parte do preço de hoje e vai se aproximando da chance que o modelo dá naquele minuto. Escolha a velocidade: "lento" imita a noite real do 1º turno, em que o mercado tinha andado ~60% do caminho às 17h45 e ~90% às 19h. "Igual ao modelo" é o caso em que o mercado sabe tudo o que o modelo sabe.</p>
+    <div class="painel">
+      <div class="controles">
+        <div class="grupo">
+          <span class="rotulo" id="r-bpos">Posição</span>
+          <div class="seg" role="group" aria-labelledby="r-bpos">
+            <button type="button" id="bb-menor" aria-pressed="true">Sim em F &lt;4%</button>
+            <button type="button" id="bb-4a8" aria-pressed="false">Sim em F 4-8%</button>
+          </div>
+        </div>
+        <div class="grupo">
+          <span class="rotulo" id="r-ritmo">Mercado na noite</span>
+          <div class="seg" role="group" aria-labelledby="r-ritmo">
+            <button type="button" id="br-0" aria-pressed="true">Lento (como 4/10)</button>
+            <button type="button" id="br-1" aria-pressed="false">Mais esperto</button>
+            <button type="button" id="br-2" aria-pressed="false">Igual ao modelo</button>
+          </div>
+        </div>
+        <div class="grupo">
+          <label class="rotulo" for="in-banca">Banca (US$)</label>
+          <input id="in-banca" class="campo" type="number" min="1" step="1" value="100">
+        </div>
+        <div class="grupo">
+          <label class="rotulo" for="in-preco">Preço de compra (¢)</label>
+          <input id="in-preco" class="campo" type="number" min="1" max="99" step="1" value="41">
+        </div>
+      </div>
+      <div class="tabela-wrap">
+        <table class="banca">
+          <thead id="banca-cab"></thead>
+          <tbody id="banca-corpo"></tbody>
+        </table>
+      </div>
+      <p class="nota" id="banca-nota"></p>
+    </div>
+    <div class="dupla" id="banca-real"></div>
+    <p class="nota">Valores médios das noites simuladas de cada cenário. "Chance hoje" são as chances que o próprio mercado dá hoje a cada cenário; a média de baixo pondera por elas. Por isso segurar até o fim dá um pouco menos que a banca: o preço de compra fica acima dessa chance. Os resultados dependem do preço modelado: com o mercado tão bom quanto o modelo, nenhuma regra ganha de segurar por muito.</p>
+  </section>
+
+  <section class="secao" aria-labelledby="t-limites">
+    <span class="rotulo">Limites</span>
+    <h2 id="t-limites">O que estes testes não provam</h2>
+    <ul class="limites">
+      <li>Só existe uma noite real com preços de mercado (1º turno de 2026), e nela as faixas tinham 5 pontos de largura.</li>
+      <li>Parte dos parâmetros foi escolhida depois de ver as noites de 2022 e de 2026. A linha tracejada "modelo antes" mostra a versão anterior a esses ajustes: ela chegou à faixa certa até mais cedo.</li>
+      <li>As noites simuladas seguem as premissas do gerador (ordem de chegada, mudança de voto por região e por seção). Uma noite real pode ser mais difícil.</li>
+      <li>O atraso de 5 minutos é uma estimativa. Se o TSE ou a sua conexão atrasarem mais, tudo acontece mais tarde.</li>
+    </ul>
+  </section>
+</main>
+
+<script type="application/json" id="dados">__DADOS__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+(function () {
+  const D = JSON.parse(document.getElementById("dados").textContent);
+  const FAIXAS = ["L 12%+", "L 8-12%", "L 4-8%", "L <4%", "F <4%", "F 4-8%", "F 8-12%", "F 12%+"];
+  const raiz = document.documentElement;
+  const cor = (n) => getComputedStyle(raiz).getPropertyValue(n).trim();
+  const hora = (t) => { const m = Math.round(17 * 60 + t); return Math.floor(m / 60) + "h" + String(m % 60).padStart(2, "0"); };
+  const hhmm = (t) => { const m = Math.round(17 * 60 + t); return String(Math.floor(m / 60)).padStart(2, "0") + ":" + String(m % 60).padStart(2, "0"); };
+  const sinal = (x, d = 2) => (x >= 0 ? "+" : "-") + Math.abs(x).toFixed(d);
+  const pct = (x, d = 0) => (x * 100).toFixed(d).replace(".", ",") + "%";
+  const virg = (s) => String(s).replace(".", ",");
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  function ultimo(arr, x) { let k = -1; for (let i = 0; i < arr.length; i++) { if (arr[i] <= x) k = i; else break; } return k; }
+  const BORDAS = [-Infinity, -12, -8, -4, 0, 4, 8, 12, Infinity];
+  const faixasCobertas = (lo, hi) => FAIXAS.filter((f, i) => hi >= BORDAS[i] && lo < BORDAS[i + 1]);
+
+  // ---------- tela do monitor (mesmo formato de monitor.py) ----------
+  function linhasTela(n, x, faixa, numeros) {
+    const k = ultimo(n.t, x);
+    const L = [];
+    const cab = `[25/10/2026 ${hhmm(x)}:00] +${Math.round(x)}min | seções ${k < 0 ? "0.0" : n.secoes[k].toFixed(1)}% | eleitorado ${k < 0 ? "0.0" : n.apurado[k].toFixed(1)}% | baixados ${k < 0 ? 0 : 450}`;
+    L.push(`<span class="d">${esc(cab)}</span>` + (numeros ? '<span class="n">1</span>' : ""));
+    if (k < 0) { L.push("  sem votos apurados ainda"); return L.join("\n"); }
+    L.push(`  parcial (TSE): F ${sinal(n.parcial[k])}` + (numeros ? '<span class="n">2</span>' : "") +
+           `   |   <span class="m">MODELO: F ${sinal(n.mu[k])} ± ${n.sd[k].toFixed(2)}</span> <span class="d">(w ${n.w[k].toFixed(2)})</span>` + (numeros ? '<span class="n">3</span>' : ""));
+    // faixa provável de 90%: mesma distribuição t(6) das faixas, média ± 1,943 dp
+    const lo = n.mu[k] - 1.943 * n.sd[k], hi = n.mu[k] + 1.943 * n.sd[k];
+    const cobre = faixasCobertas(lo, hi);
+    L.push(`  <span class="m">faixa provável (90%): F ${sinal(lo)} a F ${sinal(hi)}</span>  -> ` +
+           (cobre.length === 1 ? `só ${esc(cobre[0])}` : `cobre ${esc(cobre.join(", "))}`) + (numeros ? '<span class="n">4</span>' : ""));
+    let primeira = true;
+    FAIXAS.forEach((f) => {
+      const p = n.probs[f][k];
+      if (p < 0.0005 && f !== faixa) return;
+      const seta = f === faixa ? ">>" : "  ";
+      const txt = `  ${seta} ${f.padEnd(8)} ${(p * 100).toFixed(1).padStart(5)}%`;
+      L.push((f === faixa ? `<span class="h">${esc(txt)}</span>` : esc(txt)) + (numeros && primeira ? '<span class="n">5</span>' : ""));
+      primeira = false;
+    });
+    const pp = n.probs[faixa][k];
+    L.push(`  <span class="h">posição Sim em '${esc(faixa)}': chance de pagar ${(pp * 100).toFixed(1)}%</span>` + (numeros ? '<span class="n">6</span>' : ""));
+    return L.join("\n");
+  }
+
+  function conselho(n, x, faixa) {
+    const k = ultimo(n.t, x);
+    if (k < 0) return ["neutro", "Espere", "Ainda não há votos apurados."];
+    const ap = n.apurado[k], mu = n.mu[k], p = n.probs[faixa][k];
+    const lo = mu - 1.943 * n.sd[k], hi = mu + 1.943 * n.sd[k];
+    const cobre = faixasCobertas(lo, hi);
+    const faixaTxt = `${virg(sinal(lo, 1))} a ${virg(sinal(hi, 1))}`;
+    if (ap < 2) return ["neutro", "Cedo demais", `Só ${virg(ap.toFixed(1))}% apurado. O modelo ainda é quase só palpite e muda muito de um minuto para o outro. As regras testadas só agem a partir de 2%.`];
+    if (!cobre.includes(faixa)) return ["ruim", "A regra testada vende aqui", `A faixa provável (${faixaTxt}) não toca mais "${faixa}": a chance dela está em ${pct(p)}. Nas simulações perto da fronteira, vender neste ponto acertou em 96–98% das vezes. Venda se ainda houver comprador.`];
+    if (cobre.length === 1) return ["bom", "Segure", `A faixa provável (${faixaTxt}) está inteira dentro de "${faixa}" (${pct(p)}). Venda só se alguém pagar mais que isso.`];
+    if (ap < 20) return ["aviso", "Indefinido: não venda pela chance", `A faixa provável (${faixaTxt}) ainda cobre ${cobre.join(" e ")}. Chance de ${pct(p)} sozinha não é motivo para vender: nas simulações, vender por chance antes de 20% apurado tirou o dobro de posições vencedoras. Só venda se o preço de venda estiver uns 20 pontos acima de ${pct(p)}.`];
+    if (p <= 0.2) return ["ruim", "Venda se ainda der", `Já passou de 20% apurado e a chance de "${faixa}" está em ${pct(p)}. Nas simulações, vender a partir daqui errou ~4% das vezes perto da fronteira.`];
+    return ["aviso", "Compare com o preço", `Faixa provável ${faixaTxt}, cobrindo ${cobre.join(" e ")}. Sua faixa está com ${pct(p)}: se o preço de venda passar disso em mais de ~5 pontos, vender vale mais; senão, segure.`];
+  }
+
+  // ---------- gráficos (Chart.js), recriados quando o tema muda ----------
+  const graficos = {};
+  function eixoTempo(min, max) {
+    return { type: "linear", min, max, ticks: { stepSize: 15, color: cor("--ink-3"), callback: (v) => hora(v), font: { family: "IBM Plex Sans" } },
+             grid: { color: cor("--line") } };
+  }
+  function eixoPct() {
+    return { min: 0, max: 1, ticks: { color: cor("--ink-3"), callback: (v) => Math.round(v * 100) + "%", font: { family: "IBM Plex Sans" } },
+             grid: { color: cor("--line") } };
+  }
+  const cursor = {
+    id: "cursor",
+    afterDatasetsDraw(chart, args, opts) {
+      if (opts.x == null) return;
+      const { ctx, chartArea, scales } = chart;
+      const px = scales.x.getPixelForValue(opts.x);
+      if (px < chartArea.left || px > chartArea.right) return;
+      ctx.save(); ctx.strokeStyle = cor("--ink-2"); ctx.lineWidth = 1; ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(px, chartArea.top); ctx.lineTo(px, chartArea.bottom); ctx.stroke(); ctx.restore();
+    },
+  };
+  function base(opcoes) {
+    return Object.assign({
+      responsive: true, maintainAspectRatio: false, animation: false, parsing: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { labels: { color: cor("--ink-2"), boxWidth: 14, font: { family: "IBM Plex Sans" } } },
+        tooltip: { callbacks: { title: (it) => hora(it[0].parsed.x), label: (it) => ` ${it.dataset.label}: ${(it.parsed.y * 100).toFixed(0)}%` } },
+      },
+    }, opcoes);
+  }
+  const serie = (t, v) => t.map((x, i) => ({ x, y: v[i] })).filter((p) => p.y != null && !Number.isNaN(p.y));
+
+  let noite = "sim_a", faixa = "F <4%";
+  function desenharEnsaio() {
+    const n = D[noite];
+    const x = +document.getElementById("slider").value;
+    graficos.ensaio?.destroy();
+    graficos.ensaio = new Chart(document.getElementById("g-ensaio"), {
+      type: "line",
+      data: { datasets: [
+        { label: 'Chance de "F <4%"', data: serie(n.t, n.probs["F <4%"]), borderColor: cor("--faixa-a"), backgroundColor: cor("--faixa-a"), borderWidth: 2, pointRadius: 0 },
+        { label: 'Chance de "F 4-8%"', data: serie(n.t, n.probs["F 4-8%"]), borderColor: cor("--faixa-b"), backgroundColor: cor("--faixa-b"), borderWidth: 2, pointRadius: 0, borderDash: [6, 4] },
+      ] },
+      options: base({ scales: { x: eixoTempo(5, 150), y: eixoPct() }, plugins: Object.assign(base({}).plugins, { cursor: { x } }) }),
+      plugins: [cursor],
+    });
+  }
+  function atualizarEnsaio() {
+    const n = D[noite];
+    const x = +document.getElementById("slider").value;
+    const k = ultimo(n.t, x);
+    document.getElementById("hora").textContent = hora(x);
+    document.getElementById("apurado").textContent = (k < 0 ? "0" : virg(n.apurado[k].toFixed(1))) + "% apurado";
+    document.getElementById("tela").innerHTML = linhasTela(n, x, faixa, false);
+    const [nivel, tag, txt] = conselho(n, x, faixa);
+    const c = document.getElementById("conselho");
+    c.dataset.n = nivel;
+    document.getElementById("conselho-tag").textContent = tag;
+    document.getElementById("conselho-txt").textContent = txt;
+    const certa = n.margem_final >= 4 ? "F 4-8%" : "F <4%";
+    document.getElementById("verdade").textContent = `Só no ensaio: o resultado final é F ${virg(sinal(n.margem_final))}, faixa "${certa}". Sua posição ${certa === faixa ? "ganha" : "perde"}.`;
+    if (graficos.ensaio) { graficos.ensaio.options.plugins.cursor.x = x; graficos.ensaio.update("none"); }
+  }
+
+  function desenharReal() {
+    const R = D.real1t, mf = R.modelo_final, ma = R.modelo_antes, pm = R.mercado;
+    const opc = { scales: { x: eixoTempo(0, 150), y: eixoPct() } };
+    graficos.vence?.destroy(); graficos.perde?.destroy(); graficos.margem?.destroy();
+    graficos.vence = new Chart(document.getElementById("g-vence"), { type: "line", options: base(opc), data: { datasets: [
+      { label: "Modelo", data: serie(mf.t, mf["F <5%"]), borderColor: cor("--modelo"), backgroundColor: cor("--modelo"), borderWidth: 2, pointRadius: 0 },
+      { label: "Modelo antes dos ajustes", data: serie(ma.t, ma["F <5%"]), borderColor: cor("--modelo"), backgroundColor: cor("--modelo"), borderWidth: 1.5, borderDash: [5, 4], pointRadius: 0 },
+      { label: "Mercado", data: serie(pm.t, pm["F <5%"]), borderColor: cor("--mercado"), backgroundColor: cor("--mercado"), borderWidth: 2, pointRadius: 0, stepped: true },
+    ] } });
+    graficos.perde = new Chart(document.getElementById("g-perde"), { type: "line", options: base(opc), data: { datasets: [
+      { label: "Modelo", data: serie(mf.t, mf["L <5%"]), borderColor: cor("--modelo"), backgroundColor: cor("--modelo"), borderWidth: 2, pointRadius: 0 },
+      { label: "Mercado", data: serie(pm.t, pm["L <5%"]), borderColor: cor("--mercado"), backgroundColor: cor("--mercado"), borderWidth: 2, pointRadius: 0, stepped: true },
+    ] } });
+    const sup = mf.mu.map((m, i) => m + 1.96 * mf.sd[i]), inf = mf.mu.map((m, i) => m - 1.96 * mf.sd[i]);
+    const final = R.margem_final;
+    graficos.margem = new Chart(document.getElementById("g-margem"), {
+      type: "line",
+      data: { datasets: [
+        { label: "faixa 95% (topo)", data: serie(mf.t, sup), borderWidth: 0, pointRadius: 0, fill: false },
+        { label: "Modelo (faixa = 95%)", data: serie(mf.t, mf.mu), borderColor: cor("--modelo"), backgroundColor: cor("--modelo"), borderWidth: 2, pointRadius: 0 },
+        { label: "faixa 95% (base)", data: serie(mf.t, inf), borderWidth: 0, pointRadius: 0, fill: "-2", backgroundColor: cor("--modelo") + "2e" },
+        { label: "Parcial do TSE", data: serie(mf.t, mf.parcial), borderColor: cor("--ink-3"), backgroundColor: cor("--ink-3"), borderWidth: 2, pointRadius: 0 },
+        { label: "Resultado final", data: [{ x: 0, y: final }, { x: 150, y: final }], borderColor: cor("--ink"), backgroundColor: cor("--ink"), borderWidth: 1.5, borderDash: [6, 4], pointRadius: 0 },
+      ] },
+      options: base({
+        scales: { x: eixoTempo(0, 150), y: { min: -6, max: 12, ticks: { color: cor("--ink-3"), callback: (v) => (v > 0 ? "+" : "") + v, font: { family: "IBM Plex Sans" } }, grid: { color: cor("--line") } } },
+        plugins: {
+          legend: { labels: { color: cor("--ink-2"), boxWidth: 14, font: { family: "IBM Plex Sans" }, filter: (it) => !it.text.startsWith("faixa 95%") } },
+          tooltip: { filter: (it) => !it.dataset.label.startsWith("faixa 95%"), callbacks: { title: (it) => hora(it[0].parsed.x), label: (it) => ` ${it.dataset.label}: ${sinal(it.parsed.y)}` } },
+        },
+      }),
+    });
+  }
+
+  function cruzamento(t, v, lim) {
+    let k = v.length;
+    while (k > 0 && v[k - 1] >= lim) k--;
+    return k < v.length ? t[k] : null;
+  }
+  function corrida() {
+    const R = D.real1t;
+    const linhas = [["Modelo", R.modelo_final], ["Mercado", R.mercado]];
+    const alvo = document.getElementById("corrida");
+    const esc0 = 0, esc1 = 150;
+    alvo.innerHTML = "";
+    [0.8, 0.9].forEach((lim) => {
+      const rot = document.createElement("div");
+      rot.className = "rotulo"; rot.textContent = "Passou de " + Math.round(lim * 100) + "% (e não caiu mais)";
+      alvo.appendChild(rot);
+      linhas.forEach(([nome, s]) => {
+        const t = cruzamento(s.t, s["F <5%"], lim);
+        const linha = document.createElement("div"); linha.className = "corrida-linha";
+        const pos = t == null ? 100 : ((t - esc0) / (esc1 - esc0)) * 100;
+        linha.innerHTML = `<span>${nome}</span><div class="barra"><div class="marca ${nome === "Modelo" ? "mod" : "mer"}" style="left:0; width:${Math.max(pos, 14)}%"><span style="margin-left:auto">${t == null ? "—" : hora(t)}</span></div></div>`;
+        alvo.appendChild(linha);
+      });
+    });
+    const t80m = cruzamento(R.modelo_final.t, R.modelo_final["F <5%"], 0.8), t80p = cruzamento(R.mercado.t, R.mercado["F <5%"], 0.8);
+    document.getElementById("d-80").textContent = hora(t80m) + " × " + hora(t80p);
+  }
+
+  function tabelaMomentos() {
+    const R = D.real1t, mf = R.modelo_final, pm = R.mercado;
+    const corpo = document.getElementById("tab-momentos");
+    corpo.innerHTML = "";
+    [20, 25, 30, 35, 45, 60, 90].forEach((x) => {
+      const k = ultimo(mf.t, x), j = ultimo(pm.t, x);
+      if (k < 0 || j < 0) return;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td>${hora(x)}</td><td>${virg(mf.apurado[k].toFixed(1))}%</td><td>${virg(sinal(mf.parcial[k], 1))}</td>` +
+        `<td>${virg(sinal(mf.mu[k], 1))} ± ${virg(mf.sd[k].toFixed(1))}</td>` +
+        `<td class="mod">${pct(mf["F <5%"][k])}</td><td class="mer">${pct(pm["F <5%"][j])}</td>` +
+        `<td class="mod">${pct(mf["L <5%"][k])}</td><td class="mer">${pct(pm["L <5%"][j])}</td>`;
+      corpo.appendChild(tr);
+    });
+  }
+
+  function telaExemplo() {
+    document.getElementById("tela-exemplo").innerHTML = linhasTela(D.sim_a, 32, "F <4%", true);
+  }
+
+  function marcar(id1, id2, primeiroAtivo) {
+    document.getElementById(id1).setAttribute("aria-pressed", String(primeiroAtivo));
+    document.getElementById(id2).setAttribute("aria-pressed", String(!primeiroAtivo));
+  }
+  document.getElementById("b-noite-a").addEventListener("click", () => { noite = "sim_a"; marcar("b-noite-a", "b-noite-b", true); desenharEnsaio(); atualizarEnsaio(); });
+  document.getElementById("b-noite-b").addEventListener("click", () => { noite = "sim_b"; marcar("b-noite-a", "b-noite-b", false); desenharEnsaio(); atualizarEnsaio(); });
+  document.getElementById("b-pos-menor").addEventListener("click", () => { faixa = "F <4%"; marcar("b-pos-menor", "b-pos-4a8", true); atualizarEnsaio(); });
+  document.getElementById("b-pos-4a8").addEventListener("click", () => { faixa = "F 4-8%"; marcar("b-pos-menor", "b-pos-4a8", false); atualizarEnsaio(); });
+  document.getElementById("slider").addEventListener("input", atualizarEnsaio);
+
+  // ---------- calculadora da banca ----------
+  const B = D.banca;
+  let bPos = "F <4%", bRitmo = 0;
+  const din = (x) => "US$ " + Math.round(x).toLocaleString("pt-BR");
+  function calcular() {
+    const banca = Math.max(1, +document.getElementById("in-banca").value || 100);
+    const preco = Math.min(99, Math.max(1, +document.getElementById("in-preco").value || 41)) / 100;
+    const cotas = banca / preco;
+    const ritmo = B.ritmos[bRitmo];
+    const pos = B.posicoes[bPos];
+    const cab = document.getElementById("banca-cab");
+    cab.innerHTML = "<tr><th>Como a noite termina</th><th>Chance hoje</th>" +
+      B.regras.map((r) => `<th>${esc(r)}</th>`).join("") + "</tr>";
+    const corpo = document.getElementById("banca-corpo");
+    corpo.innerHTML = "";
+    const media = Object.fromEntries(B.regras.map((r) => [r, 0]));
+    let somaChance = 0;
+    pos.cenarios.forEach((c) => {
+      somaChance += c.chance;
+      const tr = document.createElement("tr");
+      let html = `<td>${esc(c.nome)}<br><span class="${c.ganha ? "cen-ganha" : "cen-perde"}">${c.ganha ? "sua faixa ganha" : "sua faixa perde"} · ${c.noites} noites</span></td><td>${pct(c.chance)}</td>`;
+      B.regras.forEach((r) => {
+        const final = c.valor[ritmo][r] * cotas;
+        media[r] += c.chance * final;
+        const lucro = final - banca;
+        html += `<td>${din(final)}<small class="${lucro >= 0 ? "ganho" : "perda"}">${lucro >= 0 ? "+" : "−"}${din(Math.abs(lucro)).replace("US$ ", "US$ ")}</small></td>`;
+      });
+      tr.innerHTML = html;
+      corpo.appendChild(tr);
+    });
+    const tr = document.createElement("tr");
+    tr.className = "media";
+    tr.innerHTML = `<td>Média ponderada pelas chances de hoje</td><td>${pct(somaChance)}</td>` +
+      B.regras.map((r) => {
+        const v = media[r] / somaChance, l = v - banca;
+        return `<td>${din(v)}<small class="${l >= 0 ? "ganho" : "perda"}">${l >= 0 ? "+" : "−"}${din(Math.abs(l))}</small></td>`;
+      }).join("");
+    corpo.appendChild(tr);
+    const melhor = B.regras.reduce((a, r) => (media[r] > media[a] ? r : a), B.regras[0]);
+    document.getElementById("banca-nota").textContent =
+      `${banca.toLocaleString("pt-BR")} dólares a ${Math.round(preco * 100)}¢ compram ${Math.round(cotas).toLocaleString("pt-BR")} cotas. ` +
+      `Com o mercado "${ritmo}", a regra com a maior média foi "${melhor}" (${din(media[melhor] / somaChance)}), contra ${din(media["Segurar até o fim"] / somaChance)} de segurar até o fim.`;
+    // noite real do 1º turno, com a mesma banca comprada às 17h
+    const real = document.getElementById("banca-real");
+    real.innerHTML = "";
+    B.real1t.forEach((x) => {
+      const cot = banca / x.entrada;
+      const div = document.createElement("div");
+      div.className = "cartao";
+      const linhas = Object.entries(x.regras).map(([r, v]) => {
+        const quando = v.hora == null ? "não vendeu" : `vendeu às ${hora(v.hora)} a ${Math.round(v.preco * 100)}¢`;
+        return `<tr><td>${esc(r)}</td><td>${r === "Segurar até o fim" ? "—" : quando}</td><td>${din(v.valor * cot)}</td></tr>`;
+      }).join("");
+      div.innerHTML = `<h3>Noite real de 4/10: Sim em "${esc(x.faixa === "L <5%" ? "Lula <5%" : "Flávio <5%")}" (${x.venceu ? "ganhou" : "perdeu"})</h3>` +
+        `<p class="nota">${din(banca)} comprados às 17h a ${Math.round(x.entrada * 100)}¢ = ${Math.round(cot).toLocaleString("pt-BR")} cotas. Preços reais dos negócios.</p>` +
+        `<div class="tabela-wrap"><table><thead><tr><th>Regra</th><th>O que fez</th><th>No fim</th></tr></thead><tbody>${linhas}</tbody></table></div>`;
+      real.appendChild(div);
+    });
+  }
+  function marcarGrupo(ids, ativo) { ids.forEach((id, i) => document.getElementById(id).setAttribute("aria-pressed", String(i === ativo))); }
+  document.getElementById("bb-menor").addEventListener("click", () => { bPos = "F <4%"; marcarGrupo(["bb-menor", "bb-4a8"], 0); document.getElementById("in-preco").value = Math.round(B.posicoes[bPos].entrada * 100); calcular(); });
+  document.getElementById("bb-4a8").addEventListener("click", () => { bPos = "F 4-8%"; marcarGrupo(["bb-menor", "bb-4a8"], 1); document.getElementById("in-preco").value = Math.round(B.posicoes[bPos].entrada * 100); calcular(); });
+  ["br-0", "br-1", "br-2"].forEach((id, i) => document.getElementById(id).addEventListener("click", () => { bRitmo = i; marcarGrupo(["br-0", "br-1", "br-2"], i); calcular(); }));
+  document.getElementById("in-banca").addEventListener("input", calcular);
+  document.getElementById("in-preco").addEventListener("input", calcular);
+
+  function tudo() {
+    calcular();
+    telaExemplo(); corrida(); tabelaMomentos(); atualizarEnsaio();
+    if (window.Chart) {
+      Chart.defaults.font.family = "IBM Plex Sans";
+      desenharEnsaio(); atualizarEnsaio(); desenharReal();
+    }
+  }
+  tudo();
+  // o tema pode mudar com a página aberta: redesenha os gráficos com as cores novas
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (window.Chart) { desenharEnsaio(); atualizarEnsaio(); desenharReal(); } });
+  new MutationObserver(() => { if (window.Chart) { desenharEnsaio(); atualizarEnsaio(); desenharReal(); } })
+    .observe(raiz, { attributes: true, attributeFilter: ["data-theme"] });
+})();
+</script>

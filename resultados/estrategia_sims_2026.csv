@@ -1,0 +1,961 @@
+sim,faixa,regra,ganha,dist4,vendido,t_venda,ap_venda
+0,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.0314905494439213,0.0,,
+0,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.0314905494439213,0.0,,
+0,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.0314905494439213,0.0,,
+0,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.0314905494439213,0.0,,
+0,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.0314905494439213,0.0,,
+0,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.0314905494439213,0.0,,
+0,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.0314905494439213,0.0,,
+0,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.0314905494439213,0.0,,
+0,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.0314905494439213,1.0,21.0,2.4279081735150254
+0,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.0314905494439213,1.0,29.0,5.405619466192091
+0,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.0314905494439213,1.0,29.0,5.405619466192091
+0,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.0314905494439213,1.0,55.0,20.60919245164038
+0,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.0314905494439213,1.0,21.0,2.4279081735150254
+0,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.0314905494439213,1.0,21.0,2.4279081735150254
+0,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.0314905494439213,1.0,29.0,5.405619466192091
+0,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.0314905494439213,1.0,29.0,5.405619466192091
+1,F <4%,"tudo se chance ≤ 10%, desde 2%",False,2.7475352067137715,1.0,23.0,2.510303205945874
+1,F <4%,"tudo se chance ≤ 10%, desde 5%",False,2.7475352067137715,1.0,31.0,5.460479144392871
+1,F <4%,"tudo se chance ≤ 20%, desde 5%",False,2.7475352067137715,1.0,31.0,5.460479144392871
+1,F <4%,"tudo se chance ≤ 20%, desde 20%",False,2.7475352067137715,1.0,55.0,20.009917540272625
+1,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.7475352067137715,1.0,23.0,2.510303205945874
+1,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.7475352067137715,1.0,23.0,2.510303205945874
+1,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.7475352067137715,1.0,31.0,5.460479144392871
+1,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.7475352067137715,1.0,31.0,5.460479144392871
+1,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,2.7475352067137715,0.0,,
+1,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,2.7475352067137715,0.0,,
+1,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,2.7475352067137715,0.0,,
+1,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,2.7475352067137715,0.0,,
+1,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.7475352067137715,0.0,,
+1,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.7475352067137715,0.0,,
+1,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.7475352067137715,0.0,,
+1,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.7475352067137715,0.0,,
+2,F <4%,"tudo se chance ≤ 10%, desde 2%",False,1.4795642600651204,1.0,17.0,2.0549754991664115
+2,F <4%,"tudo se chance ≤ 10%, desde 5%",False,1.4795642600651204,1.0,29.0,5.239250139061069
+2,F <4%,"tudo se chance ≤ 20%, desde 5%",False,1.4795642600651204,1.0,29.0,5.239250139061069
+2,F <4%,"tudo se chance ≤ 20%, desde 20%",False,1.4795642600651204,1.0,55.0,20.73009956149361
+2,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,1.4795642600651204,1.0,19.0,2.442245002389276
+2,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,1.4795642600651204,1.0,19.0,2.442245002389276
+2,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,1.4795642600651204,1.0,29.0,5.239250139061069
+2,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,1.4795642600651204,1.0,29.0,5.239250139061069
+2,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,1.4795642600651204,0.0,,
+2,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,1.4795642600651204,0.0,,
+2,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,1.4795642600651204,0.0,,
+2,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,1.4795642600651204,0.0,,
+2,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,1.4795642600651204,0.0,,
+2,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,1.4795642600651204,0.0,,
+2,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,1.4795642600651204,0.0,,
+2,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,1.4795642600651204,0.0,,
+3,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.4191496397912275,0.0,,
+3,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.4191496397912275,0.0,,
+3,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.4191496397912275,0.0,,
+3,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.4191496397912275,0.0,,
+3,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.4191496397912275,0.0,,
+3,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.4191496397912275,0.0,,
+3,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.4191496397912275,0.0,,
+3,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.4191496397912275,0.0,,
+3,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.4191496397912275,1.0,23.0,2.459419715796163
+3,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.4191496397912275,1.0,31.0,6.008956237596818
+3,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.4191496397912275,1.0,31.0,6.008956237596818
+3,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.4191496397912275,1.0,55.0,21.02195315031231
+3,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.4191496397912275,1.0,23.0,2.459419715796163
+3,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.4191496397912275,1.0,23.0,2.459419715796163
+3,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.4191496397912275,1.0,31.0,6.008956237596818
+3,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.4191496397912275,1.0,31.0,6.008956237596818
+4,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.961962779793344,1.0,21.0,2.443398424493437
+4,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.961962779793344,1.0,29.0,5.312512915760559
+4,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.961962779793344,1.0,29.0,5.312512915760559
+4,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.961962779793344,1.0,53.0,20.039240037326024
+4,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.961962779793344,1.0,21.0,2.443398424493437
+4,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.961962779793344,1.0,21.0,2.443398424493437
+4,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.961962779793344,1.0,29.0,5.312512915760559
+4,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.961962779793344,1.0,29.0,5.312512915760559
+4,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.961962779793344,1.0,75.0,37.954600991009436
+4,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.961962779793344,1.0,75.0,37.954600991009436
+4,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.961962779793344,1.0,73.0,36.227906053133374
+4,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.961962779793344,1.0,73.0,36.227906053133374
+4,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.961962779793344,1.0,79.0,41.80982649740914
+4,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.961962779793344,1.0,73.0,36.227906053133374
+4,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.961962779793344,1.0,73.0,36.227906053133374
+4,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.961962779793344,1.0,67.0,30.967178703138675
+5,F <4%,"tudo se chance ≤ 10%, desde 2%",False,2.0531188916252896,1.0,21.0,2.070291256467671
+5,F <4%,"tudo se chance ≤ 10%, desde 5%",False,2.0531188916252896,1.0,31.0,5.801887047697818
+5,F <4%,"tudo se chance ≤ 20%, desde 5%",False,2.0531188916252896,1.0,31.0,5.801887047697818
+5,F <4%,"tudo se chance ≤ 20%, desde 20%",False,2.0531188916252896,1.0,57.0,21.019459213605373
+5,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.0531188916252896,1.0,21.0,2.070291256467671
+5,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.0531188916252896,1.0,21.0,2.070291256467671
+5,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.0531188916252896,1.0,31.0,5.801887047697818
+5,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.0531188916252896,1.0,31.0,5.801887047697818
+5,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,2.0531188916252896,0.0,,
+5,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,2.0531188916252896,0.0,,
+5,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,2.0531188916252896,0.0,,
+5,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,2.0531188916252896,0.0,,
+5,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.0531188916252896,0.0,,
+5,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.0531188916252896,0.0,,
+5,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.0531188916252896,0.0,,
+5,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.0531188916252896,0.0,,
+6,F <4%,"tudo se chance ≤ 10%, desde 2%",True,2.5615137226330513,0.0,,
+6,F <4%,"tudo se chance ≤ 10%, desde 5%",True,2.5615137226330513,0.0,,
+6,F <4%,"tudo se chance ≤ 20%, desde 5%",True,2.5615137226330513,0.0,,
+6,F <4%,"tudo se chance ≤ 20%, desde 20%",True,2.5615137226330513,0.0,,
+6,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.5615137226330513,0.0,,
+6,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.5615137226330513,0.0,,
+6,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.5615137226330513,0.0,,
+6,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.5615137226330513,0.0,,
+6,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,2.5615137226330513,1.0,21.0,2.663998748634655
+6,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,2.5615137226330513,1.0,29.0,5.4512448382077245
+6,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,2.5615137226330513,1.0,29.0,5.4512448382077245
+6,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,2.5615137226330513,1.0,55.0,20.741963871657397
+6,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.5615137226330513,1.0,27.0,4.590488316901831
+6,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.5615137226330513,1.0,27.0,4.590488316901831
+6,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.5615137226330513,1.0,29.0,5.4512448382077245
+6,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.5615137226330513,1.0,29.0,5.4512448382077245
+7,F <4%,"tudo se chance ≤ 10%, desde 2%",False,1.1190669560177406,1.0,25.0,3.056962919154993
+7,F <4%,"tudo se chance ≤ 10%, desde 5%",False,1.1190669560177406,1.0,31.0,5.238372001205683
+7,F <4%,"tudo se chance ≤ 20%, desde 5%",False,1.1190669560177406,1.0,31.0,5.238372001205683
+7,F <4%,"tudo se chance ≤ 20%, desde 20%",False,1.1190669560177406,1.0,75.0,32.89694144521975
+7,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,1.1190669560177406,1.0,83.0,38.812996493174744
+7,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,1.1190669560177406,1.0,75.0,32.89694144521975
+7,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,1.1190669560177406,1.0,31.0,5.238372001205683
+7,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,1.1190669560177406,1.0,31.0,5.238372001205683
+7,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,1.1190669560177406,0.0,,
+7,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,1.1190669560177406,0.0,,
+7,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,1.1190669560177406,0.0,,
+7,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,1.1190669560177406,0.0,,
+7,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,1.1190669560177406,0.0,,
+7,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,1.1190669560177406,0.0,,
+7,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,1.1190669560177406,0.0,,
+7,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,1.1190669560177406,0.0,,
+8,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.2669874287036205,1.0,17.0,2.1621643822788084
+8,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.2669874287036205,1.0,29.0,5.405285597423548
+8,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.2669874287036205,1.0,29.0,5.405285597423548
+8,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.2669874287036205,1.0,55.0,20.214782566358135
+8,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.2669874287036205,1.0,17.0,2.1621643822788084
+8,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.2669874287036205,1.0,17.0,2.1621643822788084
+8,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.2669874287036205,1.0,29.0,5.405285597423548
+8,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.2669874287036205,1.0,29.0,5.405285597423548
+8,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.2669874287036205,1.0,111.0,67.04414709559967
+8,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.2669874287036205,1.0,111.0,67.04414709559967
+8,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.2669874287036205,1.0,101.0,57.202015808912975
+8,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.2669874287036205,1.0,101.0,57.202015808912975
+8,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.2669874287036205,1.0,119.0,74.66053215771379
+8,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.2669874287036205,1.0,101.0,57.202015808912975
+8,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.2669874287036205,1.0,101.0,57.202015808912975
+8,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.2669874287036205,1.0,89.0,45.60317919164538
+9,F <4%,"tudo se chance ≤ 10%, desde 2%",True,0.33472190326861107,0.0,,
+9,F <4%,"tudo se chance ≤ 10%, desde 5%",True,0.33472190326861107,0.0,,
+9,F <4%,"tudo se chance ≤ 20%, desde 5%",True,0.33472190326861107,0.0,,
+9,F <4%,"tudo se chance ≤ 20%, desde 20%",True,0.33472190326861107,0.0,,
+9,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,0.33472190326861107,0.0,,
+9,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,0.33472190326861107,0.0,,
+9,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,0.33472190326861107,0.0,,
+9,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,0.33472190326861107,0.0,,
+9,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,0.33472190326861107,1.0,25.0,3.591364609029879
+9,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,0.33472190326861107,1.0,89.0,46.735981434679076
+9,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,0.33472190326861107,1.0,29.0,5.044139120545699
+9,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,0.33472190326861107,1.0,61.0,24.096713164654048
+9,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,0.33472190326861107,1.0,105.0,63.189693896955134
+9,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,0.33472190326861107,1.0,61.0,24.096713164654048
+9,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,0.33472190326861107,1.0,61.0,24.096713164654048
+9,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,0.33472190326861107,1.0,29.0,5.044139120545699
+10,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.814094483447193,1.0,65.0,29.526131804573865
+10,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.814094483447193,1.0,65.0,29.526131804573865
+10,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.814094483447193,1.0,35.0,8.348112013375008
+10,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.814094483447193,1.0,57.0,23.452749603645806
+10,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.814094483447193,1.0,71.0,34.41507927238303
+10,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.814094483447193,1.0,57.0,23.452749603645806
+10,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.814094483447193,1.0,57.0,23.452749603645806
+10,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.814094483447193,1.0,33.0,7.270316854753112
+10,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.814094483447193,1.0,21.0,2.2890666413212024
+10,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.814094483447193,1.0,29.0,5.315986410835583
+10,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.814094483447193,1.0,29.0,5.315986410835583
+10,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.814094483447193,1.0,53.0,20.494616249568086
+10,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.814094483447193,1.0,21.0,2.2890666413212024
+10,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.814094483447193,1.0,21.0,2.2890666413212024
+10,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.814094483447193,1.0,29.0,5.315986410835583
+10,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.814094483447193,1.0,29.0,5.315986410835583
+11,F <4%,"tudo se chance ≤ 10%, desde 2%",False,5.824121471433399,1.0,23.0,2.1824888010493426
+11,F <4%,"tudo se chance ≤ 10%, desde 5%",False,5.824121471433399,1.0,31.0,5.48590230620608
+11,F <4%,"tudo se chance ≤ 20%, desde 5%",False,5.824121471433399,1.0,31.0,5.48590230620608
+11,F <4%,"tudo se chance ≤ 20%, desde 20%",False,5.824121471433399,1.0,53.0,20.563453690231658
+11,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.824121471433399,1.0,23.0,2.1824888010493426
+11,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.824121471433399,1.0,23.0,2.1824888010493426
+11,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.824121471433399,1.0,31.0,5.48590230620608
+11,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.824121471433399,1.0,31.0,5.48590230620608
+11,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,5.824121471433399,1.0,23.0,2.1824888010493426
+11,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,5.824121471433399,1.0,31.0,5.48590230620608
+11,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,5.824121471433399,1.0,31.0,5.48590230620608
+11,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,5.824121471433399,1.0,53.0,20.563453690231658
+11,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.824121471433399,1.0,23.0,2.1824888010493426
+11,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.824121471433399,1.0,23.0,2.1824888010493426
+11,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.824121471433399,1.0,31.0,5.48590230620608
+11,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.824121471433399,1.0,31.0,5.48590230620608
+12,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.9608688248715156,0.0,,
+12,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.9608688248715156,0.0,,
+12,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.9608688248715156,0.0,,
+12,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.9608688248715156,0.0,,
+12,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.9608688248715156,0.0,,
+12,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.9608688248715156,0.0,,
+12,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.9608688248715156,0.0,,
+12,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.9608688248715156,0.3333333333333333,105.0,65.72289672077687
+12,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.9608688248715156,1.0,17.0,2.4407003868789356
+12,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.9608688248715156,1.0,27.0,5.126834634868227
+12,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.9608688248715156,1.0,27.0,5.126834634868227
+12,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.9608688248715156,1.0,55.0,20.656332201994864
+12,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.9608688248715156,1.0,23.0,3.7683534827649745
+12,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.9608688248715156,1.0,23.0,3.7683534827649745
+12,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.9608688248715156,1.0,27.0,5.126834634868227
+12,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.9608688248715156,1.0,27.0,5.126834634868227
+13,F <4%,"tudo se chance ≤ 10%, desde 2%",False,5.942180728234206,1.0,23.0,2.1926642391971396
+13,F <4%,"tudo se chance ≤ 10%, desde 5%",False,5.942180728234206,1.0,33.0,5.875920242329258
+13,F <4%,"tudo se chance ≤ 20%, desde 5%",False,5.942180728234206,1.0,33.0,5.875920242329258
+13,F <4%,"tudo se chance ≤ 20%, desde 20%",False,5.942180728234206,1.0,57.0,20.205748581434126
+13,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.942180728234206,1.0,23.0,2.1926642391971396
+13,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.942180728234206,1.0,23.0,2.1926642391971396
+13,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.942180728234206,1.0,33.0,5.875920242329258
+13,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.942180728234206,1.0,33.0,5.875920242329258
+13,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,5.942180728234206,1.0,23.0,2.1926642391971396
+13,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,5.942180728234206,1.0,33.0,5.875920242329258
+13,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,5.942180728234206,1.0,33.0,5.875920242329258
+13,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,5.942180728234206,1.0,57.0,20.205748581434126
+13,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.942180728234206,1.0,23.0,2.1926642391971396
+13,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.942180728234206,1.0,23.0,2.1926642391971396
+13,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.942180728234206,1.0,33.0,5.875920242329258
+13,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.942180728234206,1.0,33.0,5.875920242329258
+14,F <4%,"tudo se chance ≤ 10%, desde 2%",False,3.120565445645516,1.0,23.0,2.29735918560261
+14,F <4%,"tudo se chance ≤ 10%, desde 5%",False,3.120565445645516,1.0,31.0,5.291411779647348
+14,F <4%,"tudo se chance ≤ 20%, desde 5%",False,3.120565445645516,1.0,31.0,5.291411779647348
+14,F <4%,"tudo se chance ≤ 20%, desde 20%",False,3.120565445645516,1.0,55.0,20.608323762901094
+14,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.120565445645516,1.0,23.0,2.29735918560261
+14,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.120565445645516,1.0,23.0,2.29735918560261
+14,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.120565445645516,1.0,31.0,5.291411779647348
+14,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.120565445645516,1.0,31.0,5.291411779647348
+14,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,3.120565445645516,0.0,,
+14,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,3.120565445645516,0.0,,
+14,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,3.120565445645516,0.0,,
+14,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,3.120565445645516,0.0,,
+14,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.120565445645516,0.0,,
+14,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.120565445645516,0.0,,
+14,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.120565445645516,0.0,,
+14,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.120565445645516,0.0,,
+15,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.480287659566809,0.0,,
+15,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.480287659566809,0.0,,
+15,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.480287659566809,0.0,,
+15,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.480287659566809,0.0,,
+15,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.480287659566809,0.0,,
+15,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.480287659566809,0.0,,
+15,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.480287659566809,0.0,,
+15,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.480287659566809,0.0,,
+15,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.480287659566809,1.0,23.0,2.27050227790786
+15,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.480287659566809,1.0,31.0,5.268388693321235
+15,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.480287659566809,1.0,31.0,5.268388693321235
+15,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.480287659566809,1.0,57.0,20.83488458947247
+15,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.480287659566809,1.0,23.0,2.27050227790786
+15,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.480287659566809,1.0,23.0,2.27050227790786
+15,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.480287659566809,1.0,31.0,5.268388693321235
+15,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.480287659566809,1.0,31.0,5.268388693321235
+16,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.45292791409066,1.0,29.0,4.339436011363807
+16,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.45292791409066,1.0,31.0,5.147258584328263
+16,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.45292791409066,1.0,31.0,5.147258584328263
+16,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.45292791409066,1.0,57.0,21.04109264992504
+16,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.45292791409066,1.0,33.0,6.077706746392342
+16,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.45292791409066,1.0,33.0,6.077706746392342
+16,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.45292791409066,1.0,31.0,5.147258584328263
+16,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.45292791409066,1.0,31.0,5.147258584328263
+16,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.45292791409066,1.0,21.0,2.0017542976958014
+16,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.45292791409066,1.0,31.0,5.147258584328263
+16,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.45292791409066,1.0,31.0,5.147258584328263
+16,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.45292791409066,1.0,57.0,21.04109264992504
+16,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.45292791409066,1.0,21.0,2.0017542976958014
+16,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.45292791409066,1.0,21.0,2.0017542976958014
+16,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.45292791409066,1.0,31.0,5.147258584328263
+16,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.45292791409066,1.0,31.0,5.147258584328263
+17,F <4%,"tudo se chance ≤ 10%, desde 2%",True,2.0362424231279457,0.0,,
+17,F <4%,"tudo se chance ≤ 10%, desde 5%",True,2.0362424231279457,0.0,,
+17,F <4%,"tudo se chance ≤ 20%, desde 5%",True,2.0362424231279457,0.0,,
+17,F <4%,"tudo se chance ≤ 20%, desde 20%",True,2.0362424231279457,0.0,,
+17,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.0362424231279457,0.0,,
+17,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.0362424231279457,0.0,,
+17,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.0362424231279457,0.0,,
+17,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.0362424231279457,0.0,,
+17,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,2.0362424231279457,1.0,23.0,2.4918175851666335
+17,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,2.0362424231279457,1.0,31.0,5.868181416250784
+17,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,2.0362424231279457,1.0,31.0,5.868181416250784
+17,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,2.0362424231279457,1.0,53.0,20.720650445402665
+17,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.0362424231279457,1.0,29.0,4.899681033747417
+17,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.0362424231279457,1.0,29.0,4.899681033747417
+17,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.0362424231279457,1.0,31.0,5.868181416250784
+17,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.0362424231279457,1.0,31.0,5.868181416250784
+18,F <4%,"tudo se chance ≤ 10%, desde 2%",False,3.3845443265914623,1.0,21.0,2.2684637885965087
+18,F <4%,"tudo se chance ≤ 10%, desde 5%",False,3.3845443265914623,1.0,29.0,5.349725424749896
+18,F <4%,"tudo se chance ≤ 20%, desde 5%",False,3.3845443265914623,1.0,29.0,5.349725424749896
+18,F <4%,"tudo se chance ≤ 20%, desde 20%",False,3.3845443265914623,1.0,51.0,20.548345183543315
+18,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.3845443265914623,1.0,21.0,2.2684637885965087
+18,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.3845443265914623,1.0,21.0,2.2684637885965087
+18,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.3845443265914623,1.0,29.0,5.349725424749896
+18,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.3845443265914623,1.0,29.0,5.349725424749896
+18,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,3.3845443265914623,0.0,,
+18,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,3.3845443265914623,0.0,,
+18,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,3.3845443265914623,0.0,,
+18,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,3.3845443265914623,0.0,,
+18,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.3845443265914623,0.0,,
+18,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.3845443265914623,0.0,,
+18,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.3845443265914623,0.0,,
+18,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.3845443265914623,0.0,,
+19,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.051513544630533,1.0,21.0,2.383526305176953
+19,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.051513544630533,1.0,31.0,5.747874010298792
+19,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.051513544630533,1.0,31.0,5.747874010298792
+19,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.051513544630533,1.0,57.0,20.679102681950813
+19,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.051513544630533,1.0,21.0,2.383526305176953
+19,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.051513544630533,1.0,21.0,2.383526305176953
+19,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.051513544630533,1.0,31.0,5.747874010298792
+19,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.051513544630533,1.0,31.0,5.747874010298792
+19,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.051513544630533,1.0,133.0,88.05837275877282
+19,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.051513544630533,1.0,133.0,88.05837275877282
+19,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.051513544630533,1.0,125.0,82.04442675793892
+19,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.051513544630533,1.0,125.0,82.04442675793892
+19,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.051513544630533,1.0,139.0,91.37520526866084
+19,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.051513544630533,1.0,125.0,82.04442675793892
+19,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.051513544630533,1.0,125.0,82.04442675793892
+19,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.051513544630533,1.0,117.0,74.84585326201787
+20,F <4%,"tudo se chance ≤ 10%, desde 2%",True,0.14908156166952757,0.0,,
+20,F <4%,"tudo se chance ≤ 10%, desde 5%",True,0.14908156166952757,0.0,,
+20,F <4%,"tudo se chance ≤ 20%, desde 5%",True,0.14908156166952757,0.0,,
+20,F <4%,"tudo se chance ≤ 20%, desde 20%",True,0.14908156166952757,0.0,,
+20,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,0.14908156166952757,0.0,,
+20,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,0.14908156166952757,0.0,,
+20,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,0.14908156166952757,0.0,,
+20,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,0.14908156166952757,0.0,,
+20,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,0.14908156166952757,1.0,107.0,65.15472011034653
+20,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,0.14908156166952757,1.0,107.0,65.15472011034653
+20,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,0.14908156166952757,1.0,79.0,38.907739000572164
+20,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,0.14908156166952757,1.0,79.0,38.907739000572164
+20,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,0.14908156166952757,1.0,119.0,76.46468276006942
+20,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,0.14908156166952757,1.0,79.0,38.907739000572164
+20,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,0.14908156166952757,1.0,79.0,38.907739000572164
+20,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,0.14908156166952757,1.0,39.0,11.918111540982201
+21,F <4%,"tudo se chance ≤ 10%, desde 2%",True,0.03701744099691684,1.0,17.0,2.6402367414302352
+21,F <4%,"tudo se chance ≤ 10%, desde 5%",True,0.03701744099691684,1.0,27.0,5.681535545870742
+21,F <4%,"tudo se chance ≤ 20%, desde 5%",True,0.03701744099691684,1.0,27.0,5.681535545870742
+21,F <4%,"tudo se chance ≤ 20%, desde 20%",True,0.03701744099691684,0.0,,
+21,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,0.03701744099691684,0.0,,
+21,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,0.03701744099691684,0.0,,
+21,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,0.03701744099691684,0.5,27.0,5.681535545870742
+21,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,0.03701744099691684,0.6666666666666666,27.0,5.681535545870742
+21,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,0.03701744099691684,1.0,135.0,89.27069057359391
+21,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,0.03701744099691684,1.0,135.0,89.27069057359391
+21,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,0.03701744099691684,1.0,127.0,84.38369277340485
+21,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,0.03701744099691684,1.0,127.0,84.38369277340485
+21,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,0.03701744099691684,1.0,155.0,96.02156935871375
+21,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,0.03701744099691684,1.0,127.0,84.38369277340485
+21,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,0.03701744099691684,1.0,127.0,84.38369277340485
+21,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,0.03701744099691684,1.0,111.0,70.44756248617003
+22,F <4%,"tudo se chance ≤ 10%, desde 2%",False,2.505947997432239,1.0,21.0,2.7666772536663164
+22,F <4%,"tudo se chance ≤ 10%, desde 5%",False,2.505947997432239,1.0,27.0,5.101354148417403
+22,F <4%,"tudo se chance ≤ 20%, desde 5%",False,2.505947997432239,1.0,27.0,5.101354148417403
+22,F <4%,"tudo se chance ≤ 20%, desde 20%",False,2.505947997432239,1.0,53.0,20.876058167927138
+22,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.505947997432239,1.0,23.0,3.421725257790309
+22,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.505947997432239,1.0,23.0,3.421725257790309
+22,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.505947997432239,1.0,27.0,5.101354148417403
+22,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.505947997432239,1.0,27.0,5.101354148417403
+22,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,2.505947997432239,0.0,,
+22,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,2.505947997432239,0.0,,
+22,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,2.505947997432239,0.0,,
+22,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,2.505947997432239,0.0,,
+22,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.505947997432239,0.0,,
+22,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.505947997432239,0.0,,
+22,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.505947997432239,0.0,,
+22,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.505947997432239,0.0,,
+23,F <4%,"tudo se chance ≤ 10%, desde 2%",True,2.1585779173685493,0.0,,
+23,F <4%,"tudo se chance ≤ 10%, desde 5%",True,2.1585779173685493,0.0,,
+23,F <4%,"tudo se chance ≤ 20%, desde 5%",True,2.1585779173685493,0.0,,
+23,F <4%,"tudo se chance ≤ 20%, desde 20%",True,2.1585779173685493,0.0,,
+23,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.1585779173685493,0.0,,
+23,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.1585779173685493,0.0,,
+23,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.1585779173685493,0.0,,
+23,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.1585779173685493,0.0,,
+23,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,2.1585779173685493,1.0,17.0,2.040609063061749
+23,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,2.1585779173685493,1.0,27.0,5.738578599829602
+23,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,2.1585779173685493,1.0,27.0,5.738578599829602
+23,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,2.1585779173685493,1.0,51.0,20.48418505534476
+23,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.1585779173685493,1.0,17.0,2.040609063061749
+23,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.1585779173685493,1.0,17.0,2.040609063061749
+23,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.1585779173685493,1.0,27.0,5.738578599829602
+23,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.1585779173685493,1.0,27.0,5.738578599829602
+24,F <4%,"tudo se chance ≤ 10%, desde 2%",False,5.100820083585708,1.0,17.0,2.3141962505945135
+24,F <4%,"tudo se chance ≤ 10%, desde 5%",False,5.100820083585708,1.0,27.0,5.650437244933315
+24,F <4%,"tudo se chance ≤ 20%, desde 5%",False,5.100820083585708,1.0,27.0,5.650437244933315
+24,F <4%,"tudo se chance ≤ 20%, desde 20%",False,5.100820083585708,1.0,51.0,20.071975555111475
+24,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.100820083585708,1.0,17.0,2.3141962505945135
+24,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.100820083585708,1.0,17.0,2.3141962505945135
+24,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.100820083585708,1.0,27.0,5.650437244933315
+24,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.100820083585708,1.0,27.0,5.650437244933315
+24,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,5.100820083585708,1.0,23.0,3.9885399356214046
+24,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,5.100820083585708,1.0,55.0,22.701895751593625
+24,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,5.100820083585708,1.0,27.0,5.650437244933315
+24,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,5.100820083585708,1.0,51.0,20.071975555111475
+24,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.100820083585708,1.0,65.0,29.705210192847197
+24,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.100820083585708,1.0,51.0,20.071975555111475
+24,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.100820083585708,1.0,51.0,20.071975555111475
+24,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.100820083585708,1.0,27.0,5.650437244933315
+25,F <4%,"tudo se chance ≤ 10%, desde 2%",True,2.409855549257199,0.0,,
+25,F <4%,"tudo se chance ≤ 10%, desde 5%",True,2.409855549257199,0.0,,
+25,F <4%,"tudo se chance ≤ 20%, desde 5%",True,2.409855549257199,0.0,,
+25,F <4%,"tudo se chance ≤ 20%, desde 20%",True,2.409855549257199,0.0,,
+25,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.409855549257199,0.0,,
+25,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.409855549257199,0.0,,
+25,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.409855549257199,0.0,,
+25,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.409855549257199,0.0,,
+25,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,2.409855549257199,1.0,21.0,2.0565440524375034
+25,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,2.409855549257199,1.0,31.0,5.813706002104368
+25,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,2.409855549257199,1.0,31.0,5.813706002104368
+25,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,2.409855549257199,1.0,53.0,20.02398538430881
+25,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.409855549257199,1.0,21.0,2.0565440524375034
+25,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.409855549257199,1.0,21.0,2.0565440524375034
+25,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.409855549257199,1.0,31.0,5.813706002104368
+25,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.409855549257199,1.0,31.0,5.813706002104368
+26,F <4%,"tudo se chance ≤ 10%, desde 2%",True,2.0342663908637,0.0,,
+26,F <4%,"tudo se chance ≤ 10%, desde 5%",True,2.0342663908637,0.0,,
+26,F <4%,"tudo se chance ≤ 20%, desde 5%",True,2.0342663908637,0.0,,
+26,F <4%,"tudo se chance ≤ 20%, desde 20%",True,2.0342663908637,0.0,,
+26,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.0342663908637,0.0,,
+26,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.0342663908637,0.0,,
+26,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.0342663908637,0.0,,
+26,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.0342663908637,0.0,,
+26,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,2.0342663908637,1.0,25.0,2.2397076085674983
+26,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,2.0342663908637,1.0,33.0,5.97098842926127
+26,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,2.0342663908637,1.0,33.0,5.97098842926127
+26,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,2.0342663908637,1.0,55.0,20.1375706890737
+26,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.0342663908637,1.0,25.0,2.2397076085674983
+26,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.0342663908637,1.0,25.0,2.2397076085674983
+26,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.0342663908637,1.0,33.0,5.97098842926127
+26,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.0342663908637,1.0,33.0,5.97098842926127
+27,F <4%,"tudo se chance ≤ 10%, desde 2%",True,2.420467803785652,0.0,,
+27,F <4%,"tudo se chance ≤ 10%, desde 5%",True,2.420467803785652,0.0,,
+27,F <4%,"tudo se chance ≤ 20%, desde 5%",True,2.420467803785652,0.0,,
+27,F <4%,"tudo se chance ≤ 20%, desde 20%",True,2.420467803785652,0.0,,
+27,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.420467803785652,0.0,,
+27,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.420467803785652,0.0,,
+27,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.420467803785652,0.0,,
+27,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.420467803785652,0.0,,
+27,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,2.420467803785652,1.0,21.0,2.369006793391615
+27,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,2.420467803785652,1.0,29.0,5.4246978615207775
+27,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,2.420467803785652,1.0,29.0,5.4246978615207775
+27,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,2.420467803785652,1.0,59.0,21.052786875999196
+27,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.420467803785652,1.0,21.0,2.369006793391615
+27,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.420467803785652,1.0,21.0,2.369006793391615
+27,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.420467803785652,1.0,29.0,5.4246978615207775
+27,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.420467803785652,1.0,29.0,5.4246978615207775
+28,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.850361225579929,0.0,,
+28,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.850361225579929,0.0,,
+28,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.850361225579929,0.0,,
+28,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.850361225579929,0.0,,
+28,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.850361225579929,0.0,,
+28,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.850361225579929,0.0,,
+28,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.850361225579929,0.0,,
+28,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.850361225579929,0.0,,
+28,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.850361225579929,1.0,21.0,2.131259473250713
+28,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.850361225579929,1.0,29.0,5.054402750443677
+28,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.850361225579929,1.0,29.0,5.054402750443677
+28,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.850361225579929,1.0,57.0,20.580925105883807
+28,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.850361225579929,1.0,21.0,2.131259473250713
+28,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.850361225579929,1.0,21.0,2.131259473250713
+28,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.850361225579929,1.0,29.0,5.054402750443677
+28,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.850361225579929,1.0,29.0,5.054402750443677
+29,F <4%,"tudo se chance ≤ 10%, desde 2%",False,2.029622131999459,1.0,65.0,27.459830594860858
+29,F <4%,"tudo se chance ≤ 10%, desde 5%",False,2.029622131999459,1.0,65.0,27.459830594860858
+29,F <4%,"tudo se chance ≤ 20%, desde 5%",False,2.029622131999459,1.0,29.0,5.375373475526068
+29,F <4%,"tudo se chance ≤ 20%, desde 20%",False,2.029622131999459,1.0,55.0,20.718269898088828
+29,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.029622131999459,1.0,67.0,28.793624356323853
+29,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.029622131999459,1.0,55.0,20.718269898088828
+29,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.029622131999459,1.0,55.0,20.718269898088828
+29,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.029622131999459,1.0,29.0,5.375373475526068
+29,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,2.029622131999459,0.0,,
+29,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,2.029622131999459,0.0,,
+29,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,2.029622131999459,0.0,,
+29,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,2.029622131999459,0.0,,
+29,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.029622131999459,0.0,,
+29,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.029622131999459,0.0,,
+29,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.029622131999459,0.0,,
+29,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.029622131999459,0.0,,
+30,F <4%,"tudo se chance ≤ 10%, desde 2%",True,0.4109735886733126,0.0,,
+30,F <4%,"tudo se chance ≤ 10%, desde 5%",True,0.4109735886733126,0.0,,
+30,F <4%,"tudo se chance ≤ 20%, desde 5%",True,0.4109735886733126,0.0,,
+30,F <4%,"tudo se chance ≤ 20%, desde 20%",True,0.4109735886733126,0.0,,
+30,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,0.4109735886733126,0.0,,
+30,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,0.4109735886733126,0.0,,
+30,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,0.4109735886733126,0.0,,
+30,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,0.4109735886733126,0.0,,
+30,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,0.4109735886733126,1.0,87.0,48.7716567992592
+30,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,0.4109735886733126,1.0,87.0,48.7716567992592
+30,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,0.4109735886733126,1.0,79.0,40.82987252632141
+30,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,0.4109735886733126,1.0,79.0,40.82987252632141
+30,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,0.4109735886733126,1.0,91.0,53.001888116077886
+30,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,0.4109735886733126,1.0,79.0,40.82987252632141
+30,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,0.4109735886733126,1.0,79.0,40.82987252632141
+30,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,0.4109735886733126,1.0,69.0,32.28226384468269
+31,F <4%,"tudo se chance ≤ 10%, desde 2%",True,0.5945735242951251,0.0,,
+31,F <4%,"tudo se chance ≤ 10%, desde 5%",True,0.5945735242951251,0.0,,
+31,F <4%,"tudo se chance ≤ 20%, desde 5%",True,0.5945735242951251,0.0,,
+31,F <4%,"tudo se chance ≤ 20%, desde 20%",True,0.5945735242951251,0.0,,
+31,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,0.5945735242951251,0.0,,
+31,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,0.5945735242951251,0.0,,
+31,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,0.5945735242951251,0.0,,
+31,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,0.5945735242951251,0.0,,
+31,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,0.5945735242951251,1.0,81.0,43.13774731825109
+31,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,0.5945735242951251,1.0,81.0,43.13774731825109
+31,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,0.5945735242951251,1.0,75.0,37.89677240053288
+31,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,0.5945735242951251,1.0,75.0,37.89677240053288
+31,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,0.5945735242951251,1.0,87.0,48.72829039593037
+31,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,0.5945735242951251,1.0,75.0,37.89677240053288
+31,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,0.5945735242951251,1.0,75.0,37.89677240053288
+31,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,0.5945735242951251,1.0,59.0,25.46802306670345
+32,F <4%,"tudo se chance ≤ 10%, desde 2%",True,2.742686504811657,0.0,,
+32,F <4%,"tudo se chance ≤ 10%, desde 5%",True,2.742686504811657,0.0,,
+32,F <4%,"tudo se chance ≤ 20%, desde 5%",True,2.742686504811657,0.0,,
+32,F <4%,"tudo se chance ≤ 20%, desde 20%",True,2.742686504811657,0.0,,
+32,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.742686504811657,0.0,,
+32,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.742686504811657,0.0,,
+32,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.742686504811657,0.0,,
+32,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.742686504811657,0.0,,
+32,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,2.742686504811657,1.0,21.0,2.5532229810541374
+32,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,2.742686504811657,1.0,29.0,5.468941772763913
+32,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,2.742686504811657,1.0,29.0,5.468941772763913
+32,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,2.742686504811657,1.0,55.0,20.98782483281506
+32,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.742686504811657,1.0,21.0,2.5532229810541374
+32,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.742686504811657,1.0,21.0,2.5532229810541374
+32,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.742686504811657,1.0,29.0,5.468941772763913
+32,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.742686504811657,1.0,29.0,5.468941772763913
+33,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.265222286927319,1.0,21.0,2.522558709515821
+33,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.265222286927319,1.0,29.0,5.06421030300499
+33,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.265222286927319,1.0,29.0,5.06421030300499
+33,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.265222286927319,1.0,57.0,20.115655039153456
+33,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.265222286927319,1.0,21.0,2.522558709515821
+33,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.265222286927319,1.0,21.0,2.522558709515821
+33,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.265222286927319,1.0,29.0,5.06421030300499
+33,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.265222286927319,1.0,29.0,5.06421030300499
+33,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.265222286927319,1.0,111.0,66.8833111708515
+33,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.265222286927319,1.0,111.0,66.8833111708515
+33,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.265222286927319,1.0,105.0,61.025916235589065
+33,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.265222286927319,1.0,105.0,61.025916235589065
+33,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.265222286927319,1.0,119.0,73.91096842497855
+33,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.265222286927319,1.0,105.0,61.025916235589065
+33,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.265222286927319,1.0,105.0,61.025916235589065
+33,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.265222286927319,1.0,97.0,52.9010232113946
+34,F <4%,"tudo se chance ≤ 10%, desde 2%",False,5.570913472599626,1.0,19.0,2.3578322687024755
+34,F <4%,"tudo se chance ≤ 10%, desde 5%",False,5.570913472599626,1.0,29.0,5.665537562387712
+34,F <4%,"tudo se chance ≤ 20%, desde 5%",False,5.570913472599626,1.0,29.0,5.665537562387712
+34,F <4%,"tudo se chance ≤ 20%, desde 20%",False,5.570913472599626,1.0,53.0,20.408867410866026
+34,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.570913472599626,1.0,19.0,2.3578322687024755
+34,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.570913472599626,1.0,19.0,2.3578322687024755
+34,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.570913472599626,1.0,29.0,5.665537562387712
+34,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.570913472599626,1.0,29.0,5.665537562387712
+34,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,5.570913472599626,1.0,43.0,13.623111308313462
+34,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,5.570913472599626,1.0,43.0,13.623111308313462
+34,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,5.570913472599626,1.0,29.0,5.665537562387712
+34,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,5.570913472599626,1.0,53.0,20.408867410866026
+34,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.570913472599626,1.0,57.0,23.22004055220458
+34,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.570913472599626,1.0,53.0,20.408867410866026
+34,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.570913472599626,1.0,43.0,13.623111308313462
+34,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.570913472599626,1.0,29.0,5.665537562387712
+35,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.389408158475121,1.0,19.0,2.2966133353724993
+35,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.389408158475121,1.0,29.0,5.304757711214192
+35,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.389408158475121,1.0,29.0,5.304757711214192
+35,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.389408158475121,1.0,57.0,20.927343560481248
+35,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.389408158475121,1.0,19.0,2.2966133353724993
+35,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.389408158475121,1.0,19.0,2.2966133353724993
+35,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.389408158475121,1.0,29.0,5.304757711214192
+35,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.389408158475121,1.0,29.0,5.304757711214192
+35,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.389408158475121,1.0,109.0,61.26861867220806
+35,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.389408158475121,1.0,109.0,61.26861867220806
+35,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.389408158475121,1.0,99.0,52.39451783198448
+35,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.389408158475121,1.0,99.0,52.39451783198448
+35,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.389408158475121,1.0,115.0,66.69200436647435
+35,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.389408158475121,1.0,99.0,52.39451783198448
+35,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.389408158475121,1.0,99.0,52.39451783198448
+35,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.389408158475121,1.0,95.0,48.91943467551078
+36,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.1926115638445722,0.0,,
+36,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.1926115638445722,0.0,,
+36,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.1926115638445722,0.0,,
+36,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.1926115638445722,0.0,,
+36,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.1926115638445722,0.0,,
+36,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.1926115638445722,0.0,,
+36,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.1926115638445722,0.0,,
+36,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.1926115638445722,0.0,,
+36,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.1926115638445722,1.0,21.0,2.0676858201908677
+36,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.1926115638445722,1.0,31.0,5.6731340217837545
+36,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.1926115638445722,1.0,31.0,5.6731340217837545
+36,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.1926115638445722,1.0,53.0,20.426846559022792
+36,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.1926115638445722,1.0,21.0,2.0676858201908677
+36,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.1926115638445722,1.0,21.0,2.0676858201908677
+36,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.1926115638445722,1.0,31.0,5.6731340217837545
+36,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.1926115638445722,1.0,31.0,5.6731340217837545
+37,F <4%,"tudo se chance ≤ 10%, desde 2%",False,2.839867982904427,1.0,21.0,2.3820812203561137
+37,F <4%,"tudo se chance ≤ 10%, desde 5%",False,2.839867982904427,1.0,31.0,5.820345581010933
+37,F <4%,"tudo se chance ≤ 20%, desde 5%",False,2.839867982904427,1.0,31.0,5.820345581010933
+37,F <4%,"tudo se chance ≤ 20%, desde 20%",False,2.839867982904427,1.0,55.0,20.324331208728974
+37,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.839867982904427,1.0,21.0,2.3820812203561137
+37,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.839867982904427,1.0,21.0,2.3820812203561137
+37,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.839867982904427,1.0,31.0,5.820345581010933
+37,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.839867982904427,1.0,31.0,5.820345581010933
+37,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,2.839867982904427,0.0,,
+37,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,2.839867982904427,0.0,,
+37,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,2.839867982904427,0.0,,
+37,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,2.839867982904427,0.0,,
+37,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.839867982904427,0.0,,
+37,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.839867982904427,0.0,,
+37,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.839867982904427,0.0,,
+37,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.839867982904427,0.0,,
+38,F <4%,"tudo se chance ≤ 10%, desde 2%",True,2.265854393394265,0.0,,
+38,F <4%,"tudo se chance ≤ 10%, desde 5%",True,2.265854393394265,0.0,,
+38,F <4%,"tudo se chance ≤ 20%, desde 5%",True,2.265854393394265,0.0,,
+38,F <4%,"tudo se chance ≤ 20%, desde 20%",True,2.265854393394265,0.0,,
+38,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.265854393394265,0.0,,
+38,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.265854393394265,0.0,,
+38,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.265854393394265,0.0,,
+38,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.265854393394265,0.0,,
+38,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,2.265854393394265,1.0,21.0,2.2362536416657197
+38,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,2.265854393394265,1.0,31.0,5.833075430208645
+38,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,2.265854393394265,1.0,31.0,5.833075430208645
+38,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,2.265854393394265,1.0,57.0,21.13932818057075
+38,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.265854393394265,1.0,21.0,2.2362536416657197
+38,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.265854393394265,1.0,21.0,2.2362536416657197
+38,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.265854393394265,1.0,31.0,5.833075430208645
+38,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.265854393394265,1.0,31.0,5.833075430208645
+39,F <4%,"tudo se chance ≤ 10%, desde 2%",False,3.640139777209443,1.0,17.0,2.0138920022851448
+39,F <4%,"tudo se chance ≤ 10%, desde 5%",False,3.640139777209443,1.0,29.0,5.509579271365683
+39,F <4%,"tudo se chance ≤ 20%, desde 5%",False,3.640139777209443,1.0,29.0,5.509579271365683
+39,F <4%,"tudo se chance ≤ 20%, desde 20%",False,3.640139777209443,1.0,55.0,20.899734503145663
+39,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.640139777209443,1.0,17.0,2.0138920022851448
+39,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.640139777209443,1.0,17.0,2.0138920022851448
+39,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.640139777209443,1.0,29.0,5.509579271365683
+39,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.640139777209443,1.0,29.0,5.509579271365683
+39,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,3.640139777209443,0.0,,
+39,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,3.640139777209443,0.0,,
+39,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,3.640139777209443,0.0,,
+39,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,3.640139777209443,0.0,,
+39,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.640139777209443,0.0,,
+39,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.640139777209443,0.0,,
+39,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.640139777209443,0.0,,
+39,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.640139777209443,0.0,,
+40,F <4%,"tudo se chance ≤ 10%, desde 2%",False,3.1646738033577977,1.0,19.0,2.1425379382168486
+40,F <4%,"tudo se chance ≤ 10%, desde 5%",False,3.1646738033577977,1.0,29.0,5.3676831549101856
+40,F <4%,"tudo se chance ≤ 20%, desde 5%",False,3.1646738033577977,1.0,29.0,5.3676831549101856
+40,F <4%,"tudo se chance ≤ 20%, desde 20%",False,3.1646738033577977,1.0,57.0,20.256375685567228
+40,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.1646738033577977,1.0,19.0,2.1425379382168486
+40,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.1646738033577977,1.0,19.0,2.1425379382168486
+40,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.1646738033577977,1.0,29.0,5.3676831549101856
+40,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.1646738033577977,1.0,29.0,5.3676831549101856
+40,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,3.1646738033577977,0.0,,
+40,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,3.1646738033577977,0.0,,
+40,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,3.1646738033577977,0.0,,
+40,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,3.1646738033577977,0.0,,
+40,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.1646738033577977,0.0,,
+40,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.1646738033577977,0.0,,
+40,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.1646738033577977,0.0,,
+40,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.1646738033577977,0.0,,
+41,F <4%,"tudo se chance ≤ 10%, desde 2%",False,2.318868573540197,1.0,17.0,2.0144753277185012
+41,F <4%,"tudo se chance ≤ 10%, desde 5%",False,2.318868573540197,1.0,27.0,5.36691399686039
+41,F <4%,"tudo se chance ≤ 20%, desde 5%",False,2.318868573540197,1.0,27.0,5.36691399686039
+41,F <4%,"tudo se chance ≤ 20%, desde 20%",False,2.318868573540197,1.0,51.0,20.481410794860466
+41,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.318868573540197,1.0,17.0,2.0144753277185012
+41,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.318868573540197,1.0,17.0,2.0144753277185012
+41,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.318868573540197,1.0,27.0,5.36691399686039
+41,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.318868573540197,1.0,27.0,5.36691399686039
+41,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,2.318868573540197,0.0,,
+41,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,2.318868573540197,0.0,,
+41,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,2.318868573540197,0.0,,
+41,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,2.318868573540197,0.0,,
+41,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.318868573540197,0.0,,
+41,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.318868573540197,0.0,,
+41,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.318868573540197,0.0,,
+41,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.318868573540197,0.0,,
+42,F <4%,"tudo se chance ≤ 10%, desde 2%",False,5.398279178496459,1.0,21.0,2.117943148914281
+42,F <4%,"tudo se chance ≤ 10%, desde 5%",False,5.398279178496459,1.0,33.0,5.831673811321824
+42,F <4%,"tudo se chance ≤ 20%, desde 5%",False,5.398279178496459,1.0,33.0,5.831673811321824
+42,F <4%,"tudo se chance ≤ 20%, desde 20%",False,5.398279178496459,1.0,57.0,20.536439927209805
+42,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.398279178496459,1.0,21.0,2.117943148914281
+42,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.398279178496459,1.0,21.0,2.117943148914281
+42,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.398279178496459,1.0,33.0,5.831673811321824
+42,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.398279178496459,1.0,33.0,5.831673811321824
+42,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,5.398279178496459,1.0,21.0,2.117943148914281
+42,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,5.398279178496459,1.0,33.0,5.831673811321824
+42,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,5.398279178496459,1.0,33.0,5.831673811321824
+42,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,5.398279178496459,1.0,57.0,20.536439927209805
+42,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,5.398279178496459,1.0,21.0,2.117943148914281
+42,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,5.398279178496459,1.0,21.0,2.117943148914281
+42,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,5.398279178496459,1.0,33.0,5.831673811321824
+42,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,5.398279178496459,1.0,33.0,5.831673811321824
+43,F <4%,"tudo se chance ≤ 10%, desde 2%",True,2.2774993735884377,0.0,,
+43,F <4%,"tudo se chance ≤ 10%, desde 5%",True,2.2774993735884377,0.0,,
+43,F <4%,"tudo se chance ≤ 20%, desde 5%",True,2.2774993735884377,0.0,,
+43,F <4%,"tudo se chance ≤ 20%, desde 20%",True,2.2774993735884377,0.0,,
+43,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.2774993735884377,0.0,,
+43,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.2774993735884377,0.0,,
+43,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.2774993735884377,0.0,,
+43,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.2774993735884377,0.0,,
+43,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,2.2774993735884377,1.0,23.0,2.6971771149942425
+43,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,2.2774993735884377,1.0,31.0,5.931432539481385
+43,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,2.2774993735884377,1.0,31.0,5.931432539481385
+43,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,2.2774993735884377,1.0,55.0,21.272420870534848
+43,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.2774993735884377,1.0,33.0,6.951523206018062
+43,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.2774993735884377,1.0,33.0,6.951523206018062
+43,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.2774993735884377,1.0,31.0,5.931432539481385
+43,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.2774993735884377,1.0,31.0,5.931432539481385
+44,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.877006677476913,1.0,61.0,23.7425174575727
+44,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.877006677476913,1.0,61.0,23.7425174575727
+44,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.877006677476913,1.0,31.0,5.674839272267629
+44,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.877006677476913,1.0,57.0,21.067807190937348
+44,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.877006677476913,1.0,69.0,29.465837624738644
+44,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.877006677476913,1.0,57.0,21.067807190937348
+44,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.877006677476913,1.0,57.0,21.067807190937348
+44,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.877006677476913,1.0,31.0,5.674839272267629
+44,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.877006677476913,1.0,19.0,2.1484524549487127
+44,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.877006677476913,1.0,31.0,5.674839272267629
+44,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.877006677476913,1.0,31.0,5.674839272267629
+44,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.877006677476913,1.0,57.0,21.067807190937348
+44,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.877006677476913,1.0,19.0,2.1484524549487127
+44,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.877006677476913,1.0,19.0,2.1484524549487127
+44,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.877006677476913,1.0,31.0,5.674839272267629
+44,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.877006677476913,1.0,31.0,5.674839272267629
+45,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.690354049487003,0.0,,
+45,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.690354049487003,0.0,,
+45,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.690354049487003,0.0,,
+45,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.690354049487003,0.0,,
+45,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.690354049487003,0.0,,
+45,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.690354049487003,0.0,,
+45,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.690354049487003,0.0,,
+45,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.690354049487003,0.0,,
+45,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.690354049487003,1.0,25.0,2.4620925557677587
+45,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.690354049487003,1.0,33.0,5.356129405695265
+45,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.690354049487003,1.0,33.0,5.356129405695265
+45,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.690354049487003,1.0,59.0,21.225019694635183
+45,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.690354049487003,1.0,25.0,2.4620925557677587
+45,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.690354049487003,1.0,25.0,2.4620925557677587
+45,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.690354049487003,1.0,33.0,5.356129405695265
+45,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.690354049487003,1.0,33.0,5.356129405695265
+46,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.5352699802692182,0.0,,
+46,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.5352699802692182,0.0,,
+46,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.5352699802692182,0.0,,
+46,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.5352699802692182,0.0,,
+46,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.5352699802692182,0.0,,
+46,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.5352699802692182,0.0,,
+46,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.5352699802692182,0.0,,
+46,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.5352699802692182,0.0,,
+46,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.5352699802692182,1.0,23.0,2.444534838188639
+46,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.5352699802692182,1.0,31.0,5.375670177771319
+46,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.5352699802692182,1.0,31.0,5.375670177771319
+46,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.5352699802692182,1.0,55.0,21.481214839090967
+46,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.5352699802692182,1.0,23.0,2.444534838188639
+46,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.5352699802692182,1.0,23.0,2.444534838188639
+46,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.5352699802692182,1.0,31.0,5.375670177771319
+46,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.5352699802692182,1.0,31.0,5.375670177771319
+47,F <4%,"tudo se chance ≤ 10%, desde 2%",False,3.0299073646969346,1.0,21.0,2.4293400295733347
+47,F <4%,"tudo se chance ≤ 10%, desde 5%",False,3.0299073646969346,1.0,29.0,5.873191337602202
+47,F <4%,"tudo se chance ≤ 20%, desde 5%",False,3.0299073646969346,1.0,29.0,5.873191337602202
+47,F <4%,"tudo se chance ≤ 20%, desde 20%",False,3.0299073646969346,1.0,53.0,21.21610791827928
+47,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.0299073646969346,1.0,21.0,2.4293400295733347
+47,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.0299073646969346,1.0,21.0,2.4293400295733347
+47,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.0299073646969346,1.0,29.0,5.873191337602202
+47,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.0299073646969346,1.0,29.0,5.873191337602202
+47,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,3.0299073646969346,0.0,,
+47,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,3.0299073646969346,0.0,,
+47,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,3.0299073646969346,0.0,,
+47,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,3.0299073646969346,0.0,,
+47,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.0299073646969346,0.0,,
+47,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.0299073646969346,0.0,,
+47,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.0299073646969346,0.0,,
+47,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.0299073646969346,0.0,,
+48,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.216278929868748,1.0,19.0,2.246324509595443
+48,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.216278929868748,1.0,29.0,5.4264938235191185
+48,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.216278929868748,1.0,29.0,5.4264938235191185
+48,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.216278929868748,1.0,53.0,20.497164991148352
+48,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.216278929868748,1.0,19.0,2.246324509595443
+48,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.216278929868748,1.0,19.0,2.246324509595443
+48,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.216278929868748,1.0,29.0,5.4264938235191185
+48,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.216278929868748,1.0,29.0,5.4264938235191185
+48,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.216278929868748,1.0,119.0,80.87060779177766
+48,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.216278929868748,1.0,119.0,80.87060779177766
+48,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.216278929868748,1.0,85.0,46.462175027653
+48,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.216278929868748,1.0,85.0,46.462175027653
+48,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.216278929868748,1.0,121.0,82.37803977040991
+48,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.216278929868748,1.0,85.0,46.462175027653
+48,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.216278929868748,1.0,85.0,46.462175027653
+48,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.216278929868748,1.0,53.0,20.497164991148352
+49,F <4%,"tudo se chance ≤ 10%, desde 2%",True,1.1384257520892587,0.0,,
+49,F <4%,"tudo se chance ≤ 10%, desde 5%",True,1.1384257520892587,0.0,,
+49,F <4%,"tudo se chance ≤ 20%, desde 5%",True,1.1384257520892587,0.0,,
+49,F <4%,"tudo se chance ≤ 20%, desde 20%",True,1.1384257520892587,0.0,,
+49,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,1.1384257520892587,0.0,,
+49,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,1.1384257520892587,0.0,,
+49,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,1.1384257520892587,0.0,,
+49,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,1.1384257520892587,0.0,,
+49,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,1.1384257520892587,1.0,39.0,9.673473383638454
+49,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,1.1384257520892587,1.0,39.0,9.673473383638454
+49,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,1.1384257520892587,1.0,33.0,6.6118161436094836
+49,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,1.1384257520892587,1.0,57.0,21.073612097922556
+49,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,1.1384257520892587,1.0,59.0,22.55092974357298
+49,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,1.1384257520892587,1.0,57.0,21.073612097922556
+49,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,1.1384257520892587,1.0,39.0,9.673473383638454
+49,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,1.1384257520892587,1.0,31.0,5.790422120174144
+50,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.983278375763447,1.0,27.0,4.065942055109806
+50,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.983278375763447,1.0,33.0,7.1602151241204055
+50,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.983278375763447,1.0,31.0,6.1073158666338445
+50,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.983278375763447,1.0,55.0,21.016843068330328
+50,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.983278375763447,1.0,57.0,22.45392763754768
+50,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.983278375763447,1.0,55.0,21.016843068330328
+50,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.983278375763447,1.0,33.0,7.1602151241204055
+50,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.983278375763447,1.0,31.0,6.1073158666338445
+50,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.983278375763447,1.0,21.0,2.008828535942553
+50,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.983278375763447,1.0,31.0,6.1073158666338445
+50,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.983278375763447,1.0,31.0,6.1073158666338445
+50,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.983278375763447,1.0,55.0,21.016843068330328
+50,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.983278375763447,1.0,21.0,2.008828535942553
+50,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.983278375763447,1.0,21.0,2.008828535942553
+50,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.983278375763447,1.0,31.0,6.1073158666338445
+50,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.983278375763447,1.0,31.0,6.1073158666338445
+51,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.233007313594689,0.0,,
+51,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.233007313594689,0.0,,
+51,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.233007313594689,0.0,,
+51,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.233007313594689,0.0,,
+51,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.233007313594689,0.0,,
+51,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.233007313594689,0.0,,
+51,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.233007313594689,0.0,,
+51,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.233007313594689,0.0,,
+51,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.233007313594689,1.0,25.0,2.5990745019148886
+51,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.233007313594689,1.0,33.0,5.951556007049719
+51,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.233007313594689,1.0,33.0,5.951556007049719
+51,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.233007313594689,1.0,55.0,20.487211292258156
+51,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.233007313594689,1.0,25.0,2.5990745019148886
+51,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.233007313594689,1.0,25.0,2.5990745019148886
+51,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.233007313594689,1.0,33.0,5.951556007049719
+51,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.233007313594689,1.0,33.0,5.951556007049719
+52,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.4071883339686413,0.0,,
+52,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.4071883339686413,0.0,,
+52,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.4071883339686413,0.0,,
+52,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.4071883339686413,0.0,,
+52,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.4071883339686413,0.0,,
+52,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.4071883339686413,0.0,,
+52,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.4071883339686413,0.0,,
+52,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.4071883339686413,0.0,,
+52,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.4071883339686413,1.0,15.0,2.0009297048316
+52,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.4071883339686413,1.0,27.0,5.32877736431735
+52,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.4071883339686413,1.0,27.0,5.32877736431735
+52,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.4071883339686413,1.0,53.0,20.31498414309182
+52,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.4071883339686413,1.0,15.0,2.0009297048316
+52,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.4071883339686413,1.0,15.0,2.0009297048316
+52,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.4071883339686413,1.0,27.0,5.32877736431735
+52,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.4071883339686413,1.0,27.0,5.32877736431735
+53,F <4%,"tudo se chance ≤ 10%, desde 2%",True,0.16070775596572684,0.0,,
+53,F <4%,"tudo se chance ≤ 10%, desde 5%",True,0.16070775596572684,0.0,,
+53,F <4%,"tudo se chance ≤ 20%, desde 5%",True,0.16070775596572684,0.0,,
+53,F <4%,"tudo se chance ≤ 20%, desde 20%",True,0.16070775596572684,0.0,,
+53,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,0.16070775596572684,0.0,,
+53,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,0.16070775596572684,0.0,,
+53,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,0.16070775596572684,0.0,,
+53,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,0.16070775596572684,0.0,,
+53,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,0.16070775596572684,1.0,111.0,71.33397776725035
+53,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,0.16070775596572684,1.0,111.0,71.33397776725035
+53,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,0.16070775596572684,1.0,69.0,32.99737673009142
+53,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,0.16070775596572684,1.0,69.0,32.99737673009142
+53,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,0.16070775596572684,1.0,119.0,78.81543701087871
+53,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,0.16070775596572684,1.0,69.0,32.99737673009142
+53,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,0.16070775596572684,1.0,69.0,32.99737673009142
+53,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,0.16070775596572684,1.0,27.0,6.560601304455515
+54,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.564989507035335,1.0,21.0,2.198021888020707
+54,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.564989507035335,1.0,31.0,5.9671942941802225
+54,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.564989507035335,1.0,31.0,5.9671942941802225
+54,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.564989507035335,1.0,55.0,20.65713348703937
+54,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.564989507035335,1.0,21.0,2.198021888020707
+54,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.564989507035335,1.0,21.0,2.198021888020707
+54,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.564989507035335,1.0,31.0,5.9671942941802225
+54,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.564989507035335,1.0,31.0,5.9671942941802225
+54,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.564989507035335,1.0,21.0,2.198021888020707
+54,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.564989507035335,1.0,31.0,5.9671942941802225
+54,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.564989507035335,1.0,31.0,5.9671942941802225
+54,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.564989507035335,1.0,55.0,20.65713348703937
+54,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.564989507035335,1.0,21.0,2.198021888020707
+54,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.564989507035335,1.0,21.0,2.198021888020707
+54,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.564989507035335,1.0,31.0,5.9671942941802225
+54,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.564989507035335,1.0,31.0,5.9671942941802225
+55,F <4%,"tudo se chance ≤ 10%, desde 2%",True,0.26530720536663344,0.0,,
+55,F <4%,"tudo se chance ≤ 10%, desde 5%",True,0.26530720536663344,0.0,,
+55,F <4%,"tudo se chance ≤ 20%, desde 5%",True,0.26530720536663344,0.0,,
+55,F <4%,"tudo se chance ≤ 20%, desde 20%",True,0.26530720536663344,0.0,,
+55,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,0.26530720536663344,0.0,,
+55,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,0.26530720536663344,0.0,,
+55,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,0.26530720536663344,0.0,,
+55,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,0.26530720536663344,0.0,,
+55,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,0.26530720536663344,1.0,103.0,63.199291679139236
+55,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,0.26530720536663344,1.0,103.0,63.199291679139236
+55,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,0.26530720536663344,1.0,47.0,17.285635320800985
+55,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,0.26530720536663344,1.0,51.0,20.019990927966635
+55,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,0.26530720536663344,1.0,111.0,71.0300116714852
+55,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,0.26530720536663344,1.0,51.0,20.019990927966635
+55,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,0.26530720536663344,1.0,51.0,20.019990927966635
+55,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,0.26530720536663344,1.0,41.0,13.421570481268741
+56,F <4%,"tudo se chance ≤ 10%, desde 2%",False,2.3227564837114087,1.0,21.0,2.348417169429462
+56,F <4%,"tudo se chance ≤ 10%, desde 5%",False,2.3227564837114087,1.0,31.0,5.4899742453002
+56,F <4%,"tudo se chance ≤ 20%, desde 5%",False,2.3227564837114087,1.0,31.0,5.4899742453002
+56,F <4%,"tudo se chance ≤ 20%, desde 20%",False,2.3227564837114087,1.0,59.0,20.58233932359208
+56,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,2.3227564837114087,1.0,31.0,5.4899742453002
+56,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,2.3227564837114087,1.0,31.0,5.4899742453002
+56,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,2.3227564837114087,1.0,31.0,5.4899742453002
+56,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,2.3227564837114087,1.0,31.0,5.4899742453002
+56,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,2.3227564837114087,0.0,,
+56,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,2.3227564837114087,0.0,,
+56,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,2.3227564837114087,0.0,,
+56,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,2.3227564837114087,0.0,,
+56,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,2.3227564837114087,0.0,,
+56,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,2.3227564837114087,0.0,,
+56,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,2.3227564837114087,0.0,,
+56,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,2.3227564837114087,0.0,,
+57,F <4%,"tudo se chance ≤ 10%, desde 2%",True,3.35047626710135,0.0,,
+57,F <4%,"tudo se chance ≤ 10%, desde 5%",True,3.35047626710135,0.0,,
+57,F <4%,"tudo se chance ≤ 20%, desde 5%",True,3.35047626710135,0.0,,
+57,F <4%,"tudo se chance ≤ 20%, desde 20%",True,3.35047626710135,0.0,,
+57,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",True,3.35047626710135,0.0,,
+57,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,3.35047626710135,0.0,,
+57,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,3.35047626710135,0.0,,
+57,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,3.35047626710135,0.0,,
+57,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,3.35047626710135,1.0,19.0,2.2217946042233594
+57,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,3.35047626710135,1.0,29.0,5.425319613359559
+57,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,3.35047626710135,1.0,29.0,5.425319613359559
+57,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,3.35047626710135,1.0,55.0,20.913086104182167
+57,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,3.35047626710135,1.0,19.0,2.2217946042233594
+57,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,3.35047626710135,1.0,19.0,2.2217946042233594
+57,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,3.35047626710135,1.0,29.0,5.425319613359559
+57,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,3.35047626710135,1.0,29.0,5.425319613359559
+58,F <4%,"tudo se chance ≤ 10%, desde 2%",False,1.620912433727609,1.0,19.0,2.134611389698704
+58,F <4%,"tudo se chance ≤ 10%, desde 5%",False,1.620912433727609,1.0,29.0,5.772606126755219
+58,F <4%,"tudo se chance ≤ 20%, desde 5%",False,1.620912433727609,1.0,29.0,5.772606126755219
+58,F <4%,"tudo se chance ≤ 20%, desde 20%",False,1.620912433727609,1.0,53.0,20.067212570660566
+58,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,1.620912433727609,1.0,19.0,2.134611389698704
+58,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,1.620912433727609,1.0,19.0,2.134611389698704
+58,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,1.620912433727609,1.0,29.0,5.772606126755219
+58,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,1.620912433727609,1.0,29.0,5.772606126755219
+58,F 4-8%,"tudo se chance ≤ 10%, desde 2%",True,1.620912433727609,0.0,,
+58,F 4-8%,"tudo se chance ≤ 10%, desde 5%",True,1.620912433727609,0.0,,
+58,F 4-8%,"tudo se chance ≤ 20%, desde 5%",True,1.620912433727609,0.0,,
+58,F 4-8%,"tudo se chance ≤ 20%, desde 20%",True,1.620912433727609,0.0,,
+58,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",True,1.620912433727609,0.0,,
+58,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),True,1.620912433727609,0.0,,
+58,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),True,1.620912433727609,0.0,,
+58,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",True,1.620912433727609,0.0,,
+59,F <4%,"tudo se chance ≤ 10%, desde 2%",False,4.384910256078904,1.0,89.0,57.08032442242419
+59,F <4%,"tudo se chance ≤ 10%, desde 5%",False,4.384910256078904,1.0,89.0,57.08032442242419
+59,F <4%,"tudo se chance ≤ 20%, desde 5%",False,4.384910256078904,1.0,35.0,11.019162952318872
+59,F <4%,"tudo se chance ≤ 20%, desde 20%",False,4.384910256078904,1.0,49.0,21.01008380061995
+59,F <4%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.384910256078904,1.0,97.0,65.35051146522044
+59,F <4%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.384910256078904,1.0,49.0,21.01008380061995
+59,F <4%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.384910256078904,1.0,49.0,21.01008380061995
+59,F <4%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.384910256078904,1.0,25.0,5.637924725405696
+59,F 4-8%,"tudo se chance ≤ 10%, desde 2%",False,4.384910256078904,1.0,15.0,2.089772814082902
+59,F 4-8%,"tudo se chance ≤ 10%, desde 5%",False,4.384910256078904,1.0,25.0,5.637924725405696
+59,F 4-8%,"tudo se chance ≤ 20%, desde 5%",False,4.384910256078904,1.0,25.0,5.637924725405696
+59,F 4-8%,"tudo se chance ≤ 20%, desde 20%",False,4.384910256078904,1.0,49.0,21.01008380061995
+59,F 4-8%,"tudo se a faixa de 90% sair da sua, desde 2%",False,4.384910256078904,1.0,15.0,2.089772814082902
+59,F 4-8%,metade se faixa de 90% sair (desde 2%) + resto se ≤ 20% (desde 20%),False,4.384910256078904,1.0,15.0,2.089772814082902
+59,F 4-8%,metade se ≤ 10% (desde 5%) + resto se ≤ 20% (desde 20%),False,4.384910256078904,1.0,25.0,5.637924725405696
+59,F 4-8%,"escalonada: ⅓ a 30%, ⅓ a 15%, ⅓ a 5%, desde 5%",False,4.384910256078904,1.0,25.0,5.637924725405696
