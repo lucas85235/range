@@ -47,6 +47,8 @@ class FonteTSE:
     workers: int = 16
     timeout: float = 15.0
     sessao: requests.Session = field(default_factory=requests.Session)
+    falhas: int = 0                 # municípios que falharam no último varios()
+    erro_exemplo: str | None = None
 
     def __post_init__(self):
         self.sessao.headers.update({"User-Agent": "monitor-apuracao (leitura publica)"})
@@ -120,7 +122,13 @@ class FonteTSE:
                 "gerado": f"{d.get('dg', '')} {d.get('hg', '')}".strip(), "hora": m.hora}
 
     def varios(self, pedidos: list[tuple[str, int]]) -> list[Municipio]:
-        """Baixa em paralelo os votos de vários municípios [(uf, cd), ...]."""
+        """Baixa em paralelo os votos de vários municípios [(uf, cd), ...].
+
+        Os que falham ficam para o próximo ciclo. Quantos falharam (erro ou arquivo ausente) fica
+        em self.falhas e o primeiro erro em self.erro_exemplo: uma falha em massa não pode passar
+        calada, porque na volta o modelo recebe tudo de uma vez e distorce (ver monitor.py).
+        """
+        self.falhas, self.erro_exemplo = 0, None
         if not pedidos:
             return []
         out = []
@@ -129,8 +137,13 @@ class FonteTSE:
             for fu in cf.as_completed(futs):
                 try:
                     m = fu.result()
-                    if m is not None:
-                        out.append(m)
-                except Exception:
-                    pass  # fica para o próximo ciclo
+                except Exception as e:
+                    self.falhas += 1
+                    self.erro_exemplo = self.erro_exemplo or repr(e)
+                    continue
+                if m is None:  # 404: o arquivo do município não existe (ainda)
+                    self.falhas += 1
+                    self.erro_exemplo = self.erro_exemplo or "arquivo não encontrado (404)"
+                else:
+                    out.append(m)
         return out

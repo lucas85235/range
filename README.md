@@ -2,7 +2,15 @@
 
 Mercado: [Brazil Presidential Election Second Round: Margin of Victory](https://polymarket.com/event/brazil-presidential-election-second-round-margin-of-victory)
 (Polymarket). Margem = |%Flávio − %Lula| dos votos válidos; se cair exatamente na fronteira,
-vale a faixa de cima. Resolve pelo resultado oficial do TSE.
+vale a faixa de cima. Resolve pelo "consenso de fontes de imprensa confiáveis" sobre a contagem
+oficial; o TSE só decide se houver ambiguidade. A resolução passa pelo UMA (o oráculo da
+Polymarket): no 1º turno, o pagamento saiu entre 1h48 e 5h da madrugada seguinte. O TSE publica os
+percentuais com 2 casas; uma margem real logo abaixo de 4 (de ~3,99 a 4,0) pode aparecer como
+4,00 e resolver em "F 4-8%".
+
+Todos os horários deste README são de Brasília (UTC−3). O código também usa Brasília, qualquer que
+seja o relógio do computador; se o Windows estiver em outro fuso (Manaus, UTC−4, por exemplo),
+16h50 de Brasília são 15h50 no relógio dele.
 
 Só leitura: o monitor consulta os JSON públicos do TSE e os preços públicos da Polymarket. Não
 envia ordens. O Brasil é "close-only" na Polymarket: qualquer venda é manual.
@@ -16,8 +24,9 @@ começo.
 pip install -r eleicao/requirements.txt
 ```
 
-No dia 25/10, a partir das 16h50: painel no navegador, já lendo o TSE (troque a faixa e o plano
-pelos seus):
+No dia 25/10, a partir das 16h50 de Brasília: painel no navegador, já lendo o TSE (troque a faixa
+e o plano pelos seus). Antes, feche qualquer painel de ensaio: com a porta 8050 ocupada, o painel
+novo para com erro.
 
 ```bash
 python eleicao/painel.py --ao-vivo --faixa "F <4%" --degrau f90@2:100
@@ -339,7 +348,9 @@ chance de terminar com prejuízo):
 - **Esse erro derruba o trade com limiar de 70%.** Naquele caminho real, com faixas de 4 pontos e
   o mercado "como em 4/10", as duas variantes compravam "F 4-8%" às 17h38 e vendiam com perda às
   18h30. Com limiar de 80% elas esperam: o trade em dinheiro fica com os US$ 100 e o com posição
-  segura "F <4%" (US$ 247), sem perder o acerto do 2º turno de 2022.
+  segura "F <4%" (US$ 247), sem perder o acerto do 2º turno de 2022. Esse caminho foi rodado com
+  o modelo sem ordem de chegada; com a configuração do monitor (com ordem), a faixa errada chega a
+  69,8%, e o limiar de 70% também escapa, por 0,2 ponto (60% e 65% caem).
 - **A simulação favorece quem troca de faixa.** O preço simulado vai atrás do próprio modelo. No
   mercado que sabe mais, o trade com posição perde em 2 de cada 3 noites, e o ganho do trade some.
   As regras que só vendem perdem a pequena vantagem, mas não ficam abaixo de segurar: vendem pelo
@@ -347,25 +358,43 @@ chance de terminar com prejuízo):
 - **O peso dos cenários muda o placar de quem segura.** Com todas as noites iguais, segurar vai a
   US$ 123: o lote tem muitas noites perto de 4. As médias acima usam as chances de hoje.
 - **Parâmetros escolhidos nas simulações** (limiar de 60%) parecem bons também na metade das noites
-  que ficou de fora da escolha, mas caem no erro de 2026, como os de 70%. Só limiar de 80% ou mais
-  escapa dele.
+  que ficou de fora da escolha, mas caem no erro de 2026. No caminho sem ordem de chegada, só 75%
+  ou mais escapa; com a ordem (a configuração do monitor), 70% também escapa, e 60% e 65% caem.
 - **Para que lado as estratégias erram nas simulações:** sem lado preferido (o trade em dinheiro
   erra a faixa 4% das vezes para Flávio e 4% para Lula). O viés aparece no caso real.
 
 **Veredito:**
 
 - **Para a sua posição** (só dá para vender): **"faixa de 90% sai da sua, desde 2%"**
-  (`f90@2:100`). Fica perto das melhores nas simulações e foi a melhor na noite real com preço
-  real: na faixa perdedora ("Lula <5%") vendia às 17h33 a 50¢ (US$ 84 de US$ 100) e na vencedora
-  não vendia. Nos dois caminhos reais, nunca vendeu a faixa que ganhou. "Chance ≤ 20% desde 5%"
-  rende parecido nas simulações, mas na noite real saiu 12 minutos depois e pela metade do preço.
-  O stop no preço vende em quedas passageiras: no caminho real de 2026, com o mercado igual ao
-  modelo, vendeu "F <4%" (que ganhou) quase de graça.
-- **Para o trade simulado:** **começar em dinheiro, com limiar de 80%.** Nunca perde muito
-  quando o mercado é eficiente (não compra), ganha quando ele anda atrás do modelo e, junto com a
-  de 90%, foi a única que passou pelos dois caminhos reais sem prejuízo em nenhum mercado (a de
-  90% rende bem menos nas simulações). Começar com posição perde com mais frequência em todos os
-  mercados: de 7% a 65% das noites, contra 0% a 12%.
+  (`f90@2:100`), escolhida pelo pior caso, não pela média. Detalhes em
+  [resultados/auditoria.md](resultados/auditoria.md).
+  - **Não é a de maior média nas simulações.** No mercado "como em 4/10", "chance ≤ 20% desde
+    5%" rende ~US$ 7 a mais por US$ 100 (os US$ 14 da tabela acima caem para ~7 quando as
+    vitórias de Lula por mais de 1 ponto, que faltavam no lote, entram nas contas). No "mais
+    esperto", a de 90% fica US$ 3 a 5 à frente.
+  - **É a que menos vende a faixa que ganha.** Em 84 noites montadas com os votos reais de
+    2014, 2018 e 2022 (1º → 2º turno do mesmo ano), deslocadas para terminar entre 3 e 5, nunca
+    vendeu a faixa vencedora e nunca ficou abaixo de segurar. "Chance ≤ 20% desde 2%" vendeu a
+    vencedora em 13 delas, todas a até 0,6 ponto da fronteira de 4.
+  - **A noite real de 4/10 não separa os critérios, só o "desde 2%".** Às 17h33, com a chance
+    da faixa perdedora ("Lula <5%") em 2%, qualquer critério desde 2% (chance ≤ 5%, ≤ 10%,
+    ≤ 20% ou a faixa de 90%) vendia a 50¢: US$ 84 de US$ 100 (com 5 min entre o dado e a venda;
+    a conta da banca, acima, usa outra compra e outra execução e dá US$ 93). Desde 5%, as regras
+    saíam às 17h45, a 27¢ (US$ 47). Na faixa vencedora, nenhuma vendia.
+  - **Com o modelo enviesado, todas vendem mais a faixa que ganha.** Somando às noites metade do erro do 1º turno de
+    2026 (o tamanho do pior viés visto entre turnos do mesmo ano, em 2014), a de 90% vende a
+    vencedora em 21% das noites que terminam entre 3 e 4 (3% sem viés), mas no ritmo "como em
+    4/10" continua acima de segurar em todos os cenários de viés.
+  - O stop no preço vende em quedas passageiras: no caminho real de 2026, com o mercado igual ao
+    modelo, vendeu "F <4%" (que ganhou) quase de graça; na noite de 4/10 rendeu US$ 23 contra 84.
+- **Para o trade simulado:** **começar em dinheiro, com limiar de 80%** (80% é o limiar padrão
+  da aba Trade; em "Começa em", escolha "Dinheiro (espera o sinal)", porque a aba começa na sua
+  posição). O 80% não rende mais: nas simulações fica US$ 16 a 37 abaixo do de 70% na média. Ele
+  serve para perder menos vezes: começando em dinheiro, prejuízo em 3–5% das noites nos ritmos
+  que andam atrás do modelo, e ganha do 70% no mercado que sabe mais que o modelo. Começar com
+  posição perde com mais frequência: de 12% a 63% das noites com 80%. O lucro do trade depende
+  de o mercado andar atrás do modelo: no "mais esperto", some com um viés pró-Flávio de ~1,5
+  ponto; no ritmo de 4/10, aguenta 2 pontos.
 
 ### Duas perguntas sobre o mercado e o modelo
 
@@ -472,7 +501,25 @@ python eleicao/painel.py --faixa "F <4%" --degrau f90@2:100
   - em "Tela do monitor", o mesmo texto do terminal.
 - **Som:** ligue o botão "Som" (o navegador só toca depois de um clique). Toca quando um degrau
   dispara, quando a chance cai abaixo do alerta e quando a faixa de 90% sai da sua. A aba ao vivo
-  continua sendo lida enquanto você usa a simulação, então os avisos tocam do mesmo jeito.
+  continua sendo lida enquanto você usa a simulação, então os avisos tocam do mesmo jeito. Um F5
+  desliga o som: ligue de novo.
+- **Falha nos arquivos de município do TSE.** Se 10% ou mais dos pedidos de um ciclo falham
+  (mínimo 5), o topo mostra "TSE falhando", a linha do tempo ganha um aviso com som e o quadro do
+  que fazer passa a dizer para não agir por disparo do modelo. O motivo: enquanto os municípios
+  falham (com o arquivo do Brasil respondendo), o modelo segue rodando com os municípios
+  congelados e o relógio andando, e esses retratos parados entram no julgamento da ordem de
+  chegada (w), que desaba na volta.
+  - Nos testes, com uma falha total começando cedo (~17h20), a faixa de 90% ficou sem a faixa
+    certa por até ~1 h depois da volta. Num caso, com 20 min de falha, ela saiu da faixa certa
+    com 23,5% apurado.
+  - Seções % e eleitorado % voltam a andar juntos em 3 a 5 min, então essa conferência não basta.
+  - Falha parcial (até ~90% dos arquivos) quase não distorce. A queda total do TSE, com "erro no
+    ciclo", também não: o modelo não roda nesse tempo.
+  - Por isso o aviso fica por 70 min depois da volta ("Modelo se recuperando"). Nesse tempo, não
+    aja por disparo do modelo e use o preço da Polymarket como referência.
+- **Sem ciclo novo.** Se nenhum ciclo chega por 2,5 intervalos (~100 s), por TSE pendurado ou rede
+  caída, o topo mostra "sem ciclo novo", a linha do tempo ganha um aviso com som e o quadro diz que
+  o modelo está parado. O preço da Polymarket continua ao vivo.
 - **Se o painel cair ou for fechado no meio da apuração, retome a sessão**, em vez de começar do
   zero:
 
@@ -512,7 +559,7 @@ aponta outra. Os controles da noite são os mesmos (cenário, velocidade, pausa,
 simulação: nada aqui envia ordens.
 
 - **Regra** (editável na aba): a partir de 2% apurado, se a faixa favorita do modelo não é a da
-  carteira e tem pelo menos 70%, vende tudo no preço de venda. Depois compra a favorita no preço de
+  carteira e tem pelo menos 80%, vende tudo no preço de venda. Depois compra a favorita no preço de
   compra se a chance do modelo passar o preço por 5 pontos ou mais; senão espera em dinheiro e
   compra quando a vantagem aparecer. Máximo de 2 trocas por noite.
 - **Na tela**, como no ao vivo:
@@ -529,26 +576,31 @@ simulação: nada aqui envia ordens.
   Tudo vale do ciclo do clique em diante.
 - **"Testar esta regra nas 100 noites simuladas e na noite real do 1º turno"** roda só a regra
   automática nas noites de `estudos/banca.py`, nos três ritmos de mercado, e na noite de 4/10 com
-  os preços reais. É o mesmo cálculo de `python eleicao/estudos/trade.py`.
+  os preços reais. É o mesmo cálculo de `python eleicao/estudos/trade.py` (que usa 70%, como os
+  estudos; o botão testa a regra da tela).
 - **"Começa em: Dinheiro (espera o sinal)"** é a variante sem posição: a carteira fica parada até
   o modelo dar o sinal (a favorita com pelo menos o limiar e a chance passando o preço de compra
   pela vantagem pedida), compra, e daí segue a mesma regra de trocas.
 
-Com a regra padrão, começando em Sim "F <4%" a 40,5¢ com US$100. Cada noite pesa pela chance que
-o mercado dá hoje ao cenário dela:
+Com a regra padrão (limiar de 80%), começando em Sim "F <4%" a 40,5¢ com US$100. Cada noite pesa
+pela chance que o mercado dá hoje ao cenário dela:
 
 | Ritmo do mercado | Com trocas: média | Mediana | 10% piores ficam abaixo de | Noites com prejuízo | Perdem mais da metade | Segurar: média |
 |---|---|---|---|---|---|---|
-| como em 4/10 | US$ 344 | US$ 291 | US$ 158 | 7% | 2% | US$ 95 |
-| mais esperto | US$ 151 | US$ 134 | US$ 48 | 34% | 11% | US$ 95 |
-| igual ao modelo | US$ 104 | US$ 61 | US$ 0 | 65% | 46% | US$ 95 |
+| como em 4/10 | US$ 304 | US$ 247 | US$ 56 | 12% | 6% | US$ 95 |
+| mais esperto | US$ 135 | US$ 96 | US$ 16 | 53% | 18% | US$ 95 |
+| igual ao modelo | US$ 104 | US$ 37 | US$ 0 | 63% | 63% | US$ 95 |
+
+Com limiar de 70% (o padrão até 16/10), a média sobe para US$ 344 / 151 (no "igual ao modelo",
+fica nos mesmos US$ 104) e o prejuízo cai para 7% / 34% (65% contra 63% no "igual ao modelo"). Começando com posição, 70% ganha de 80% nas simulações; começando em
+dinheiro, 80% perde na média mas tem menos noites de prejuízo (tabela abaixo).
 
 **Esses lucros vêm quase todos de uma premissa.** O preço simulado é feito a partir do próprio
 modelo: o mercado vai até a chance que o modelo dá, com atraso. Ele nunca sabe algo que o modelo
 não sabe nem se mexe antes dele. O teste mede quanto vale esse atraso, não se o modelo acerta.
 
-- Se o mercado reagir tão rápido quanto o modelo, trocar perde dinheiro em 2 de cada 3 noites. A
-  média de US$ 104 se sustenta em poucas noites com ganho enorme: faixas compradas a 5–10¢ que
+- Se o mercado reagir tão rápido quanto o modelo, trocar perde dinheiro em ~2 de cada 3 noites.
+  A média de US$ 104 se sustenta em poucas noites com ganho enorme: faixas compradas a 5–10¢ que
   pagam US$ 1.
 - As noites simuladas vêm de um gerador parecido com o modelo, então ele acerta mais nelas do que
   na vida real. Na noite real do 1º turno, a margem prevista errou ~2 pontos às 18h. Com faixas de
@@ -569,18 +621,18 @@ do modelo.
 
 **Começando em dinheiro e esperando o sinal** (US$100, regra padrão):
 
-| Ritmo do mercado | Pelo sinal: média | Mediana | Noites com prejuízo | Operou em | 1ª compra (mediana) |
-|---|---|---|---|---|---|
-| como em 4/10 | US$ 349 | US$ 299 | 6% | 99% | 17h16 |
-| mais esperto | US$ 159 | US$ 166 | 10% | 94% | 17h16 |
-| igual ao modelo | US$ 100 | US$ 100 | 0% | 0% | — |
+| Ritmo do mercado | Pelo sinal: média | Mediana | Noites com prejuízo | Operou em | 1ª compra (mediana) | Com limiar de 70% |
+|---|---|---|---|---|---|---|
+| como em 4/10 | US$ 312 | US$ 241 | 3% | 98% | 17h20 | US$ 349 (6% com prejuízo) |
+| mais esperto | US$ 143 | US$ 148 | 5% | 85% | 17h18 | US$ 159 (10%) |
+| igual ao modelo | US$ 100 | US$ 100 | 0% | 0% | — | US$ 100 (0%) |
 
 - **Se o mercado acompanha o modelo, ela não compra e não perde nada.** A exigência de vantagem
   sobre o preço barra a entrada. Por isso, das duas variantes, é a que menos sofre quando a
   premissa do atraso falha. Começando com posição, a regra vende a preço justo e perde em 2 de
   cada 3 noites nesse ritmo.
-- **O ganho continua vindo do atraso do mercado.** A 1ª compra sai cedo (17h16 na mediana, perto
-  de 2% apurado), quando o mercado simulado ainda está no preço de antes da apuração.
+- **O ganho continua vindo do atraso do mercado.** A 1ª compra sai cedo (17h18–17h20 na mediana,
+  perto de 2% apurado), quando o mercado simulado ainda está no preço de antes da apuração.
 - **Na noite real do 1º turno**, ela comprava "Flávio <5%" a 40¢ às 17h33: US$ 100 viravam
   ~US$ 250 (US$ 238 com 3¢ de cada lado). Mas é a mesma noite de onde saiu o ritmo "como em 4/10".
 
@@ -645,7 +697,10 @@ Avisos:
 - `>>> PLANO` (com bipe) quando um degrau dispara;
 - `!!` quando o modelo dá à posição menos que o preço pelo qual dá para vendê-la;
 - `!!!` (com bipe) quando a chance cai abaixo de `--alerta` (padrão 50%), a partir de 1%
-  apurado.
+  apurado;
+- `!! AVISO` quando 10% ou mais dos arquivos de município pedidos no ciclo falham (mínimo 5), e
+  `!! RECUPERANDO` por 70 min depois da volta. O motivo está em "Falha nos arquivos de município
+  do TSE", na seção do painel.
 
 Tudo fica gravado em `eleicao/dados/ao_vivo/<sessão>/`: o log por ciclo, os retratos por
 município, `sessao.json` (URL e base, conferidas ao retomar) e, no painel, `mercado.jsonl` (o livro
@@ -676,8 +731,20 @@ Medido em 15/10 contra o TSE e a Polymarket de verdade:
 - **Comece antes das 17h.** Se o monitor começar com a apuração andando, o 1º ciclo baixa todos os
   municípios que mudaram (~5.700, uns 4–6 min) antes da primeira previsão. Depois de uma queda,
   use `--retomar`.
-- **As contas de banca e trade supõem 5 min de atraso**, mais que o real (~1–1,5 min): nisso
-  elas são conservadoras.
+- **Do voto chegar ao TSE até a sua venda, conte ~5 min, não 1–1,5.** Os 30–90 s acima vão da
+  geração do arquivo até o painel. Antes disso, a seção recebida ainda leva tempo para entrar no
+  arquivo do município (que é o que o monitor lê): na noite de 4/10, mediana de ~2 min entre 17h10
+  e 19h (p90 de 3,6 min). Depois, vem a sua reação ao aviso e a ordem manual. A estimativa
+  (não testada numa noite real) fica entre 2,4 e 8,6 min, ~5 no provável.
+- **As contas de banca e trade não são conservadoras no atraso.** Nas noites simuladas, o atraso
+  de 5 min de `nucleo/mercado_sim.py` (`ATRASO`) se anula com o ajuste do ritmo a 4/10, que usou a
+  mesma soma: a venda sai, na prática, sem atraso nenhum em relação ao mercado. Os números das
+  simulações são o teto. Só as contas da noite real de 4/10, com preço real, usam 5 min de fato.
+  - No "mais esperto", com 2 / 5 / 10 min de atraso, a faixa de 90% cai de US$ 114 para
+    112 / 108 / 104, e o trade em dinheiro com 80%, de 143 para 136 / 129 / 119.
+  - Na noite real de 4/10, a faixa de 90% rendia US$ 81–92 com qualquer atraso até 10 min e caía
+    para 74 → 47 entre 11 e 15 min: o mercado derrubou a faixa perdedora entre 17h38 e 17h43.
+  - **Venda assim que o `>>> PLANO` tocar: meta de até 5 min, limite de ~10.**
 
 ## Estrutura do projeto
 

@@ -331,7 +331,8 @@ class Monitor:
         inicio = time.time()
         pedidos = self._pedidos()
         dif_te = 0
-        for m in self.fonte.varios(pedidos):
+        recebidos = self.fonte.varios(pedidos)
+        for m in recebidos:
             j = self.pos[m.cd]
             self.F[j], self.L[j], self.est[j], self.st[j], self.ts[j] = m.F, m.L, m.est, m.st, m.ts
             if self.te[j] == 0 and m.te > 0:
@@ -354,7 +355,14 @@ class Monitor:
         self.ciclos += 1
         res = {"t": t, "gerado": br["gerado"], "secoes_pct": 100 * br["st"] / max(br["ts"], 1),
                "eleitorado_pct": 100 * self.est.sum() / max(self.te.sum(), 1),
-               "baixados": len(pedidos), "fila": getattr(self, "fila", 0), "F_tse": br["F"], "L_tse": br["L"]}
+               "baixados": len(recebidos), "pedidos": len(pedidos), "falhas": self.fonte.falhas,
+               "fila": getattr(self, "fila", 0), "F_tse": br["F"], "L_tse": br["L"]}
+        if self.fonte.falhas:
+            res["erro_municipios"] = self.fonte.erro_exemplo
+        if aviso_municipios(res):
+            self.t_falha = t
+        if getattr(self, "t_falha", None) is not None:
+            res["min_desde_falha"] = t - self.t_falha
         if self.polymarket:
             # o painel passa uma função com o preço que ele já lê a cada 10 s; o terminal lê agora
             try:
@@ -419,10 +427,40 @@ class Monitor:
         return disparos
 
 
+RECUPERACAO = 70  # minutos depois da última falha em que o modelo ainda pode estar distorcido
+
+
+def aviso_municipios(res: dict) -> str | None:
+    """Aviso quando muitos arquivos de município falham no ciclo (≥ 10% dos pedidos, mínimo 5).
+
+    A falha fica para o próximo ciclo, mas uma falha total (bloqueio, rede), com o arquivo do
+    Brasil respondendo, deixa o modelo rodando com os municípios congelados e o relógio andando:
+    esses retratos parados entram no julgamento da ordem de chegada (w), que desaba na volta.
+    Nos testes, com a falha começando cedo, a faixa de 90% ficou sem a faixa certa até ~1 h
+    depois da volta, mesmo com seções % e eleitorado % já juntos. Falha parcial (até ~90%) quase
+    não distorce; queda total do TSE (ciclo com erro) também não. Por isso o aviso: por
+    RECUPERACAO min, não agir por disparo do modelo; usar o preço da Polymarket como referência.
+    """
+    falhas, pedidos = res.get("falhas", 0), res.get("pedidos", 0)
+    if falhas < max(5, 0.1 * pedidos):
+        return None
+    return (f"{falhas} de {pedidos} arquivos de município falharam neste ciclo"
+            f" ({res.get('erro_municipios') or 'erro'}). O modelo está parado nos dados antigos e pode "
+            "distorcer quando eles voltarem: por até ~1 h depois da volta, não aja por disparo do modelo; "
+            "use o preço da Polymarket como referência")
+
+
 def formatar_tela(res: dict, faixa: str, lado: str = "sim") -> tuple[list[str], float | None, str]:
     """Linhas que o monitor imprime num ciclo, mais a chance da posição e o nome dela."""
     linhas = [f"[{res.get('gerado') or '?'}] +{res['t']:.0f}min | seções {res['secoes_pct']:.1f}% | "
-              f"eleitorado {res['eleitorado_pct']:.1f}% | baixados {res.get('baixados', 0)}"]
+              f"eleitorado {res['eleitorado_pct']:.1f}% | baixados {res.get('baixados', 0)}"
+              + (f" | falharam {res['falhas']}" if res.get("falhas") else "")]
+    aviso = aviso_municipios(res)
+    if aviso:
+        linhas.append(f"  !! AVISO: {aviso}")
+    elif res.get("min_desde_falha") is not None and res["min_desde_falha"] < RECUPERACAO:
+        linhas.append(f"  !! RECUPERANDO: os arquivos de município falharam há {res['min_desde_falha']:.0f} min; "
+                      f"até {RECUPERACAO} min depois, não aja por disparo do modelo (compare com a Polymarket)")
     if "mu" not in res:
         return linhas + ["  " + res.get("msg", "")], None, ""
     linhas.append(f"  parcial (TSE): F {res['parcial_tse']:+.2f}   |   MODELO: F {res['mu']:+.2f} ± {res['sd']:.2f} "

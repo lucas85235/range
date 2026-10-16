@@ -23,6 +23,7 @@ import itertools
 import json
 import math
 import re
+import socket
 import sys
 import threading
 import time
@@ -40,8 +41,8 @@ from nucleo.fonte_tse import URL_OFICIAL, FonteTSE  # noqa: E402
 from nucleo.mercado_sim import PRECO_HOJE, RITMOS, mercado_sim, sortear_margem  # noqa: E402
 from nucleo.modelo import NOMES_FAIXAS, carregar_params, faixa_provavel  # noqa: E402
 from nucleo.polymarket import FontePolymarket  # noqa: E402
-from monitor import (AO_VIVO, BRT, Degrau, Monitor, achar_sessao, carregar_base, conferir_sessao,  # noqa: E402
-                     ler_log, retratos)
+from monitor import (AO_VIVO, BRT, Degrau, Monitor, achar_sessao, aviso_municipios, carregar_base,  # noqa: E402
+                     conferir_sessao, ler_log, retratos)
 from nucleo.replay_tse import GRADE, Replay, passo, responder  # noqa: E402
 from nucleo.simulacao import gerar_apuracao, sortear_cenario  # noqa: E402
 
@@ -76,6 +77,8 @@ def limpo(x):
 
 def linha_terminal(res: dict) -> str:
     cab = f"[{res.get('gerado') or '?'}] +{res['t']:.0f}min | eleitorado {res['eleitorado_pct']:.1f}%"
+    if res.get("falhas"):
+        cab += f" | {res['falhas']} de {res.get('pedidos', '?')} municípios falharam"
     if "mu" not in res:
         return f"{cab} | {res.get('msg', '')}"
     top = sorted(res["probs"].items(), key=lambda kv: -kv[1])[:2]
@@ -233,6 +236,7 @@ class SessaoVivo(Sessao):
             self.estado = "rodando"
             self.evento(f"lendo {self.url} a cada {self.intervalo:g} s"
                         + (" + preços da Polymarket" if self.polymarket else ""))
+            falhando = False  # avisa quando a falha nos municípios começa e quando acaba
             while not self.parar.is_set():
                 t0 = time.time()
                 try:
@@ -242,6 +246,13 @@ class SessaoVivo(Sessao):
                     print("[ao vivo] " + linha_terminal(res), flush=True)
                     if res.get("mercado_erro"):
                         self.evento(f"Polymarket indisponível: {res['mercado_erro']}", "aviso")
+                    aviso = aviso_municipios(res)
+                    if aviso and not falhando:
+                        self._avisar(aviso, "erro")
+                    elif falhando and not aviso:
+                        self._avisar("arquivos de município voltaram; por até ~1 h, não aja por disparo do "
+                                     "modelo: ele pode estar distorcido (compare com a Polymarket)", "aviso")
+                    falhando = bool(aviso)
                 except Exception as e:  # rede instável: segue no próximo ciclo
                     self.evento(f"erro no ciclo: {e!r}", "erro")
                     print(f"[ao vivo] erro no ciclo: {e!r}", flush=True)
@@ -473,7 +484,7 @@ class Contexto:
         regra = trade.Regra(inicial=inicial,
                             entrada=min(max(numero(d.get("entrada"), PRECO_HOJE.get(inicial, 0.5)), 0.01), 0.99),
                             banca=max(numero(d.get("banca"), 100.0), 1.0),
-                            limiar=min(max(numero(d.get("limiar"), 0.7), 0.0), 1.0),
+                            limiar=min(max(numero(d.get("limiar"), 0.8), 0.0), 1.0),
                             vantagem=numero(d.get("vantagem"), 0.05),
                             apurado_min=numero(d.get("apurado_min"), 2.0),
                             max_trocas=int(numero(d.get("max_trocas"), 2)))
@@ -500,7 +511,33 @@ def numero(x, padrao=None):
     return v
 
 
+class Servidor(ThreadingHTTPServer):
+    """No Windows, SO_REUSEADDR (ligado por padrão no HTTPServer) deixa um segundo painel subir na
+    mesma porta sem erro, e o navegador continua falando com o primeiro. Sem ele, a porta ocupada
+    dá erro; com SO_EXCLUSIVEADDRUSE, nenhum outro processo ocupa a nossa. Reiniciar logo depois
+    de uma queda continua funcionando. Fora do Windows, SO_REUSEADDR não deixa dois servidores na
+    mesma porta e só evita esperar o TIME_WAIT."""
+
+    allow_reuse_address = sys.platform != "win32"
+
+    def server_bind(self):
+        if hasattr(socket, "SO_EXCLUSIVEADDRUSE"):
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
+
+def reservar_porta(porta: int) -> Servidor:
+    """Ocupa a porta já (erro claro se outro painel a usa); manipulador() entra depois."""
+    return Servidor(("127.0.0.1", porta), BaseHTTPRequestHandler)
+
+
 def criar_servidor(ctx: Contexto, porta: int) -> ThreadingHTTPServer:
+    srv = reservar_porta(porta)
+    srv.RequestHandlerClass = manipulador(ctx, porta)
+    return srv
+
+
+def manipulador(ctx: Contexto, porta: int) -> type[BaseHTTPRequestHandler]:
     hosts = {f"127.0.0.1:{porta}", f"localhost:{porta}"}
 
     class H(BaseHTTPRequestHandler):
@@ -600,7 +637,7 @@ def criar_servidor(ctx: Contexto, porta: int) -> ThreadingHTTPServer:
             except (ValueError, TypeError, json.JSONDecodeError) as e:
                 self._json({"erro": str(e)}, 400)
 
-    return ThreadingHTTPServer(("127.0.0.1", porta), H)
+    return H
 
 
 def main() -> None:
@@ -635,8 +672,14 @@ def main() -> None:
         if retomar is None:
             print(f"nada para retomar: nenhuma sessão das últimas 12 h em {AO_VIVO} leu {args.url.rstrip('/')} "
                   "e tem retratos; começando uma sessão nova", flush=True)
+    try:  # antes de carregar a base: porta ocupada aparece já
+        srv = reservar_porta(args.porta)
+    except OSError as e:
+        a.error(f"a porta {args.porta} já está em uso ({e.strerror or e}). Provavelmente outro painel "
+                f"está aberto: feche-o (netstat -ano | findstr :{args.porta} mostra o PID) ou use "
+                f"--porta {args.porta + 1}")
     ctx = Contexto(args)
-    srv = criar_servidor(ctx, args.porta)
+    srv.RequestHandlerClass = manipulador(ctx, args.porta)
     url = f"http://127.0.0.1:{args.porta}/"
     print(f"painel em {url}  (simulação: {url}#sim)  — Ctrl+C para sair", flush=True)
     if args.ao_vivo or args.retomar:

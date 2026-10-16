@@ -202,7 +202,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   <section class="controle" id="ctl-vivo" aria-label="Monitor ao vivo">
     <div class="grow">
       <p id="vivo-txt">O monitor ao vivo não está rodando.</p>
-      <p class="nota" id="vivo-nota">No dia 25/10, comece às 16h50. Antes disso serve só de teste de conexão: o TSE ainda não tem votos do 2º turno.</p>
+      <p class="nota" id="vivo-nota">No dia 25/10, comece às 16h50 de Brasília. Antes disso serve só de teste de conexão: o TSE ainda não tem votos do 2º turno.</p>
     </div>
     <div class="acoes">
       <button class="btn primario" id="vivo-retomar" hidden>Retomar a última sessão</button>
@@ -232,7 +232,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     <label class="campo"><span>Começa em</span><select id="tr-inicial"></select></label>
     <label class="campo"><span>Preço pago (¢)</span><input id="tr-entrada" type="number" min="1" max="99" step="0.5"></label>
     <label class="campo"><span>Banca (US$)</span><input id="tr-banca" type="number" min="1" step="1" value="100"></label>
-    <label class="campo"><span>Trocar com chance ≥ (%)</span><input id="tr-limiar" type="number" min="1" max="99" step="1" value="70"></label>
+    <label class="campo"><span>Trocar com chance ≥ (%)</span><input id="tr-limiar" type="number" min="1" max="99" step="1" value="80"></label>
     <label class="campo"><span>Comprar com vantagem ≥ (pts)</span><input id="tr-vantagem" type="number" min="0" max="50" step="1" value="5"></label>
     <label class="campo"><span>Desde (% apurado)</span><input id="tr-apurado" type="number" min="0" max="100" step="1" value="2"></label>
     <label class="campo"><span>Máx. de trocas</span><input id="tr-trocas" type="number" min="0" max="10" step="1" value="2"></label>
@@ -440,6 +440,19 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   }
 
   // ---------- avaliação (tudo derivado dos ciclos + posição) ----------
+  // mesma regra de monitor.aviso_municipios: no ciclo, ≥ 10% dos arquivos de município pedidos
+  // (mínimo 5) falharam. Na volta, o modelo pode ficar distorcido por até RECUPERACAO minutos: nos
+  // testes com falha total começando cedo, a faixa de 90% ficou errada até ~1 h depois da volta.
+  const RECUPERACAO = 70;
+  const municipiosFalhando = (c) => !!c && (c.falhas || 0) >= Math.max(5, 0.1 * (c.pedidos || 0));
+  // ao vivo, sem ciclo novo por 2,5 intervalos: TSE pendurado ou rede caída (o preço da Polymarket
+  // segue ao vivo, à parte). Devolve há quantos segundos, ou null.
+  function semCicloNovo(s) {
+    if (s !== S.vivo || !s.ok || s.estado !== "rodando" || !s.ultimoNovo) return null;
+    const seg = (Date.now() - s.ultimoNovo) / 1000;
+    return seg > 2.5 * (s.info.intervalo || 40) ? seg : null;
+  }
+
   function avaliar(s) {
     const f = pos.faixa, sim = pos.lado === "sim";
     const L = s.ciclos.map((c) => {
@@ -472,6 +485,17 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       ev.push({ chave: `plano|${chave}|${d.texto}`, k: d.k, t: o.t, nivel: "ruim", som: "plano",
                 texto: `Plano: degrau ${d.texto} disparou — vender ${virg(d.fracao)}% da posição (chance ${pct(o.p, 1)}, ${virg(o.ap.toFixed(1))}% apurado${o.bid != null ? ", venda a ~" + cents(o.bid) : ""}).` });
     });
+    let falhavaAntes = false;
+    L.forEach((o, k) => {
+      const falha = municipiosFalhando(o.c);
+      if (falha && !falhavaAntes)
+        ev.push({ chave: `tse|${k}`, k, t: o.t, nivel: "ruim", som: "alerta",
+                  texto: `${o.c.falhas} de ${o.c.pedidos} arquivos de município do TSE falharam (${o.c.erro_municipios || "erro"}). O modelo está parado nos dados antigos e pode distorcer quando eles voltarem: por até ~1 h depois da volta, não aja por disparo do modelo; use o preço da Polymarket como referência.` });
+      if (!falha && falhavaAntes)
+        ev.push({ chave: `tse-volta|${k}`, k, t: o.t, nivel: "aviso", som: null,
+                  texto: `Os arquivos de município voltaram. Nos testes, o modelo ficou distorcido por até ~1 h depois de uma falha total, mesmo com seções % e eleitorado % já subindo juntos: até ${hora(o.t + RECUPERACAO)}, não aja por disparo do modelo; compare com o preço da Polymarket.` });
+      falhavaAntes = falha;
+    });
     let ultimo = 1.0, foraAntes = false;
     L.forEach((o, k) => {
       if (!o.tem || o.ap < 1) return;
@@ -488,6 +512,10 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
                   texto: `A faixa provável de 90% voltou a favorecer a posição (${margem(o.c.lo90, 1)} a ${margem(o.c.hi90, 1)}).` });
       if (o.ap >= 2) foraAntes = o.fora;
     });
+    const semCiclo = semCicloNovo(s);
+    if (semCiclo != null && L.length)  // uma vez por parada (a chave muda quando volta a chegar ciclo)
+      ev.push({ chave: `parado|${L.length}`, k: L.length, t: L[L.length - 1].t + semCiclo / 60, nivel: "ruim", som: "alerta",
+                texto: `Sem ciclo novo do TSE há ${Math.round(semCiclo / 60)} min: o modelo e o plano estão parados no último ciclo (${hora(L[L.length - 1].t)}). Não aja por disparo do modelo até os ciclos voltarem; o preço da Polymarket segue ao vivo.` });
     ev.sort((a, b) => a.k - b.k);
     return { L, plano, ev };
   }
@@ -657,18 +685,21 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       }),
       plugins: [linhasFaixa],
     });
+    // horário de Brasília (UTC−3, sem horário de verão desde 2019), como o resto do painel,
+    // mesmo com o relógio do computador em outro fuso
+    const brt = (ms) => new Date(ms - 3 * 3600e3), dois = (x) => String(x).padStart(2, "0");
     G.mercado = new Chart($("g-mercado"), {
       type: "line",
       data: { datasets: [] },
       options: opcoes({
         scales: {
           x: { type: "linear", ticks: { maxRotation: 0, autoSkipPadding: 12, color: cor("--ink-3"), font: { family: "IBM Plex Sans" },
-                 callback: (v) => { const d = new Date(v); return (mkJanela || 168) > 24 ? `${d.getDate()}/${d.getMonth() + 1}` : `${d.getHours()}h${String(d.getMinutes()).padStart(2, "0")}`; } },
+                 callback: (v) => { const d = brt(v); return (mkJanela || 168) > 24 ? `${d.getUTCDate()}/${d.getUTCMonth() + 1}` : `${d.getUTCHours()}h${dois(d.getUTCMinutes())}`; } },
                grid: { color: cor("--line") } },
           y: { min: 0, ticks: { color: cor("--ink-3"), callback: (v) => Math.round(v * 100) + "¢", font: { family: "IBM Plex Sans" } }, grid: { color: cor("--line") } },
         },
         plugins: Object.assign(opcoes({}).plugins, {
-          tooltip: { callbacks: { title: (it) => new Date(it[0].parsed.x).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }),
+          tooltip: { callbacks: { title: (it) => { const d = brt(it[0].parsed.x); return `${dois(d.getUTCDate())}/${dois(d.getUTCMonth() + 1)} ${dois(d.getUTCHours())}:${dois(d.getUTCMinutes())} (Brasília)`; },
                                   label: (it) => ` ${it.dataset.label}: ${cents(it.parsed.y)}` } },
         }),
       }),
@@ -795,6 +826,14 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     setTxt("mk-leg", leg);
   }
 
+  // 16h50 de Brasília no relógio deste computador, se ele estiver em outro fuso (ex.: Manaus, 15h50)
+  const COMECO_LOCAL = (() => {
+    const d = new Date(Date.UTC(2026, 9, 25, 19, 50));  // 16h50 de 25/10 em Brasília (UTC−3)
+    if (d.getTimezoneOffset() === 180) return "";
+    const dia = d.getDate() !== 25 ? ` de ${d.getDate()}/${d.getMonth() + 1}` : "";
+    return ` (${d.getHours()}h${String(d.getMinutes()).padStart(2, "0")}${dia} no relógio deste computador)`;
+  })();
+
   // ---------- renderização ----------
   function setTxt(id, t) { const e = $(id); if (e.textContent !== t) e.textContent = t; }
 
@@ -805,9 +844,10 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     // ao vivo: sem ciclo novo por 2,5 intervalos = rede ou TSE com problema
     const atraso = s.ultimoNovo ? Math.round((Date.now() - s.ultimoNovo) / 1000) : null;
     const parado = aba === "vivo" && estado === "rodando" && atraso != null && atraso > 2.5 * (s.info.intervalo || 40);
-    const nivel = !s.ok || estado === "erro" ? "ruim" : parado ? "aviso" : estado === "rodando" ? "bom" : estado === "gerando" || estado === "preparando" ? "aviso" : "neutro";
+    const falhando = aba === "vivo" && estado === "rodando" && ult && municipiosFalhando(ult.c);
+    const nivel = !s.ok || estado === "erro" ? "ruim" : parado || falhando ? "aviso" : estado === "rodando" ? "bom" : estado === "gerando" || estado === "preparando" ? "aviso" : "neutro";
     $("badge").dataset.n = nivel;
-    setTxt("badge", simulada && s.info.pausado && estado === "rodando" ? "pausado" : parado ? "sem ciclo novo" : estado);
+    setTxt("badge", simulada && s.info.pausado && estado === "rodando" ? "pausado" : falhando ? "TSE falhando" : parado ? "sem ciclo novo" : estado);
     if (simulada) {
       setTxt("carimbo", s.id == null ? "nenhuma simulação" : `${hora(s.info.relogio ?? -2)} simulado · ${virg(s.info.velocidade ?? 60)}× · semente ${s.info.semente ?? "—"}`);
     } else {
@@ -819,6 +859,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
           `dados do TSE de ${idadeTxt(idade)} atrás`);
         if (estado === "rodando" && c.duracao != null) partes.push(`ciclo de ${Math.round(c.duracao)} s`);
         if (estado === "rodando" && c.fila) partes.push(`${inteiro(c.fila)} municípios na fila`);
+        if (c.falhas) partes.push(`${inteiro(c.falhas)} de ${inteiro(c.pedidos || 0)} municípios falharam`);
         if (estado !== "rodando") partes.push("último ciclo");
       }
       const mk = mercadoAgora();
@@ -906,6 +947,19 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       [n, tag, txt] = [ganha ? "bom" : "ruim", "Apuração encerrada",
         `Resultado: ${margem(mf)}, faixa "${fx}". ${nomePos} ${ganha ? "paga US$ 1 por cota" : "não paga nada"}. Veja na banca simulada como terminou cada jeito de vender.`];
     }
+    // falha nos arquivos de município: agora ou há menos de RECUPERACAO min (o modelo se refaz)
+    const falhaK = L.map((o) => municipiosFalhando(o.c)).lastIndexOf(true);
+    if (ult && falhaK >= 0 && (falhaK === L.length - 1 || ult.t - L[falhaK].t < RECUPERACAO)) {
+      const agora = falhaK === L.length - 1;
+      [n, tag, txt] = [agora ? "ruim" : "aviso", agora ? "Dados do TSE falhando" : "Modelo se recuperando de falha do TSE",
+        (agora ? `${ult.c.falhas} de ${ult.c.pedidos} arquivos de município falharam neste ciclo: o modelo está parado nos dados antigos.`
+               : `Os arquivos de município falharam até ${hora(L[falhaK].t)}. Nos testes, o modelo ficou distorcido por até ~1 h depois de uma falha total, mesmo com seções % e eleitorado % já subindo juntos.`)
+        + ` Até ${hora(L[falhaK].t + RECUPERACAO)}, não aja por disparo do modelo; use o preço da Polymarket como referência. O que o modelo diria: ${tag}. ${txt}`];
+    }
+    const semCiclo = semCicloNovo(s);
+    if (semCiclo != null && ult)
+      [n, tag, txt] = ["aviso", "Sem dados novos do TSE",
+        `Nenhum ciclo novo há ${Math.round(semCiclo / 60)} min: o modelo, o plano e esta tela estão parados no ciclo de ${hora(ult.t)} (o preço da Polymarket acima segue ao vivo). Não aja por disparo do modelo até os ciclos voltarem; se não voltarem, acompanhe pelo site do TSE e pela Polymarket. O que o modelo dizia: ${tag}. ${txt}`];
     $("k-conselho").dataset.n = n; setTxt("k-tag", tag); setTxt("k-txt", txt);
 
     // plano
@@ -929,7 +983,8 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   function tela(ult, um, foco) {
     if (!ult) return '<span class="d">(sem ciclos)</span>';
     const c = ult.c, Lh = [];
-    Lh.push(`<span class="d">[${esc(c.gerado || "?")}] +${Math.round(c.t)}min | seções ${(c.secoes_pct || 0).toFixed(1)}% | eleitorado ${(c.eleitorado_pct || 0).toFixed(1)}% | baixados ${c.baixados ?? 0}</span>`);
+    Lh.push(`<span class="d">[${esc(c.gerado || "?")}] +${Math.round(c.t)}min | seções ${(c.secoes_pct || 0).toFixed(1)}% | eleitorado ${(c.eleitorado_pct || 0).toFixed(1)}% | baixados ${c.baixados ?? 0}${c.falhas ? ` | falharam ${c.falhas}` : ""}</span>`);
+    if (municipiosFalhando(c)) Lh.push(`  <span class="d">!! AVISO: ${c.falhas} de ${c.pedidos} arquivos de município falharam; o modelo está parado nos dados antigos</span>`);
     if (!um || um !== ult) { Lh.push("  " + esc(c.msg || "")); return Lh.join("\n"); }
     const sg = (x) => (x >= 0 ? "+" : "-") + Math.abs(x).toFixed(2);
     Lh.push(`  parcial (TSE): F ${sg(c.parcial_tse)}   |   MODELO: F ${sg(c.mu)} ± ${c.sd.toFixed(2)} (w ${(c.w ?? 0).toFixed(2)})`);
@@ -977,7 +1032,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
         setTxt("vivo-txt", s.estado === "erro" ? `O monitor parou com erro: ${s.erro}` : "O monitor ao vivo não está rodando.");
         setTxt("vivo-nota", ret
           ? `Sessão gravada: ${ret.pasta}, ${ret.ciclos} ciclos, até ${ret.gerado || "?"} (${virg((ret.eleitorado_pct || 0).toFixed(1))}% apurado). Se o painel caiu no meio da apuração, retome-a: o histórico volta e o modelo é refeito com os retratos gravados.`
-          : "No dia 25/10, comece às 16h50. Antes disso serve só de teste de conexão: o TSE ainda não tem votos do 2º turno.");
+          : `No dia 25/10, comece às 16h50 de Brasília${COMECO_LOCAL}. Antes disso serve só de teste de conexão: o TSE ainda não tem votos do 2º turno.`);
       }
       $("vivo-nota").classList.toggle("erro", s.estado === "erro" && !ret);
     } else {
@@ -1001,7 +1056,9 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
 
   // ---------- trade: carteira que troca para a faixa que o modelo aponta ----------
   // Mesma regra de trade.py (que a testa nas noites salvas), mais os botões manuais.
-  let trade = { inicial: "F <4%", entrada: 40.5, banca: 100, limiar: 70, vantagem: 5, apurado: 2, trocas: 2, auto: true };
+  // limiar 80%: rende menos que 70% na média; começando em dinheiro, tem menos noites de prejuízo
+  // (começando com posição, 70% é melhor nas simulações). Ver README, aba Trade.
+  let trade = { inicial: "F <4%", entrada: 40.5, banca: 100, limiar: 80, vantagem: 5, apurado: 2, trocas: 2, auto: true, v: 2 };
   function salvarTrade() { try { localStorage.setItem("painel-trade", JSON.stringify(trade)); } catch (e) { /* sem armazenamento */ } }
   function lerTradeSalvo() { try { return JSON.parse(localStorage.getItem("painel-trade") || "null"); } catch (e) { return null; } }
   const precoHoje = (f) => (CFG && CFG.preco_hoje[f] != null ? +(CFG.preco_hoje[f] * 100).toFixed(1) : trade.entrada);
@@ -1206,9 +1263,9 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     const n = (id, d) => { const v = parseFloat(String($(id).value).replace(",", ".")); return Number.isFinite(v) ? v : d; };
     const inicial = $("tr-inicial").value, novaFaixa = inicial !== trade.inicial;
     trade = { inicial, entrada: novaFaixa && inicial !== "dinheiro" ? precoHoje(inicial) : Math.min(Math.max(n("tr-entrada", precoHoje(inicial)), 1), 99),
-              banca: Math.max(n("tr-banca", 100), 1), limiar: Math.min(Math.max(n("tr-limiar", 70), 1), 99),
+              banca: Math.max(n("tr-banca", 100), 1), limiar: Math.min(Math.max(n("tr-limiar", 80), 1), 99),
               vantagem: Math.max(n("tr-vantagem", 5), 0), apurado: Math.max(n("tr-apurado", 2), 0),
-              trocas: Math.max(Math.round(n("tr-trocas", 2)), 0), auto: trade.auto };
+              trocas: Math.max(Math.round(n("tr-trocas", 2)), 0), auto: trade.auto, v: 2 };
     if (novaFaixa) $("tr-entrada").value = trade.entrada;
     $("tr-entrada").disabled = inicial === "dinheiro";  // começando em dinheiro, não há preço pago
     salvarTrade();
@@ -1435,6 +1492,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     $("b-entrada").value = entradaPadrao();
     $("tr-inicial").innerHTML = '<option value="dinheiro">Dinheiro (espera o sinal)</option>' + FAIXAS.map((f) => `<option>${esc(f)}</option>`).join("");
     const tsalvo = lerTradeSalvo();
+    if (tsalvo && !tsalvo.v && tsalvo.limiar === 70) tsalvo.limiar = 80;  // 70 era só o padrão antigo
     trade = Object.assign(trade, { inicial: pos.faixa, entrada: precoHoje(pos.faixa) },
                           tsalvo && (FAIXAS.includes(tsalvo.inicial) || tsalvo.inicial === "dinheiro") ? tsalvo : {});
     mostrarTrade();
