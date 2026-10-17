@@ -389,7 +389,7 @@ chance de terminar com prejuízo):
     modelo, vendeu "F <4%" (que ganhou) quase de graça; na noite de 4/10 rendeu US$ 23 contra 84.
 - **Para o trade simulado:** **começar em dinheiro, com limiar de 80%** (80% é o limiar padrão
   da aba Trade; em "Começa em", escolha "Dinheiro (espera o sinal)", porque a aba começa na sua
-  posição). O 80% não rende mais: nas simulações fica US$ 16 a 37 abaixo do de 70% na média. Ele
+  posição; no dia 25, com "Noite: Ao vivo (TSE)", a aba avisa o sinal na apuração real). O 80% não rende mais: nas simulações fica US$ 16 a 37 abaixo do de 70% na média. Ele
   serve para perder menos vezes: começando em dinheiro, prejuízo em 3–5% das noites nos ritmos
   que andam atrás do modelo, e ganha do 70% no mercado que sabe mais que o modelo. Começar com
   posição perde com mais frequência: de 12% a 63% das noites com 80%. O lucro do trade depende
@@ -553,11 +553,23 @@ python eleicao/painel.py --faixa "F <4%" --degrau f90@2:100
   - Uma sessão só abre em um lugar por vez. Se o painel e o monitor do terminal tentarem a mesma
     pasta, o segundo para com um aviso.
 
-### Aba "Trade (simulação)"
+### Aba "Trade"
 
-A mesma noite simulada da aba Simulação, agora com uma carteira que troca de faixa quando o modelo
-aponta outra. Os controles da noite são os mesmos (cenário, velocidade, pausa, revelar). Só
-simulação: nada aqui envia ordens.
+Uma carteira que troca de faixa quando o modelo aponta outra. Em "Noite", escolha onde ela roda:
+
+- **Simulada:** a mesma noite da aba Simulação, com os mesmos controles (cenário, velocidade,
+  pausa, revelar) e o preço simulado.
+- **Ao vivo (TSE):** os ciclos da aba ao vivo, com os preços da Polymarket de cada ciclo e os
+  controles do monitor ao vivo. A carteira é de papel. A cada compra ou venda da regra, a linha do
+  tempo mostra "Sinal de compra" ou "Sinal de venda" com o preço, e o som toca em qualquer aba do
+  painel. É assim que se segue a estratégia de esperar o sinal: "Começa em: Dinheiro (espera o
+  sinal)", "Noite: Ao vivo (TSE)" e o som ligado.
+  - O painel não manda ordens: a ordem é sua, na Polymarket.
+  - Sem o preço da Polymarket no ciclo (ou sem o livro da faixa), a regra não opera.
+  - Se você operar diferente da regra, registre com os botões da carteira. O que você registra
+    fica no navegador, ligado à pasta da sessão: sobrevive a um F5 e a uma retomada.
+  - Para não ouvir os sinais, volte para "Noite: Simulada". A posição e o plano da aba ao vivo
+    seguem avisando como antes.
 
 - **Regra** (editável na aba): a partir de 2% apurado, se a faixa favorita do modelo não é a da
   carteira e tem pelo menos 80%, vende tudo no preço de venda. Depois compra a favorita no preço de

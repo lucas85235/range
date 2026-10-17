@@ -189,7 +189,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     <nav class="abas" role="tablist" aria-label="Modo">
       <button role="tab" id="aba-vivo" aria-selected="true"><span class="ponto" id="ponto-vivo"></span>Ao vivo (TSE)</button>
       <button role="tab" id="aba-sim" aria-selected="false"><span class="ponto" id="ponto-sim"></span>Simulação</button>
-      <button role="tab" id="aba-trade" aria-selected="false" title="Noite simulada com uma carteira que troca para a faixa que o modelo aponta"><span class="ponto" id="ponto-trade"></span>Trade (simulação)</button>
+      <button role="tab" id="aba-trade" aria-selected="false" title="Carteira que troca para a faixa que o modelo aponta, na noite simulada ou na apuração ao vivo"><span class="ponto" id="ponto-trade"></span>Trade</button>
     </nav>
     <div class="status">
       <span class="badge" id="badge">—</span>
@@ -229,6 +229,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
 
   <!-- trade: carteira que troca para a faixa do modelo -->
   <section class="controle" id="ctl-trade" aria-label="Regra da carteira" hidden>
+    <div class="campo"><span>Noite</span><div class="seg" role="group" aria-label="Noite"><button id="tr-noite-sim" aria-pressed="true">Simulada</button><button id="tr-noite-vivo" aria-pressed="false">Ao vivo (TSE)</button></div></div>
     <label class="campo"><span>Começa em</span><select id="tr-inicial"></select></label>
     <label class="campo"><span>Preço pago (¢)</span><input id="tr-entrada" type="number" min="1" max="99" step="0.5"></label>
     <label class="campo"><span>Banca (US$)</span><input id="tr-banca" type="number" min="1" step="1" value="100"></label>
@@ -238,6 +239,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     <label class="campo"><span>Máx. de trocas</span><input id="tr-trocas" type="number" min="0" max="10" step="1" value="2"></label>
     <div class="campo"><span>Automático</span><div class="seg" role="group" aria-label="Automático"><button id="tr-auto-on" aria-pressed="true">Ligado</button><button id="tr-auto-off" aria-pressed="false">Desligado</button></div></div>
     <p class="nota grow">A cada ciclo, a partir do % apurado: se a faixa favorita do modelo não é a da carteira e tem pelo menos o limiar, vende tudo; depois compra a favorita se a chance do modelo passar o preço de compra pela vantagem pedida (senão espera em dinheiro).</p>
+    <p class="nota grow" id="tr-nota-vivo" hidden>Ao vivo, a carteira é de papel: segue a regra nos ciclos do TSE com os preços da Polymarket e avisa, com som em qualquer aba, cada sinal de compra e de venda. O painel não manda ordens: a ordem é sua, na Polymarket. Se você operar diferente, registre com os botões da carteira.</p>
   </section>
 
   <!-- posição -->
@@ -346,7 +348,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   </section>
 
   <section class="cartao" id="carteira" hidden aria-label="Carteira">
-    <h2>Carteira</h2>
+    <h2 id="tr-titulo">Carteira</h2>
     <div class="acoes">
       <button class="btn" id="tr-favorita">Trocar agora para a favorita</button>
       <button class="btn" id="tr-dinheiro">Vender tudo (ficar em dinheiro)</button>
@@ -418,9 +420,19 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
                         ultimoNovo: 0, vendas: [], ok: true, retomavel: null,
                         vistosTrade: new Set(), carregadaTrade: false, manuais: [], autoInicio: null });
   const S = { vivo: nova(), sim: nova() };
-  // a aba Trade usa a mesma noite simulada da aba Simulação
+  // a aba Trade usa a noite simulada da aba Simulação ou, com "Noite: ao vivo", a apuração real
   let aba = location.hash === "#sim" ? "sim" : location.hash === "#trade" ? "trade" : "vivo";
-  const sessaoDa = (a) => (a === "vivo" ? "vivo" : "sim");
+  const sessaoDa = (a) => (a === "vivo" ? "vivo" : a === "trade" ? trade.noite : "sim");
+  const sTrade = () => S[trade.noite];
+  // ao vivo, o que você registra na carteira de papel sobrevive a um F5 e a uma retomada (pela pasta)
+  const chaveManuais = (s) => "painel-trade-vivo:" + (s.info.pasta || s.id);
+  function salvarManuais(s) {
+    if (s !== S.vivo) return;
+    try { localStorage.setItem(chaveManuais(s), JSON.stringify({ manuais: s.manuais, autoInicio: s.autoInicio })); } catch (e) { /* sem armazenamento */ }
+  }
+  function lerManuais(s) {
+    try { const d = JSON.parse(localStorage.getItem(chaveManuais(s)) || "null"); if (d && Array.isArray(d.manuais)) Object.assign(s, d); } catch (e) { /* sem armazenamento */ }
+  }
 
   async function puxar(tipo) {
     const s = S[tipo];
@@ -434,6 +446,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       else if (d.desde === s.ciclos.length) s.ciclos.push(...d.ciclos);
       if (d.ciclos && d.ciclos.length) s.ultimoNovo = Date.now();
       Object.assign(s, { estado: d.estado, erro: d.erro, eventos: d.eventos || [], info: d.info || {}, ok: true, retomavel: d.retomavel || null });
+      if (tipo === "vivo" && s.id != null && s.manuaisDe !== chaveManuais(s)) { s.manuaisDe = chaveManuais(s); lerManuais(s); }
     } catch (e) {
       s.ok = false;
     }
@@ -566,19 +579,19 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   const TITULO = document.title;
   document.addEventListener("visibilitychange", () => { if (!document.hidden) document.title = TITULO; });
 
-  // tipo: "vivo", "sim" ou "trade" (trade = trocas da carteira na noite simulada)
+  // tipo: "vivo", "sim" ou "trade" (trade = trocas da carteira, na noite simulada ou ao vivo)
   function novidades(tipo, ev) {
-    const s = S[sessaoDa(tipo)], trade = tipo === "trade";
-    const vistos = trade ? s.vistosTrade : s.vistos, flag = trade ? "carregadaTrade" : "carregada";
+    const s = S[sessaoDa(tipo)], eTrade = tipo === "trade";
+    const vistos = eTrade ? s.vistosTrade : s.vistos, flag = eTrade ? "carregadaTrade" : "carregada";
     const novos = ev.filter((e) => !vistos.has(e.chave));
     novos.forEach((e) => vistos.add(e.chave));
     if (!s[flag]) { s[flag] = true; return; }
-    // o ao vivo avisa em qualquer aba; simulação e trade, só na própria aba
-    if (tipo !== "vivo" && tipo !== aba) return;
+    // o ao vivo (posição e trade) avisa em qualquer aba; a noite simulada, só na própria aba
+    if (s !== S.vivo && tipo !== aba) return;
     const tocar = novos.find((e) => e.som === "plano") || novos.find((e) => e.som);
     if (tocar) {
       bip(tocar.som);
-      if (document.hidden) document.title = `(!) ${tipo === "vivo" ? "AO VIVO" : tipo === "trade" ? "trade" : "simulação"} — ${TITULO}`;
+      if (document.hidden) document.title = `(!) ${s === S.vivo ? (eTrade ? "TRADE AO VIVO" : "AO VIVO") : eTrade ? "trade" : "simulação"} — ${TITULO}`;
     }
   }
 
@@ -844,12 +857,12 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
 
   // partes comuns às três abas
   function renderTopo(s, ult) {
-    const simulada = aba !== "vivo";
+    const simulada = s !== S.vivo;
     const estado = s.ok ? s.estado : "sem conexão";
     // ao vivo: sem ciclo novo por 2,5 intervalos = rede ou TSE com problema
     const atraso = s.ultimoNovo ? Math.round((Date.now() - s.ultimoNovo) / 1000) : null;
-    const parado = aba === "vivo" && estado === "rodando" && atraso != null && atraso > 2.5 * (s.info.intervalo || 40);
-    const falhando = aba === "vivo" && estado === "rodando" && ult && municipiosFalhando(ult.c);
+    const parado = !simulada && estado === "rodando" && atraso != null && atraso > 2.5 * (s.info.intervalo || 40);
+    const falhando = !simulada && estado === "rodando" && ult && municipiosFalhando(ult.c);
     const nivel = !s.ok || estado === "erro" ? "ruim" : parado || falhando ? "aviso" : estado === "rodando" ? "bom" : estado === "gerando" || estado === "preparando" ? "aviso" : "neutro";
     $("badge").dataset.n = nivel;
     setTxt("badge", simulada && s.info.pausado && estado === "rodando" ? "pausado" : falhando ? "TSE falhando" : parado ? "sem ciclo novo" : estado);
@@ -874,7 +887,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     }
     $("ponto-vivo").dataset.on = S.vivo.estado === "rodando" ? "1" : "0";
     $("ponto-sim").dataset.on = S.sim.estado === "rodando" ? "1" : "0";
-    $("ponto-trade").dataset.on = S.sim.estado === "rodando" ? "1" : "0";
+    $("ponto-trade").dataset.on = sTrade().estado === "rodando" ? "1" : "0";
   }
 
   function renderModelo(um, ult, foco) {
@@ -1011,8 +1024,10 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   }
 
   function renderizarControles(s) {
-    $("ctl-vivo").hidden = aba !== "vivo";
-    $("ctl-sim").hidden = aba === "vivo";
+    const vivo = s === S.vivo;
+    $("ctl-vivo").hidden = !vivo;
+    $("ctl-sim").hidden = vivo;
+    $("tr-nota-vivo").hidden = !vivo;
     $("ctl-pos").hidden = aba === "trade";
     $("ctl-trade").hidden = aba !== "trade";
     $("banca").hidden = aba !== "sim";
@@ -1020,7 +1035,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     $("fig-chance").hidden = aba === "trade";
     $("fig-mercado").hidden = aba !== "vivo";
     $("fig-carteira").hidden = aba !== "trade";
-    if (aba === "vivo") {
+    if (vivo) {
       const rodando = s.estado === "rodando" || s.estado === "preparando";
       const ret = rodando ? null : s.retomavel, inf = s.info;
       $("vivo-iniciar").hidden = rodando; $("vivo-parar").hidden = !rodando; $("vivo-retomar").hidden = !ret;
@@ -1064,7 +1079,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   // Mesma regra de trade.py (que a testa nas noites salvas), mais os botões manuais.
   // limiar 80%: rende menos que 70% na média; começando em dinheiro, tem menos noites de prejuízo
   // (começando com posição, 70% é melhor nas simulações). Ver README, aba Trade.
-  let trade = { inicial: "F <4%", entrada: 40.5, banca: 100, limiar: 80, vantagem: 5, apurado: 2, trocas: 2, auto: true, v: 2 };
+  let trade = { inicial: "F <4%", entrada: 40.5, banca: 100, limiar: 80, vantagem: 5, apurado: 2, trocas: 2, auto: true, noite: "sim", v: 2 };
   function salvarTrade() { try { localStorage.setItem("painel-trade", JSON.stringify(trade)); } catch (e) { /* sem armazenamento */ } }
   function lerTradeSalvo() { try { return JSON.parse(localStorage.getItem("painel-trade") || "null"); } catch (e) { return null; } }
   const precoHoje = (f) => (CFG && CFG.preco_hoje[f] != null ? +(CFG.preco_hoje[f] * 100).toFixed(1) : trade.entrada);
@@ -1101,9 +1116,10 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
         if (m.acao === "dinheiro" && h !== null) vende(true);
         if (m.acao === "favorita" && fav !== null && h !== fav) { if (h !== null) vende(true); if (ask(fav) > 0) compra(fav, true); }
       });
-      if (auto && p && (c.eleitorado_pct || 0) >= r.apurado_min) {
+      // ao vivo, sem preço da Polymarket no ciclo (ou sem o livro da faixa), a regra não opera
+      if (auto && p && c.mercado && (c.eleitorado_pct || 0) >= r.apurado_min) {
         const confiante = p[fav] >= r.limiar;
-        if (h !== null && fav !== h && confiante && vendas < r.max_trocas) vende(false);
+        if (h !== null && fav !== h && confiante && vendas < r.max_trocas && mk[FAIXAS[h]]) vende(false);
         if (h === null && confiante && p[fav] - ask(fav) >= r.vantagem && ask(fav) > 0) compra(fav, false);
       }
       hs.push(h);
@@ -1128,13 +1144,18 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       }
       return o;
     });
-    const chave = JSON.stringify(r);
+    const chave = JSON.stringify(r), vivo = s === S.vivo;
+    // ao vivo, a carteira é de papel: a regra dá o sinal e a ordem é sua
     const ev = R.ops.map((op) => ({
       chave: `trade|${chave}|${op.k}|${op.op}|${op.faixa}|${op.manual ? 1 : 0}`, k: op.k, t: op.t,
       nivel: op.op === "compra" ? "bom" : "aviso", som: "plano",
-      texto: op.op === "vende"
-        ? `${op.manual ? "Você vendeu" : "Vendeu"} "${op.faixa}" a ${cents(op.preco)}: ${usd(op.valor)} em caixa.`
-        : `${op.manual ? "Você comprou" : "Comprou"} "${op.faixa}" a ${cents(op.preco)}: ${virg(op.cotas.toFixed(1))} cotas com ${usd(op.valor)}.` }));
+      texto: vivo && !op.manual
+        ? (op.op === "vende"
+          ? `Sinal de venda: "${op.faixa}" a ~${cents(op.preco)}. A carteira de papel vendeu ${virg(op.cotas.toFixed(1))} cotas: ${usd(op.valor)} em caixa. A ordem na Polymarket é sua.`
+          : `Sinal de compra: "${op.faixa}" a ~${cents(op.preco)}. A carteira de papel comprou ${virg(op.cotas.toFixed(1))} cotas com ${usd(op.valor)}. A ordem na Polymarket é sua.`)
+        : op.op === "vende"
+          ? `${op.manual ? "Você vendeu" : "Vendeu"} "${op.faixa}" a ${cents(op.preco)}: ${usd(op.valor)} em caixa.`
+          : `${op.manual ? "Você comprou" : "Comprou"} "${op.faixa}" a ${cents(op.preco)}: ${virg(op.cotas.toFixed(1))} cotas com ${usd(op.valor)}.` }));
     (s.manuais || []).forEach((m, i) => {
       if (m.acao !== "auto" || !s.ciclos[m.k]) return;
       ev.push({ chave: `auto|${i}|${m.k}|${m.valor}`, k: m.k, t: s.ciclos[m.k].t, nivel: "neutro", som: null,
@@ -1173,7 +1194,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   }
 
   function renderizarTrade() {
-    const s = S.sim, T = avaliarTrade(s), L = T.L, r = T.regra;
+    const s = sTrade(), T = avaliarTrade(s), L = T.L, r = T.regra;
     const ult = L.length ? L[L.length - 1] : null;
     const um = [...L].reverse().find((o) => o.tem) || null;
     renderTopo(s, ult);
@@ -1220,6 +1241,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     const suf = s.estado === "fim" ? " (final)" : T.final ? " (com o resultado revelado)" : " (a preço de venda de agora)";
     const res = (id, v) => { setTxt(id, usd(v)); setTxt(id + "-s", `${v >= r.banca ? "+" : "−"}${usd(Math.abs(v - r.banca))} sobre a banca${suf}`); };
     const dinheiro = r.inicial === "dinheiro";
+    setTxt("tr-titulo", s === S.vivo ? "Carteira de papel (ao vivo)" : "Carteira");
     setTxt("tr-segurar-rot", dinheiro ? "Ficando em dinheiro" : "Segurando a posição inicial");
     if (L.length) {
       res("tr-valor", T.valorAgora); res("tr-segurar", T.segAgora);
@@ -1228,7 +1250,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       setTxt("tr-dif-s", Math.abs(d) < 0.005 ? (dinheiro ? "igual a ficar parado" : "igual a segurar")
         : d > 0 ? (dinheiro ? "operar pelo sinal rendeu mais que ficar parado" : "trocar rendeu mais que segurar")
         : (dinheiro ? "ficar parado rendeu mais que operar" : "segurar rendeu mais que trocar"));
-    } else ["tr-valor", "tr-segurar", "tr-dif"].forEach((id) => { setTxt(id, "—"); setTxt(id + "-s", "comece uma simulação"); });
+    } else ["tr-valor", "tr-segurar", "tr-dif"].forEach((id) => { setTxt(id, "—"); setTxt(id + "-s", s === S.vivo ? "comece a ler o TSE" : "comece uma simulação"); });
     $("tr-ops").innerHTML = T.R.ops.length
       ? T.R.ops.map((o) => `<li>${hora(o.t)} · ${o.manual ? "você " : ""}${o.op === "vende" ? "vendeu" : "comprou"} "${esc(o.faixa)}" a ${cents(o.preco)}${o.op === "vende" ? ` → ${usd(o.valor)}` : ` (${virg(o.cotas.toFixed(1))} cotas)`}</li>`).join("")
       : "<li>Nenhuma troca ainda.</li>";
@@ -1249,7 +1271,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   }
   // o que você faz durante a noite fica gravado no ciclo em que clicou (vale dali para a frente)
   function acao(a, valor) {
-    const s = S.sim;
+    const s = sTrade();
     if (a === "auto") { trade.auto = valor; salvarTrade(); mostrarAuto(); }
     if (s.estado === "rodando" && s.ciclos.length) {
       const k = s.ciclos.length - 1;
@@ -1257,6 +1279,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       if (a === "dinheiro" && trade.auto) { trade.auto = false; salvarTrade(); mostrarAuto(); s.manuais.push({ k, acao: "auto", valor: false }); }
       s.manuais.push({ k, acao: a, valor });
     } else if (a === "auto" && !s.ciclos.length) s.autoInicio = valor;  // antes de a noite começar
+    salvarManuais(s);
     avaliarTrade(s).ev.forEach((e) => s.vistosTrade.add(e.chave));  // foi você: não toca
     renderizar();
   }
@@ -1271,11 +1294,11 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     trade = { inicial, entrada: novaFaixa && inicial !== "dinheiro" ? precoHoje(inicial) : Math.min(Math.max(n("tr-entrada", precoHoje(inicial)), 1), 99),
               banca: Math.max(n("tr-banca", 100), 1), limiar: Math.min(Math.max(n("tr-limiar", 80), 1), 99),
               vantagem: Math.max(n("tr-vantagem", 5), 0), apurado: Math.max(n("tr-apurado", 2), 0),
-              trocas: Math.max(Math.round(n("tr-trocas", 2)), 0), auto: trade.auto, v: 2 };
+              trocas: Math.max(Math.round(n("tr-trocas", 2)), 0), auto: trade.auto, noite: trade.noite, v: 2 };
     if (novaFaixa) $("tr-entrada").value = trade.entrada;
     $("tr-entrada").disabled = inicial === "dinheiro";  // começando em dinheiro, não há preço pago
     salvarTrade();
-    avaliarTrade(S.sim).ev.forEach((e) => S.sim.vistosTrade.add(e.chave));  // regra nova: o que já passou não toca
+    avaliarTrade(sTrade()).ev.forEach((e) => sTrade().vistosTrade.add(e.chave));  // regra nova: o que já passou não toca
     renderizar();
   }
   function mostrarTrade() {
@@ -1284,7 +1307,19 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     $("tr-trocas").value = trade.trocas;
     $("tr-entrada").disabled = trade.inicial === "dinheiro";
     mostrarAuto();
+    $("tr-noite-sim").setAttribute("aria-pressed", String(trade.noite === "sim"));
+    $("tr-noite-vivo").setAttribute("aria-pressed", String(trade.noite === "vivo"));
   }
+  // noite simulada ou ao vivo: o que já aconteceu na outra noite não toca ao trocar
+  function trocarNoite(noite) {
+    trade.noite = noite;
+    salvarTrade();
+    mostrarTrade();
+    avaliarTrade(sTrade()).ev.forEach((e) => sTrade().vistosTrade.add(e.chave));
+    ciclo(true);
+  }
+  $("tr-noite-sim").addEventListener("click", () => trocarNoite("sim"));
+  $("tr-noite-vivo").addEventListener("click", () => trocarNoite("vivo"));
   ["tr-inicial", "tr-entrada", "tr-banca", "tr-limiar", "tr-vantagem", "tr-apurado", "tr-trocas"].forEach((id) => $(id).addEventListener("change", lerTrade));
 
   // a regra automática nas noites simuladas salvas (trade.py), nos três ritmos de mercado
@@ -1464,13 +1499,13 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       rodada++;
       const atual = sessaoDa(aba), outro = atual === "vivo" ? "sim" : "vivo";
       const tarefas = [puxar(atual)];
-      if (aba === "vivo" && !M.desligado) tarefas.push(puxarMercado());
+      if (atual === "vivo" && !M.desligado) tarefas.push(puxarMercado());
       // a outra sessão também é lida (mais devagar) para não perder alertas do ao vivo
       if (forcar || rodada % 3 === 0 || S[outro].estado === "rodando") tarefas.push(puxar(outro));
       await Promise.all(tarefas);
       novidades("vivo", avaliar(S.vivo).ev);
       novidades("sim", avaliar(S.sim).ev);
-      novidades("trade", avaliarTrade(S.sim).ev);
+      novidades("trade", avaliarTrade(sTrade()).ev);
       renderizar();
     } finally { ocupado = false; }
   }
@@ -1501,6 +1536,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     if (tsalvo && !tsalvo.v && tsalvo.limiar === 70) tsalvo.limiar = 80;  // 70 era só o padrão antigo
     trade = Object.assign(trade, { inicial: pos.faixa, entrada: precoHoje(pos.faixa) },
                           tsalvo && (FAIXAS.includes(tsalvo.inicial) || tsalvo.inicial === "dinheiro") ? tsalvo : {});
+    if (trade.noite !== "vivo") trade.noite = "sim";
     mostrarTrade();
     if (!temChart()) setTxt("tab-nota", "Os gráficos precisam da internet (Chart.js); o resto do painel funciona sem eles.");
     criarGraficos();
