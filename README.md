@@ -504,8 +504,9 @@ python eleicao/painel.py --faixa "F <4%" --degrau f90@2:100
   continua sendo lida enquanto você usa a simulação, então os avisos tocam do mesmo jeito. Um F5
   desliga o som: ligue de novo.
 - **Falha nos arquivos de município do TSE.** Se 10% ou mais dos pedidos de um ciclo falham
-  (mínimo 5), o topo mostra "TSE falhando", a linha do tempo ganha um aviso com som e o quadro do
-  que fazer passa a dizer para não agir por disparo do modelo. O motivo: enquanto os municípios
+  (mínimo 5), ou chegam menos de 5% deles (o TSE pendurado só nos municípios), o topo mostra "TSE
+  falhando", a linha do tempo ganha um aviso com som e o quadro do que fazer passa a dizer para não
+  agir por disparo do modelo. O motivo: enquanto os municípios
   falham (com o arquivo do Brasil respondendo), o modelo segue rodando com os municípios
   congelados e o relógio andando, e esses retratos parados entram no julgamento da ordem de
   chegada (w), que desaba na volta.
@@ -698,8 +699,8 @@ Avisos:
 - `!!` quando o modelo dá à posição menos que o preço pelo qual dá para vendê-la;
 - `!!!` (com bipe) quando a chance cai abaixo de `--alerta` (padrão 50%), a partir de 1%
   apurado;
-- `!! AVISO` quando 10% ou mais dos arquivos de município pedidos no ciclo falham (mínimo 5), e
-  `!! RECUPERANDO` por 70 min depois da volta. O motivo está em "Falha nos arquivos de município
+- `!! AVISO` quando 10% ou mais dos arquivos de município pedidos no ciclo falham (mínimo 5) ou
+  chegam menos de 5% deles, e `!! RECUPERANDO` por 70 min depois da volta. O motivo está em "Falha nos arquivos de município
   do TSE", na seção do painel.
 
 Tudo fica gravado em `eleicao/dados/ao_vivo/<sessão>/`: o log por ciclo, os retratos por
@@ -716,6 +717,7 @@ Medido em 15/10 contra o TSE e a Polymarket de verdade:
 | Cache do TSE: quanto um arquivo pode estar velho quando chega | até ~55 s (`max-age` de 52 a 59 s) |
 | Ciclo: 28 arquivos de abrangência (o que mudou em cada município) | ~5 s |
 | Ciclo: até 450 municípios (~23 arquivos/s) | ~19 s |
+| Ciclo: espera máxima pelo TSE (o que estiver a caminho entra no próximo) | 30 s (3/4 do intervalo) |
 | Ciclo: modelo | menos de 1 s |
 | Polymarket: livro de ofertas das 8 faixas | ~0,6 s, a cada 10 s |
 | Página: lê o servidor | a cada 1 s |
@@ -746,6 +748,62 @@ Medido em 15/10 contra o TSE e a Polymarket de verdade:
     para 74 → 47 entre 11 e 15 min: o mercado derrubou a faixa perdedora entre 17h38 e 17h43.
   - **Venda assim que o `>>> PLANO` tocar: meta de até 5 min, limite de ~10.**
 
+### Se o TSE ficar lento
+
+As medições acima são de um dia sem movimento. No dia 25, o site do TSE pode ficar sobrecarregado.
+Para isso, o ciclo faz o seguinte:
+
+- **Espera o TSE por no máximo 30 s** (3/4 do intervalo; muda com `--prazo`). O que ainda estiver
+  baixando não se perde: segue nas 16 conexões, que não param entre ciclos, e entra no ciclo
+  seguinte. O topo mostra "N municípios a caminho (TSE lento)". Antes, o ciclo esperava o último
+  arquivo: com o TSE a 8 s por arquivo, cada ciclo levava ~4 min.
+- **Lê o Brasil primeiro.** O 1º ciclo continua sem prazo: baixa tudo o que já mudou antes da
+  primeira previsão.
+- **Ajusta o timeout.** A 1ª tentativa de cada arquivo espera 4× a mediana das últimas respostas,
+  entre 6 e 15 s (antes, 15 s fixos); a 2ª e a 3ª, até 10 e 15 s. Um arquivo pendurado é cortado
+  cedo, e um TSE que está só lento não é cortado.
+- **Usa a abrangência anterior** de uma UF cuja leitura atrasou, por até 2 min.
+- **Dá `!! AVISO` também quando quase nada chega** (menos de 5% dos arquivos pedidos). É o caso de
+  os arquivos de município pendurarem com o do Brasil respondendo: o modelo fica parado, como na
+  falha. Antes, o ciclo travava por ~20 min e só o painel avisava "sem ciclo novo".
+
+Teste com a noite inteira em tempo simulado (2º turno de 2022 e três 2º turnos sintéticos de 2026):
+atraso para o modelo dar 80% à faixa certa, em relação ao TSE normal (~0,7 s por arquivo).
+
+| TSE | Ciclo de antes | Ciclo de agora |
+|---|---|---|
+| 3 s por arquivo | +0,5 a +2,5 min | −0,5 a +1 min |
+| 6 s por arquivo | +2 a +14 min | 0 a +2 min |
+| 8 s por arquivo | +4,5 a +6,5 min | 0 a +2,5 min (uma vez +12) |
+| 12 s por arquivo | +9,5 a +27,5 min | +0,5 a +8,5 min |
+| 10% dos pedidos pendurados | +1 a +3 min | −0,5 a +1 min |
+| 30% dos pedidos pendurados | +4 a +19,5 min | 0 a +1,5 min |
+| 3 s + 20% pendurados | +5,5 a +18 min | 0 a +2 min |
+
+- **Em nenhum cenário a faixa de 90% deixou a faixa certa de fora.**
+- **A venda pela faixa de 90% perto do corte é o ponto fraco, nos dois ciclos.** Com 8 s por
+  arquivo só chegam ~2 arquivos/s, e o modelo fica ~6 pontos de apuração atrás. Numa noite com
+  margem final de F +4,6, a faixa de 90% tirou "F <4%" 3,5 a 16 min depois do normal no ciclo de
+  antes e 18,5 min depois no de agora (4 sorteios cada). Perto do corte, diferenças pequenas na
+  margem e na incerteza decidem esse minuto. Com o TSE muito lento, acompanhe a Polymarket em vez
+  de esperar o `>>> PLANO`.
+- **No ensaio de verdade** (HTTP, contra o replay lento), cada ciclo terminou em até 30 s. No pico,
+  chegaram ~315 municípios por ciclo com 2 s por arquivo e 80 com 8 s, o máximo que 16 conexões
+  dão. Com os arquivos de município pendurados, o `!! AVISO` saiu em todo ciclo, e o monitor
+  fecha na hora, mesmo com pedidos pendurados.
+
+Para ensaiar, o replay imita um TSE lento: `--latencia 8` (cada arquivo demora 8 s a mais),
+`--pendurar 0.1` (10% dos pedidos ficam 60 s sem resposta), `--erro 0.05` (5% respondem 503) e
+`--so-municipios` (só nos arquivos de município):
+
+```bash
+python eleicao/nucleo/replay_tse.py --ano 2022 --turno 2 --velocidade 5 --latencia 8
+```
+
+```bash
+python eleicao/monitor.py --url http://127.0.0.1:8765 --ano-base 2022
+```
+
 ## Estrutura do projeto
 
 ```
@@ -761,7 +819,7 @@ eleicao/
 │   ├── modelo.py            o modelo (transferência + ordem de chegada + incerteza)
 │   ├── simulacao.py         gera 2ºs turnos sintéticos seção a seção, com horários
 │   ├── fonte_tse.py         lê os JSON públicos do TSE
-│   ├── replay_tse.py        servidor local que imita o TSE, para ensaiar
+│   ├── replay_tse.py        servidor local que imita o TSE (normal ou lento), para ensaiar
 │   ├── mercado_sim.py       preço de mercado das noites simuladas (preço de hoje → modelo)
 │   └── polymarket.py        preços ao vivo da Polymarket (livro de ofertas da CLOB)
 ├── coleta/                  baixa os dados públicos

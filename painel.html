@@ -441,10 +441,15 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
 
   // ---------- avaliação (tudo derivado dos ciclos + posição) ----------
   // mesma regra de monitor.aviso_municipios: no ciclo, ≥ 10% dos arquivos de município pedidos
-  // (mínimo 5) falharam. Na volta, o modelo pode ficar distorcido por até RECUPERACAO minutos: nos
-  // testes com falha total começando cedo, a faixa de 90% ficou errada até ~1 h depois da volta.
+  // (mínimo 5) falharam ou chegaram menos de 5% deles (mínimo 20 pedidos). Na volta, o modelo pode
+  // ficar distorcido por até RECUPERACAO minutos: nos testes com falha total começando cedo, a faixa
+  // de 90% ficou errada até ~1 h depois da volta.
   const RECUPERACAO = 70;
-  const municipiosFalhando = (c) => !!c && (c.falhas || 0) >= Math.max(5, 0.1 * (c.pedidos || 0));
+  const falharamMuitos = (c) => (c.falhas || 0) >= Math.max(5, 0.1 * (c.pedidos || 0));
+  const municipiosFalhando = (c) => !!c && (falharamMuitos(c) || ((c.pedidos || 0) >= 20 && (c.baixados || 0) < 0.05 * c.pedidos));
+  const descFalha = (c) => falharamMuitos(c)
+    ? `${c.falhas} de ${c.pedidos} arquivos de município do TSE falharam (${c.erro_municipios || "erro"})`
+    : `Só ${c.baixados || 0} de ${c.pedidos} arquivos de município do TSE chegaram (o TSE não responde a tempo)`;
   // ao vivo, sem ciclo novo por 2,5 intervalos: TSE pendurado ou rede caída (o preço da Polymarket
   // segue ao vivo, à parte). Devolve há quantos segundos, ou null.
   function semCicloNovo(s) {
@@ -490,7 +495,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       const falha = municipiosFalhando(o.c);
       if (falha && !falhavaAntes)
         ev.push({ chave: `tse|${k}`, k, t: o.t, nivel: "ruim", som: "alerta",
-                  texto: `${o.c.falhas} de ${o.c.pedidos} arquivos de município do TSE falharam (${o.c.erro_municipios || "erro"}). O modelo está parado nos dados antigos e pode distorcer quando eles voltarem: por até ~1 h depois da volta, não aja por disparo do modelo; use o preço da Polymarket como referência.` });
+                  texto: `${descFalha(o.c)}. O modelo está parado nos dados antigos e pode distorcer quando eles voltarem: por até ~1 h depois da volta, não aja por disparo do modelo; use o preço da Polymarket como referência.` });
       if (!falha && falhavaAntes)
         ev.push({ chave: `tse-volta|${k}`, k, t: o.t, nivel: "aviso", som: null,
                   texto: `Os arquivos de município voltaram. Nos testes, o modelo ficou distorcido por até ~1 h depois de uma falha total, mesmo com seções % e eleitorado % já subindo juntos: até ${hora(o.t + RECUPERACAO)}, não aja por disparo do modelo; compare com o preço da Polymarket.` });
@@ -860,6 +865,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
         if (estado === "rodando" && c.duracao != null) partes.push(`ciclo de ${Math.round(c.duracao)} s`);
         if (estado === "rodando" && c.fila) partes.push(`${inteiro(c.fila)} municípios na fila`);
         if (c.falhas) partes.push(`${inteiro(c.falhas)} de ${inteiro(c.pedidos || 0)} municípios falharam`);
+        if (estado === "rodando" && c.atrasados) partes.push(`${inteiro(c.atrasados)} municípios a caminho (TSE lento)`);
         if (estado !== "rodando") partes.push("último ciclo");
       }
       const mk = mercadoAgora();
@@ -952,7 +958,7 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     if (ult && falhaK >= 0 && (falhaK === L.length - 1 || ult.t - L[falhaK].t < RECUPERACAO)) {
       const agora = falhaK === L.length - 1;
       [n, tag, txt] = [agora ? "ruim" : "aviso", agora ? "Dados do TSE falhando" : "Modelo se recuperando de falha do TSE",
-        (agora ? `${ult.c.falhas} de ${ult.c.pedidos} arquivos de município falharam neste ciclo: o modelo está parado nos dados antigos.`
+        (agora ? `${descFalha(ult.c)} neste ciclo: o modelo está parado nos dados antigos.`
                : `Os arquivos de município falharam até ${hora(L[falhaK].t)}. Nos testes, o modelo ficou distorcido por até ~1 h depois de uma falha total, mesmo com seções % e eleitorado % já subindo juntos.`)
         + ` Até ${hora(L[falhaK].t + RECUPERACAO)}, não aja por disparo do modelo; use o preço da Polymarket como referência. O que o modelo diria: ${tag}. ${txt}`];
     }
@@ -983,8 +989,8 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   function tela(ult, um, foco) {
     if (!ult) return '<span class="d">(sem ciclos)</span>';
     const c = ult.c, Lh = [];
-    Lh.push(`<span class="d">[${esc(c.gerado || "?")}] +${Math.round(c.t)}min | seções ${(c.secoes_pct || 0).toFixed(1)}% | eleitorado ${(c.eleitorado_pct || 0).toFixed(1)}% | baixados ${c.baixados ?? 0}${c.falhas ? ` | falharam ${c.falhas}` : ""}</span>`);
-    if (municipiosFalhando(c)) Lh.push(`  <span class="d">!! AVISO: ${c.falhas} de ${c.pedidos} arquivos de município falharam; o modelo está parado nos dados antigos</span>`);
+    Lh.push(`<span class="d">[${esc(c.gerado || "?")}] +${Math.round(c.t)}min | seções ${(c.secoes_pct || 0).toFixed(1)}% | eleitorado ${(c.eleitorado_pct || 0).toFixed(1)}% | baixados ${c.baixados ?? 0}${c.falhas ? ` | falharam ${c.falhas}` : ""}${c.atrasados ? ` | a caminho ${c.atrasados}` : ""}</span>`);
+    if (municipiosFalhando(c)) Lh.push(`  <span class="d">!! AVISO: ${esc(descFalha(c))}; o modelo está parado nos dados antigos</span>`);
     if (!um || um !== ult) { Lh.push("  " + esc(c.msg || "")); return Lh.join("\n"); }
     const sg = (x) => (x >= 0 ? "+" : "-") + Math.abs(x).toFixed(2);
     Lh.push(`  parcial (TSE): F ${sg(c.parcial_tse)}   |   MODELO: F ${sg(c.mu)} ± ${c.sd.toFixed(2)} (w ${(c.w ?? 0).toFixed(2)})`);

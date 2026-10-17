@@ -36,6 +36,10 @@ UFS = ["AC", "AL", "AM", "AP", "BA", "CE", "DF", "ES", "GO", "MA", "MG", "MS", "
        "PE", "PI", "PR", "RJ", "RN", "RO", "RR", "RS", "SC", "SE", "SP", "TO", "ZZ"]
 BRT = dt.timezone(dt.timedelta(hours=-3))
 AO_VIVO = DADOS / "ao_vivo"
+# fração do intervalo que um ciclo espera o TSE (Brasil, abrangências e municípios): 30 s no
+# intervalo de 40 s, e um ciclo normal leva ~25 s. Com o TSE lento, o que ainda estiver a caminho
+# entra no próximo ciclo e o ciclo não se arrasta
+PRAZO = 0.75
 
 
 def minutos_desde_17h(data: str, hora: str) -> float | None:
@@ -191,10 +195,10 @@ class Monitor:
     def __init__(self, fonte: FonteTSE, ano_base: int, turno_base: int, params: Params,
                  faixa: str, saida: Path, polymarket: bool = False, alerta: float = 0.5,
                  lado: str = "sim", max_mun: int = 450, plano: list[str] | None = None,
-                 base_ordem=None, gravar: bool = True):
+                 base_ordem=None, gravar: bool = True, prazo: float = PRAZO * 40):
         self.fonte, self.params, self.faixa, self.lado = fonte, params, faixa, lado
         self.ano_base, self.turno_base = ano_base, turno_base
-        self.max_mun = max_mun
+        self.max_mun, self.prazo = max_mun, prazo
         self.plano = [Degrau(x) for x in (plano or [])]
         self.polymarket, self.alerta = polymarket, alerta
         self.gravar = gravar
@@ -228,7 +232,8 @@ class Monitor:
         (self.saida / "sessao.json").write_text(json.dumps(meta, ensure_ascii=False, indent=1), encoding="utf-8")
 
     def fechar(self) -> None:
-        """Solta a trava da pasta (o painel chama ao parar a sessão)."""
+        """Solta a trava da pasta e para os downloads a caminho (o painel chama ao parar a sessão)."""
+        self.fonte.fechar()
         if self._trava is not None:
             self._trava.close()
             self._trava = None
@@ -285,19 +290,11 @@ class Monitor:
                 self.ultimo_alerta = p_pos
         return n
 
-    def _ab_todas(self) -> dict:
-        """{uf: {cd: Municipio}}; None quando o arquivo da UF falta ou vem vazio."""
-        import concurrent.futures as cf
+    def _ab_todas(self, prazo: float | None = None) -> dict:
+        """{uf: {cd: Municipio}}; None quando a UF não tem abrangência recente (FonteTSE.abrangencias)."""
+        return self.fonte.abrangencias(UFS, prazo)
 
-        def uma(u):
-            try:
-                return u, (self.fonte.abrangencia(u) or None)
-            except Exception:
-                return u, None
-        with cf.ThreadPoolExecutor(8) as ex:
-            return dict(ex.map(uma, UFS))
-
-    def _pedidos(self) -> list[tuple[str, int]]:
+    def _pedidos(self, prazo: float | None = None) -> list[tuple[str, int]]:
         """Municípios a (re)baixar neste ciclo, os mais desatualizados primeiro.
 
         O TSE responde ~15 arquivos/s por cliente; com o limite por ciclo, a prioridade é o
@@ -305,7 +302,7 @@ class Monitor:
         2022, até 300 municípios por minuto deixaram o modelo praticamente igual.
         """
         prio = {}
-        for uf, ab in self._ab_todas().items():
+        for uf, ab in self._ab_todas(prazo).items():
             js = self.idx_uf[uf]
             if not ab:  # sem abrangência confiável: rodízio pelos que ainda não acabaram
                 for j in js:
@@ -328,10 +325,21 @@ class Monitor:
         return ordem
 
     def ciclo(self) -> dict | None:
-        inicio = time.time()
-        pedidos = self._pedidos()
+        inicio, relogio = time.time(), time.monotonic()
+        # o Brasil primeiro: sem ele o ciclo não segue (TSE fora = erro no ciclo), e o total do país
+        # não espera os municípios
+        br = self.fonte.brasil()
+        # com o modelo de pé, o ciclo tem prazo: até a metade para as abrangências, o resto para os
+        # municípios; o que estiver a caminho entra no próximo. O 1º ciclo não tem: ele baixa tudo
+        # o que já mudou antes da primeira previsão
+        if self.prazo and self.modelo is not None:
+            fim = relogio + self.prazo
+            prazo_ab = max(relogio + self.prazo / 2 - time.monotonic(), 0.0)
+        else:
+            fim = prazo_ab = None
+        pedidos = self._pedidos(prazo_ab)
         dif_te = 0
-        recebidos = self.fonte.varios(pedidos)
+        recebidos = self.fonte.varios(pedidos, None if fim is None else max(fim - time.monotonic(), 0.0))
         for m in recebidos:
             j = self.pos[m.cd]
             self.F[j], self.L[j], self.est[j], self.st[j], self.ts[j] = m.F, m.L, m.est, m.st, m.ts
@@ -346,7 +354,6 @@ class Monitor:
                   f"{int(np.sum(self.te == 0))} sem eleitorado", flush=True)
         if dif_te:
             print(f"  aviso: {dif_te} municípios com eleitorado do TSE diferente do 1º turno (>2%)")
-        br = self.fonte.brasil()
         data, hora = br["gerado"].split(" ") if " " in br["gerado"] else ("", "")
         t = minutos_desde_17h(data, hora)
         if t is None:
@@ -356,7 +363,7 @@ class Monitor:
         res = {"t": t, "gerado": br["gerado"], "secoes_pct": 100 * br["st"] / max(br["ts"], 1),
                "eleitorado_pct": 100 * self.est.sum() / max(self.te.sum(), 1),
                "baixados": len(recebidos), "pedidos": len(pedidos), "falhas": self.fonte.falhas,
-               "fila": getattr(self, "fila", 0), "F_tse": br["F"], "L_tse": br["L"]}
+               "atrasados": self.fonte.atrasados, "fila": getattr(self, "fila", 0), "F_tse": br["F"], "L_tse": br["L"]}
         if self.fonte.falhas:
             res["erro_municipios"] = self.fonte.erro_exemplo
         if aviso_municipios(res):
@@ -431,7 +438,8 @@ RECUPERACAO = 70  # minutos depois da última falha em que o modelo ainda pode e
 
 
 def aviso_municipios(res: dict) -> str | None:
-    """Aviso quando muitos arquivos de município falham no ciclo (≥ 10% dos pedidos, mínimo 5).
+    """Aviso quando os arquivos de município não chegam: no ciclo, ≥ 10% dos pedidos falham
+    (mínimo 5) ou chegam menos de 5% deles (mínimo 20 pedidos: TSE pendurado ou lento demais).
 
     A falha fica para o próximo ciclo, mas uma falha total (bloqueio, rede), com o arquivo do
     Brasil respondendo, deixa o modelo rodando com os municípios congelados e o relógio andando:
@@ -441,20 +449,23 @@ def aviso_municipios(res: dict) -> str | None:
     não distorce; queda total do TSE (ciclo com erro) também não. Por isso o aviso: por
     RECUPERACAO min, não agir por disparo do modelo; usar o preço da Polymarket como referência.
     """
-    falhas, pedidos = res.get("falhas", 0), res.get("pedidos", 0)
-    if falhas < max(5, 0.1 * pedidos):
+    falhas, pedidos, chegaram = res.get("falhas", 0), res.get("pedidos", 0), res.get("baixados", 0)
+    if falhas >= max(5, 0.1 * pedidos):
+        o_que = f"{falhas} de {pedidos} arquivos de município falharam neste ciclo ({res.get('erro_municipios') or 'erro'})"
+    elif pedidos >= 20 and chegaram < 0.05 * pedidos:
+        o_que = f"só {chegaram} de {pedidos} arquivos de município chegaram neste ciclo (o TSE não responde a tempo)"
+    else:
         return None
-    return (f"{falhas} de {pedidos} arquivos de município falharam neste ciclo"
-            f" ({res.get('erro_municipios') or 'erro'}). O modelo está parado nos dados antigos e pode "
-            "distorcer quando eles voltarem: por até ~1 h depois da volta, não aja por disparo do modelo; "
-            "use o preço da Polymarket como referência")
+    return (f"{o_que}. O modelo está parado nos dados antigos e pode distorcer quando eles voltarem: por até "
+            "~1 h depois da volta, não aja por disparo do modelo; use o preço da Polymarket como referência")
 
 
 def formatar_tela(res: dict, faixa: str, lado: str = "sim") -> tuple[list[str], float | None, str]:
     """Linhas que o monitor imprime num ciclo, mais a chance da posição e o nome dela."""
     linhas = [f"[{res.get('gerado') or '?'}] +{res['t']:.0f}min | seções {res['secoes_pct']:.1f}% | "
               f"eleitorado {res['eleitorado_pct']:.1f}% | baixados {res.get('baixados', 0)}"
-              + (f" | falharam {res['falhas']}" if res.get("falhas") else "")]
+              + (f" | falharam {res['falhas']}" if res.get("falhas") else "")
+              + (f" | a caminho {res['atrasados']}" if res.get("atrasados") else "")]
     aviso = aviso_municipios(res)
     if aviso:
         linhas.append(f"  !! AVISO: {aviso}")
@@ -505,6 +516,9 @@ def main() -> None:
     a.add_argument("--ciclos", type=int, default=0, help="para depois de N ciclos (0 = sem fim)")
     a.add_argument("--max-municipios", type=int, default=450,
                    help="arquivos de município por ciclo (o TSE limita ~15/s por cliente)")
+    a.add_argument("--prazo", type=float, default=None,
+                   help="segundos que cada ciclo espera o TSE; o que ainda estiver a caminho entra no próximo "
+                        "(padrão: 3/4 do intervalo; 0 = sem prazo)")
     a.add_argument("--degrau", action="append", default=[],
                    help="degrau do plano de venda CHANCE@APURADO:FRACAO, ex.: f90@2:50 ou 20@20:50 "
                         "(pode repetir; o monitor só avisa, não vende)")
@@ -528,7 +542,8 @@ def main() -> None:
     pasta = pasta or AO_VIVO / dt.datetime.now(BRT).strftime("%Y%m%d_%H%M%S")
     try:
         mon = Monitor(FonteTSE(base_url=url), args.ano_base, args.turno_base, carregar_params(), args.faixa,
-                      pasta, args.polymarket, args.alerta, args.lado, args.max_municipios, args.degrau)
+                      pasta, args.polymarket, args.alerta, args.lado, args.max_municipios, args.degrau,
+                      prazo=PRAZO * args.intervalo if args.prazo is None else args.prazo)
     except RuntimeError as e:  # a pasta já está aberta em outro processo
         sys.exit(f"erro: {e}")
     print(f"monitor: {url} | posição: {args.lado} em {args.faixa} | base {args.ano_base} {args.turno_base}º turno | "

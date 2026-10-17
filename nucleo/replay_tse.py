@@ -8,11 +8,16 @@ mesmos arquivos JSON que o monitor lê do TSE.
     (em outro terminal) python eleicao/monitor.py --url http://127.0.0.1:8765 --ano-base 2022 ...
 
 --velocidade 30: cada segundo real avança 30 segundos da apuração (17h-21h em 8 minutos).
+
+Para ensaiar um TSE sobrecarregado: --latencia 2 (cada arquivo demora 2 s a mais), --pendurar 0.1
+(10% dos pedidos ficam 60 s sem resposta) e --erro 0.05 (5% respondem 503); com --so-municipios,
+só os arquivos de município (o Brasil e as abrangências respondem normalmente).
 """
 from __future__ import annotations
 
 import argparse
 import json
+import random
 import re
 import sys
 import time
@@ -124,13 +129,33 @@ def responder(rep: Replay, caminho: str, k: int) -> dict | None:
     return None
 
 
-def servir(rep: Replay, porta: int) -> None:
+class Servidor(ThreadingHTTPServer):
+    def handle_error(self, request, client_address):
+        if isinstance(sys.exc_info()[1], ConnectionError):  # o cliente desistiu (timeout do monitor)
+            return
+        super().handle_error(request, client_address)
+
+
+def servir(rep: Replay, porta: int, latencia: float = 0.0, pendurar: float = 0.0, erro: float = 0.0,
+           semente: int = 1, so_municipios: bool = False) -> None:
+    """Serve o replay; latencia/pendurar/erro imitam um TSE sobrecarregado (ver o topo)."""
+    sorteio = random.Random(semente)
+
     class H(BaseHTTPRequestHandler):
         def log_message(self, *a):  # silencioso
             pass
 
         def do_GET(self):
-            corpo = responder(rep, self.path, rep.agora())
+            if not so_municipios or PAD_U.search(self.path.split("?")[0]):
+                x = sorteio.random()
+                if x < erro:
+                    self.send_response(503)
+                    self.end_headers()
+                    return
+                espera = latencia + (60.0 if x < erro + pendurar else 0.0)
+                if espera:
+                    time.sleep(espera)
+            corpo = responder(rep, self.path, rep.agora())  # o arquivo de quando a resposta sai
             if corpo is None:
                 self.send_response(404)
                 self.end_headers()
@@ -142,8 +167,18 @@ def servir(rep: Replay, porta: int) -> None:
             self.end_headers()
             self.wfile.write(dados)
 
-    srv = ThreadingHTTPServer(("127.0.0.1", porta), H)
-    print(f"replay em http://127.0.0.1:{porta} (Ctrl+C para parar)", flush=True)
+    srv = Servidor(("127.0.0.1", porta), H)
+    lento = []
+    if latencia:
+        lento.append(f"latência +{latencia:g} s")
+    if pendurar:
+        lento.append(f"{pendurar:.0%} pendurados")
+    if erro:
+        lento.append(f"{erro:.0%} com erro 503")
+    if lento and so_municipios:
+        lento.append("só nos municípios")
+    print(f"replay em http://127.0.0.1:{porta}" + (f" ({', '.join(lento)})" if lento else "")
+          + " (Ctrl+C para parar)", flush=True)
     srv.serve_forever()
 
 
@@ -158,6 +193,11 @@ def main() -> None:
     a.add_argument("--velocidade", type=float, default=30.0)
     a.add_argument("--inicio", type=float, default=-2.0, help="minuto (após 17h) em que começa")
     a.add_argument("--porta", type=int, default=8765)
+    a.add_argument("--latencia", type=float, default=0.0, help="segundos a mais em cada resposta")
+    a.add_argument("--pendurar", type=float, default=0.0, help="fração dos pedidos que fica 60 s sem resposta")
+    a.add_argument("--erro", type=float, default=0.0, help="fração dos pedidos que responde 503")
+    a.add_argument("--so-municipios", action="store_true",
+                   help="lentidão e erros só nos arquivos de município (o Brasil e as abrangências respondem)")
     args = a.parse_args()
     if args.sintetico:
         from nucleo.simulacao import gerar_apuracao, sortear_cenario
@@ -172,7 +212,7 @@ def main() -> None:
     rep = Replay(sec, dia, args.velocidade, args.inicio)
     final = (rep.ap["tot"]["F"].sum() - rep.ap["tot"]["L"].sum()) / (rep.ap["tot"]["F"].sum() + rep.ap["tot"]["L"].sum()) * 100
     print(f"apuração com {len(sec)} seções, {len(rep.munis)} municípios; margem final F {final:+.2f}")
-    servir(rep, args.porta)
+    servir(rep, args.porta, args.latencia, args.pendurar, args.erro, args.semente, args.so_municipios)
 
 
 if __name__ == "__main__":

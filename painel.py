@@ -41,8 +41,8 @@ from nucleo.fonte_tse import URL_OFICIAL, FonteTSE  # noqa: E402
 from nucleo.mercado_sim import PRECO_HOJE, RITMOS, mercado_sim, sortear_margem  # noqa: E402
 from nucleo.modelo import NOMES_FAIXAS, carregar_params, faixa_provavel  # noqa: E402
 from nucleo.polymarket import FontePolymarket  # noqa: E402
-from monitor import (AO_VIVO, BRT, Degrau, Monitor, achar_sessao, aviso_municipios, carregar_base,  # noqa: E402
-                     conferir_sessao, ler_log, retratos)
+from monitor import (AO_VIVO, BRT, PRAZO, Degrau, Monitor, achar_sessao, aviso_municipios,  # noqa: E402
+                     carregar_base, conferir_sessao, ler_log, retratos)
 from nucleo.replay_tse import GRADE, Replay, passo, responder  # noqa: E402
 from nucleo.simulacao import gerar_apuracao, sortear_cenario  # noqa: E402
 
@@ -79,6 +79,8 @@ def linha_terminal(res: dict) -> str:
     cab = f"[{res.get('gerado') or '?'}] +{res['t']:.0f}min | eleitorado {res['eleitorado_pct']:.1f}%"
     if res.get("falhas"):
         cab += f" | {res['falhas']} de {res.get('pedidos', '?')} municípios falharam"
+    if res.get("atrasados"):
+        cab += f" | {res['atrasados']} a caminho"
     if "mu" not in res:
         return f"{cab} | {res.get('msg', '')}"
     top = sorted(res["probs"].items(), key=lambda kv: -kv[1])[:2]
@@ -116,10 +118,10 @@ class FonteReplay(FonteTSE):
         super().__init__(base_url="memoria://replay", workers=1)
         self.rep, self.k = rep, 0
 
-    def _get(self, caminho: str, tentativas: int = 3):
+    def _get(self, caminho: str):
         return responder(self.rep, caminho, self.k)
 
-    def varios(self, pedidos):
+    def varios(self, pedidos, prazo: float | None = None):
         return [m for uf, cd in pedidos if (m := self.votos_municipio(uf, cd)) is not None]
 
 
@@ -228,7 +230,8 @@ class SessaoVivo(Sessao):
         mercado = self.ctx.mercado.precos if (self.polymarket and self.ctx.mercado) else self.polymarket
         mon = Monitor(FonteTSE(base_url=self.url), 2026, 1, self.ctx.params, "F <4%", self.pasta,
                       polymarket=mercado, max_mun=self.ctx.args.max_municipios,
-                      base_ordem=self.ctx.base_ordem)
+                      base_ordem=self.ctx.base_ordem,
+                      prazo=PRAZO * self.intervalo if self.ctx.args.prazo is None else self.ctx.args.prazo)
         self._mercado_n = len(self.ctx.mercado.pontos) if self.ctx.mercado else 0
         try:
             if self.retomada:
@@ -380,23 +383,26 @@ class SessaoSim(Sessao):
             return
         fonte = FonteReplay(rep)
         mon = Monitor(fonte, 2026, 1, self.ctx.params, "F <4%", None, max_mun=0,
-                      base_ordem=self.ctx.base_ordem, gravar=False)
+                      base_ordem=self.ctx.base_ordem, gravar=False, prazo=0)
         self.estado = "rodando"
         self.relogio.ajustar(pausado=self.pausa_usuario)
         self.evento("apuração simulada começou (16h58)")
-        while not self.parar.is_set():
-            t = self.relogio.agora()
-            fonte.k = passo(t)
-            res = mon.ciclo()
-            res["mercado"] = mercado_sim(res.get("probs"), res["t"], self.ritmo)
-            self.adicionar(res)
-            if res["eleitorado_pct"] >= 99.99 or t >= GRADE[-1]:
-                self.estado, self.revelado = "fim", True
-                self.evento(f"apuração terminou: margem final F {self.final:+.2f}")
-                return
-            alvo = t + PASSO_SIM
-            while not self.parar.is_set() and self.relogio.agora() < alvo:
-                time.sleep(0.05)
+        try:
+            while not self.parar.is_set():
+                t = self.relogio.agora()
+                fonte.k = passo(t)
+                res = mon.ciclo()
+                res["mercado"] = mercado_sim(res.get("probs"), res["t"], self.ritmo)
+                self.adicionar(res)
+                if res["eleitorado_pct"] >= 99.99 or t >= GRADE[-1]:
+                    self.estado, self.revelado = "fim", True
+                    self.evento(f"apuração terminou: margem final F {self.final:+.2f}")
+                    return
+                alvo = t + PASSO_SIM
+                while not self.parar.is_set() and self.relogio.agora() < alvo:
+                    time.sleep(0.05)
+        finally:
+            mon.fechar()
         self.estado = "parado"
 
 
@@ -650,6 +656,9 @@ def main() -> None:
     a.add_argument("--intervalo-mercado", type=float, default=10.0,
                    help="segundos entre leituras do livro de ofertas da Polymarket")
     a.add_argument("--max-municipios", type=int, default=450, help="arquivos de município por ciclo ao vivo")
+    a.add_argument("--prazo", type=float, default=None,
+                   help="segundos que cada ciclo ao vivo espera o TSE; o que ainda estiver a caminho entra "
+                        "no próximo (padrão: 3/4 do intervalo; 0 = sem prazo)")
     a.add_argument("--faixa", default="F <4%", choices=NOMES_FAIXAS, help="posição inicial (dá para trocar na página)")
     a.add_argument("--lado", default="sim", choices=["sim", "nao"])
     a.add_argument("--alerta", type=float, default=0.5, help="avisa quando a chance da posição cai abaixo disto")
