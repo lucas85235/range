@@ -32,14 +32,23 @@ novo para com erro.
 python eleicao/painel.py --ao-vivo --faixa "F <4%" --degrau f90@2:100
 ```
 
+Para seguir a estratégia de esperar o sinal com a sua carteira de verdade, dê também o endereço
+dela (o 0x… do seu perfil na Polymarket; só leitura). Na aba Trade, escolha "Noite: Ao vivo (TSE)"
+e "Carteira: Real" (ver [Aba "Trade"](#aba-trade)):
+
+```bash
+python eleicao/painel.py --ao-vivo --carteira 0xSEU_ENDERECO
+```
+
 Se o painel cair no meio da apuração, retome a mesma sessão:
 
 ```bash
 python eleicao/painel.py --retomar ultima
 ```
 
-Antes do dia, para ensaiar: abra o painel sem `--ao-vivo` e use as abas "Simulação" e "Trade
-(simulação)". Detalhes em [Como usar](#como-usar-no-dia-2510); o que cada pasta tem, em
+Antes do dia, para ensaiar: abra o painel sem `--ao-vivo` e use as abas "Simulação" e "Trade"
+(com "Noite: Simulada"). Com "Carteira: Real", já dá para conferir agora se o painel lê a sua
+posição neste mercado. Detalhes em [Como usar](#como-usar-no-dia-2510); o que cada pasta tem, em
 [Estrutura do projeto](#estrutura-do-projeto).
 
 Guia visual (como ler a tela, duas noites simuladas e o modelo contra o mercado):
@@ -389,7 +398,8 @@ chance de terminar com prejuízo):
     modelo, vendeu "F <4%" (que ganhou) quase de graça; na noite de 4/10 rendeu US$ 23 contra 84.
 - **Para o trade simulado:** **começar em dinheiro, com limiar de 80%** (80% é o limiar padrão
   da aba Trade; em "Começa em", escolha "Dinheiro (espera o sinal)", porque a aba começa na sua
-  posição; no dia 25, com "Noite: Ao vivo (TSE)", a aba avisa o sinal na apuração real). O 80% não rende mais: nas simulações fica US$ 16 a 37 abaixo do de 70% na média. Ele
+  posição; no dia 25, com "Noite: Ao vivo (TSE)" e "Carteira: Real", a aba avisa o sinal na
+  apuração real e segue as compras e vendas que você fizer na Polymarket). O 80% não rende mais: nas simulações fica US$ 16 a 37 abaixo do de 70% na média. Ele
   serve para perder menos vezes: começando em dinheiro, prejuízo em 3–5% das noites nos ritmos
   que andam atrás do modelo, e ganha do 70% no mercado que sabe mais que o modelo. Começar com
   posição perde com mais frequência: de 12% a 63% das noites com 80%. O lucro do trade depende
@@ -560,14 +570,31 @@ Uma carteira que troca de faixa quando o modelo aponta outra. Em "Noite", escolh
 - **Simulada:** a mesma noite da aba Simulação, com os mesmos controles (cenário, velocidade,
   pausa, revelar) e o preço simulado.
 - **Ao vivo (TSE):** os ciclos da aba ao vivo, com os preços da Polymarket de cada ciclo e os
-  controles do monitor ao vivo. A carteira é de papel. A cada compra ou venda da regra, a linha do
-  tempo mostra "Sinal de compra" ou "Sinal de venda" com o preço, e o som toca em qualquer aba do
-  painel. É assim que se segue a estratégia de esperar o sinal: "Começa em: Dinheiro (espera o
-  sinal)", "Noite: Ao vivo (TSE)" e o som ligado.
-  - O painel não manda ordens: a ordem é sua, na Polymarket.
-  - Sem o preço da Polymarket no ciclo (ou sem o livro da faixa), a regra não opera.
-  - Se você operar diferente da regra, registre com os botões da carteira. O que você registra
-    fica no navegador, ligado à pasta da sessão: sobrevive a um F5 e a uma retomada.
+  controles do monitor ao vivo. Em "Carteira", escolha de qual carteira a regra parte:
+  - **Real (Polymarket)**, a do dia 25: ponha o endereço da sua carteira (o 0x… do seu perfil
+    na Polymarket; ou `--carteira 0x…` ao abrir o painel). O painel lê dali, a cada 15 s, a sua
+    posição e as suas compras e vendas neste mercado, pela Data API pública: sem chave e sem
+    mandar ordem. A regra parte do que você tem de verdade.
+    - "Sinal de compra" e "Sinal de venda" aparecem na linha do tempo, com o preço, e tocam em
+      qualquer aba. O quadro do que fazer mostra o sinal enquanto ele valer. Cada sinal toca uma
+      vez enquanto você não operar, mesmo que a chance oscile em volta do limiar.
+    - Quando você compra ou vende na Polymarket, o painel detecta na leitura seguinte (até ~15 s),
+      põe a operação na linha do tempo e segue da sua posição nova (a faixa, as trocas usadas e o
+      caixa). Não há botão para registrar nada.
+    - "Caixa para a estratégia" é o dinheiro que você separa para a regra. O que você já tinha
+      neste mercado antes da sessão começar entra como o começo da carteira. O caixa é esse valor
+      menos as compras e mais as vendas da noite. O saldo livre da carteira inteira (outros
+      mercados inclusive) não entra: a Data API não o dá.
+    - A posição de agora vem da Polymarket. Se ela não bater com a soma das operações (uma
+      operação que ainda não entrou na lista, por exemplo), o cartão avisa e vale a da
+      Polymarket.
+    - É assim que se segue a estratégia de esperar o sinal: "Noite: Ao vivo (TSE)", "Carteira:
+      Real", o caixa da estratégia e o som ligado.
+  - **De papel:** a carteira imaginária da regra, que compra e vende sozinha no preço de cada
+    ciclo, avisando do mesmo jeito. Os botões da carteira registram o que você fizer diferente
+    (fica no navegador, ligado à pasta da sessão: sobrevive a um F5 e a uma retomada).
+  - Nos dois casos, o painel não manda ordens: a ordem é sua, na Polymarket. Sem o preço da
+    Polymarket no ciclo (ou sem o livro da faixa), a regra não opera.
   - Para não ouvir os sinais, volte para "Noite: Simulada". A posição e o plano da aba ao vivo
     seguem avisando como antes.
 
@@ -833,7 +860,7 @@ eleicao/
 │   ├── fonte_tse.py         lê os JSON públicos do TSE
 │   ├── replay_tse.py        servidor local que imita o TSE (normal ou lento), para ensaiar
 │   ├── mercado_sim.py       preço de mercado das noites simuladas (preço de hoje → modelo)
-│   └── polymarket.py        preços ao vivo da Polymarket (livro de ofertas da CLOB)
+│   └── polymarket.py        preços ao vivo da Polymarket (livro de ofertas da CLOB) e a sua carteira (Data API, só leitura)
 ├── coleta/                  baixa os dados públicos
 │   ├── baixar_bu.py         boletins de urna, com hora de chegada (--cargo 11 = prefeito)
 │   ├── baixar_secao.py      votação por seção (Presidente, todos os anos)

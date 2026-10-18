@@ -230,16 +230,18 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   <!-- trade: carteira que troca para a faixa do modelo -->
   <section class="controle" id="ctl-trade" aria-label="Regra da carteira" hidden>
     <div class="campo"><span>Noite</span><div class="seg" role="group" aria-label="Noite"><button id="tr-noite-sim" aria-pressed="true">Simulada</button><button id="tr-noite-vivo" aria-pressed="false">Ao vivo (TSE)</button></div></div>
-    <label class="campo"><span>Começa em</span><select id="tr-inicial"></select></label>
-    <label class="campo"><span>Preço pago (¢)</span><input id="tr-entrada" type="number" min="1" max="99" step="0.5"></label>
-    <label class="campo"><span>Banca (US$)</span><input id="tr-banca" type="number" min="1" step="1" value="100"></label>
+    <div class="campo" id="tr-carteira-campo" hidden><span>Carteira</span><div class="seg" role="group" aria-label="Carteira"><button id="tr-cart-papel" aria-pressed="true">De papel</button><button id="tr-cart-real" aria-pressed="false">Real (Polymarket)</button></div></div>
+    <label class="campo" id="tr-endereco-campo" hidden><span>Endereço da carteira (0x…)</span><input id="tr-endereco" type="text" spellcheck="false" autocomplete="off" placeholder="0x… do seu perfil" style="min-width:24ch"></label>
+    <label class="campo" id="tr-inicial-campo"><span>Começa em</span><select id="tr-inicial"></select></label>
+    <label class="campo" id="tr-entrada-campo"><span>Preço pago (¢)</span><input id="tr-entrada" type="number" min="1" max="99" step="0.5"></label>
+    <label class="campo"><span id="tr-banca-rot">Banca (US$)</span><input id="tr-banca" type="number" min="1" step="1" value="100"></label>
     <label class="campo"><span>Trocar com chance ≥ (%)</span><input id="tr-limiar" type="number" min="1" max="99" step="1" value="80"></label>
     <label class="campo"><span>Comprar com vantagem ≥ (pts)</span><input id="tr-vantagem" type="number" min="0" max="50" step="1" value="5"></label>
     <label class="campo"><span>Desde (% apurado)</span><input id="tr-apurado" type="number" min="0" max="100" step="1" value="2"></label>
     <label class="campo"><span>Máx. de trocas</span><input id="tr-trocas" type="number" min="0" max="10" step="1" value="2"></label>
-    <div class="campo"><span>Automático</span><div class="seg" role="group" aria-label="Automático"><button id="tr-auto-on" aria-pressed="true">Ligado</button><button id="tr-auto-off" aria-pressed="false">Desligado</button></div></div>
+    <div class="campo" id="tr-auto-campo"><span>Automático</span><div class="seg" role="group" aria-label="Automático"><button id="tr-auto-on" aria-pressed="true">Ligado</button><button id="tr-auto-off" aria-pressed="false">Desligado</button></div></div>
     <p class="nota grow">A cada ciclo, a partir do % apurado: se a faixa favorita do modelo não é a da carteira e tem pelo menos o limiar, vende tudo; depois compra a favorita se a chance do modelo passar o preço de compra pela vantagem pedida (senão espera em dinheiro).</p>
-    <p class="nota grow" id="tr-nota-vivo" hidden>Ao vivo, a carteira é de papel: segue a regra nos ciclos do TSE com os preços da Polymarket e avisa, com som em qualquer aba, cada sinal de compra e de venda. O painel não manda ordens: a ordem é sua, na Polymarket. Se você operar diferente, registre com os botões da carteira.</p>
+    <p class="nota grow" id="tr-nota-vivo" hidden></p>
   </section>
 
   <!-- posição -->
@@ -349,14 +351,18 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
 
   <section class="cartao" id="carteira" hidden aria-label="Carteira">
     <h2 id="tr-titulo">Carteira</h2>
-    <div class="acoes">
+    <div class="acoes" id="tr-botoes">
       <button class="btn" id="tr-favorita">Trocar agora para a favorita</button>
       <button class="btn" id="tr-dinheiro">Vender tudo (ficar em dinheiro)</button>
       <span class="nota">"Vender tudo" também desliga o automático. Com ele ligado, a regra continua agindo depois de "Trocar agora".</span>
     </div>
     <div class="revelado" id="tr-revelado" hidden></div>
+    <div id="tr-real" hidden>
+      <p class="nota" id="tr-real-estado"></p>
+      <ul class="vendas" id="tr-real-pos"></ul>
+    </div>
     <div class="banca-res">
-      <div class="res"><span>Carteira (com trocas)</span><b id="tr-valor">—</b><span id="tr-valor-s"></span></div>
+      <div class="res"><span id="tr-valor-rot">Carteira (com trocas)</span><b id="tr-valor">—</b><span id="tr-valor-s"></span></div>
       <div class="res"><span id="tr-segurar-rot">Segurando a posição inicial</span><b id="tr-segurar">—</b><span id="tr-segurar-s"></span></div>
       <div class="res"><span>Diferença</span><b id="tr-dif">—</b><span id="tr-dif-s"></span></div>
     </div>
@@ -813,6 +819,34 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   }
   const idadeTxt = (s) => (s < 90 ? `${Math.max(0, Math.round(s))} s` : s < 5400 ? `${Math.round(s / 60)} min` : `${Math.round(s / 3600)} h`);
   const inteiro = (x) => Math.round(x).toLocaleString("pt-BR");
+
+  // ---------- sua carteira na Polymarket (aba Trade, "Carteira: Real") ----------
+  // O servidor lê a posição e as operações deste mercado pela Data API pública, só com o endereço
+  // (nada de chave, nada de ordem). Aqui a carteira é refeita ciclo a ciclo pela hora das operações.
+  const CART = { endereco: null, erro: null, idade: null, posicoes: [], operacoes: [], lida: false };
+  async function puxarCarteira() {
+    try {
+      const d = await (await fetch("/api/carteira", { cache: "no-store" })).json();
+      const primeira = !CART.lida || CART.endereco !== (d.endereco || null);
+      Object.assign(CART, { endereco: d.endereco || null, erro: d.erro || null, idade: d.idade ?? null,
+                            posicoes: d.posicoes || [], operacoes: d.operacoes || [], lida: d.idade != null });
+      // a primeira leitura (ou outro endereço) refaz a noite inteira: o que já passou não toca
+      if (primeira && CART.lida && modoReal()) avaliarTrade(S.vivo).ev.forEach((e) => S.vivo.vistosTrade.add(e.chave));
+    } catch (e) { CART.erro = String(e); }
+  }
+  async function configurarCarteira(endereco) {
+    const d = await post("/api/carteira", { endereco: endereco || null });
+    Object.assign(CART, { endereco: d.endereco || null, erro: null, idade: null, posicoes: [], operacoes: [], lida: false });
+  }
+  const modoReal = () => trade.noite === "vivo" && trade.carteira === "real";
+  // hora (unix s) em que o ciclo terminou; num ciclo gravado antes de existir esse campo, a do TSE
+  function quandoCiclo(c) {
+    if (c.quando) return c.quando;
+    const m = /(\d+)\/(\d+)\/(\d+) (\d+):(\d+):(\d+)/.exec(c.gerado || "");
+    return m ? Date.UTC(+m[3], +m[2] - 1, +m[1], +m[4] + 3, +m[5], +m[6]) / 1000 : null;
+  }
+  const horaTs = (ts) => { const d = new Date((ts - 3 * 3600) * 1000); return d.getUTCHours() + "h" + String(d.getUTCMinutes()).padStart(2, "0"); };
+  const abreviar = (e) => (e ? e.slice(0, 6) + "…" + e.slice(-4) : "");
   [...$("mk-janela").children].forEach((b) => b.addEventListener("click", () => { mkJanela = +b.dataset.h; atualizarMercado(); }));
 
   function atualizarMercado() {
@@ -1024,10 +1058,18 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   }
 
   function renderizarControles(s) {
-    const vivo = s === S.vivo;
+    const vivo = s === S.vivo, real = vivo && trade.carteira === "real";
     $("ctl-vivo").hidden = !vivo;
     $("ctl-sim").hidden = vivo;
     $("tr-nota-vivo").hidden = !vivo;
+    $("tr-carteira-campo").hidden = !vivo;
+    $("tr-endereco-campo").hidden = !real;
+    // na carteira real, o começo e as operações vêm da Polymarket
+    ["tr-inicial-campo", "tr-entrada-campo", "tr-auto-campo"].forEach((id) => { $(id).hidden = real; });
+    setTxt("tr-banca-rot", real ? "Caixa para a estratégia (US$)" : "Banca (US$)");
+    setTxt("tr-nota-vivo", real
+      ? "Carteira real: o painel lê da Polymarket, pelo endereço público da carteira (sem chave, sem ordens), a sua posição e as suas compras e vendas neste mercado, e segue a regra a partir delas. Os sinais de compra e de venda tocam em qualquer aba; quando você operar, o painel detecta e continua da sua posição de verdade."
+      : "Ao vivo, a carteira de papel segue a regra nos ciclos do TSE com os preços da Polymarket e avisa, com som em qualquer aba, cada sinal de compra e de venda. O painel não manda ordens: a ordem é sua, na Polymarket. Se você operar diferente, registre com os botões da carteira, ou use a carteira real.");
     $("ctl-pos").hidden = aba === "trade";
     $("ctl-trade").hidden = aba !== "trade";
     $("banca").hidden = aba !== "sim";
@@ -1079,7 +1121,8 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   // Mesma regra de trade.py (que a testa nas noites salvas), mais os botões manuais.
   // limiar 80%: rende menos que 70% na média; começando em dinheiro, tem menos noites de prejuízo
   // (começando com posição, 70% é melhor nas simulações). Ver README, aba Trade.
-  let trade = { inicial: "F <4%", entrada: 40.5, banca: 100, limiar: 80, vantagem: 5, apurado: 2, trocas: 2, auto: true, noite: "sim", v: 2 };
+  let trade = { inicial: "F <4%", entrada: 40.5, banca: 100, limiar: 80, vantagem: 5, apurado: 2, trocas: 2, auto: true,
+                noite: "sim", carteira: "papel", endereco: "", v: 2 };
   function salvarTrade() { try { localStorage.setItem("painel-trade", JSON.stringify(trade)); } catch (e) { /* sem armazenamento */ } }
   function lerTradeSalvo() { try { return JSON.parse(localStorage.getItem("painel-trade") || "null"); } catch (e) { return null; } }
   const precoHoje = (f) => (CFG && CFG.preco_hoje[f] != null ? +(CFG.preco_hoje[f] * 100).toFixed(1) : trade.entrada);
@@ -1129,7 +1172,132 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     return { ops, hs, valor, seg, h, cotas, caixa, cotas0, i0, vendas, auto };
   }
 
+  // Carteira real: refaz a sua carteira ciclo a ciclo pelas operações que você fez na Polymarket
+  // (pela hora) e marca onde a regra pede compra ou venda. A regra só avisa: quem opera é você.
+  const chaveC = (f, lado) => f + "|" + lado;
+  function valorCot(cot, mk) {  // a preço de venda: Sim no bid; Não a 1 − ask do Sim
+    let v = 0;
+    FAIXAS.forEach((f) => {
+      const x = mk && mk[f];
+      if (!x) return;
+      v += (cot[chaveC(f, "sim")] || 0) * x[0] + (cot[chaveC(f, "nao")] || 0) * (1 - x[1]);
+    });
+    return v;
+  }
+  function seguraDe(cot, mk) {  // a faixa em que a carteira "está": a de mais valor em Sim (≥ US$ 1)
+    let h = null, melhor = 1;
+    FAIXAS.forEach((f, i) => {
+      const n = cot[chaveC(f, "sim")] || 0, x = mk && mk[f], v = n * (x ? x[0] : 0.5);
+      if (n > 0.5 && v >= melhor) { h = i; melhor = v; }
+    });
+    return h;
+  }
+  function textoOp(o) {
+    const lado = o.lado === "nao" ? "Não" : "Sim", n = virg(o.cotas.toFixed(1));
+    if (o.tipo === "TRADE") return `${o.op === "SELL" ? "vendeu" : "comprou"} ${n} cotas de ${lado} em "${o.faixa}" a ${cents(o.preco)} (${usd(o.usdc)})`;
+    if (o.tipo === "SPLIT") return `dividiu ${usd(o.usdc)} em ${n} cotas de Sim e de Não em "${o.faixa}"`;
+    if (o.tipo === "MERGE") return `juntou ${n} cotas de Sim e de Não em "${o.faixa}" (${usd(o.usdc)})`;
+    if (o.tipo === "REDEEM") return `resgatou "${o.faixa}" (${usd(o.usdc)})`;
+    return `fez uma operação ${o.tipo} em "${o.faixa}"`;
+  }
+  function jogarReal(C, r) {
+    const ops = CART.operacoes, cot = {};
+    let i = 0, caixa = r.banca, estranho = false, trocas = 0, hAnt = null, sinalAnt = null, mkUlt = null;
+    const avisado = new Set();
+    const mexer = (o, comCaixa) => {
+      const somar = (lado, n) => { cot[chaveC(o.faixa, lado)] = Math.max((cot[chaveC(o.faixa, lado)] || 0) + n, 0); };
+      if (o.tipo === "TRADE") {
+        const s = o.op === "SELL" ? -1 : 1;
+        somar(o.lado || "sim", s * o.cotas);
+        if (comCaixa) caixa -= s * o.usdc;
+      } else if (o.tipo === "SPLIT" || o.tipo === "MERGE") {
+        const s = o.tipo === "MERGE" ? -1 : 1;
+        somar("sim", s * o.cotas); somar("nao", s * o.cotas);
+        if (comCaixa) caixa -= s * o.usdc;
+      } else if (o.tipo === "REDEEM") {
+        cot[chaveC(o.faixa, "sim")] = 0; cot[chaveC(o.faixa, "nao")] = 0;
+        if (comCaixa) caixa += o.usdc;
+      } else estranho = true;  // CONVERSION e outras: vale a posição que a Polymarket mostra
+    };
+    // o que você tinha antes da sessão ao vivo começar (sem sessão ainda: tudo, até agora)
+    const t0 = C.length ? quandoCiclo(C[0]) : null;
+    while (i < ops.length && (t0 == null || ops[i].ts < t0)) mexer(ops[i++], false);
+    const ini = { ...cot }, mk0 = C.find((c) => c.mercado)?.mercado || null;
+    const hIni = seguraDe(ini, mk0 || livrosAgora());
+    const L = [], ev = [], feitas = [];
+    C.forEach((c, k) => {
+      const ate = quandoCiclo(c), antes = feitas.length;
+      while (i < ops.length && ate != null && ops[i].ts <= ate) { const o = ops[i++]; mexer(o, true); feitas.push({ ...o, k, t: c.t }); }
+      if (c.mercado) mkUlt = c.mercado;
+      const mk = c.mercado || mkUlt;
+      const h = seguraDe(cot, mk);
+      // saiu da faixa por uma operação sua (vendeu ou trocou); com duas faixas, o preço sozinho não conta
+      if (feitas.length > antes && hAnt !== null && h !== hAnt) trocas++;
+      hAnt = h;
+      const p = c.probs ? FAIXAS.map((f) => c.probs[f]) : null;
+      let fav = null, sinal = null;
+      if (p) { fav = 0; p.forEach((x, j) => { if (x > p[fav]) fav = j; }); }
+      if (p && c.mercado && (c.eleitorado_pct || 0) >= r.apurado_min && p[fav] >= r.limiar) {
+        const ask = c.mercado[FAIXAS[fav]] ? c.mercado[FAIXAS[fav]][1] : 1;
+        if (h !== null && h !== fav && trocas < r.max_trocas) sinal = { tipo: "venda", de: FAIXAS[h], para: FAIXAS[fav], p: p[fav], pDe: p[h] };
+        else if (h === null && ask > 0 && p[fav] - ask >= r.vantagem) sinal = { tipo: "compra", para: FAIXAS[fav], p: p[fav], preco: ask };
+      }
+      // um aviso por sinal enquanto você não operar: se a chance oscila em volta do limiar, o
+      // mesmo sinal não toca de novo (o quadro do que fazer segue mostrando)
+      const id = sinal ? `${sinal.tipo}|${sinal.de || ""}|${sinal.para}` : null, desde = id && `${id}|${feitas.length}`;
+      if (sinal && id !== sinalAnt && !avisado.has(desde)) {
+        avisado.add(desde);
+        ev.push({ chave: `realsinal|${id}|${k}`, k, t: c.t, nivel: sinal.tipo === "compra" ? "bom" : "aviso", som: "plano",
+          texto: sinal.tipo === "compra"
+            ? `Sinal de compra: "${sinal.para}". O modelo dá ${pct(sinal.p)} e a compra custa ~${cents(sinal.preco)}. Compre na Polymarket; o painel detecta a sua compra.`
+            : `Sinal de venda: o modelo dá ${pct(sinal.p)} a "${sinal.para}" e ${pct(sinal.pDe)} a "${sinal.de}", a sua. Venda "${sinal.de}" na Polymarket (troca ${trocas + 1} de ${r.max_trocas}); depois, o painel avisa se a compra de "${sinal.para}" valer o preço.` });
+      }
+      sinalAnt = id;
+      const f = h === null ? null : FAIXAS[h], x = f && c.mercado ? c.mercado[f] : null;
+      const o = { t: c.t, ap: c.eleitorado_pct || 0, tem: c.mu != null, c, faixa: f, sinal,
+                  valor: caixa + valorCot(cot, mk), seg: r.banca + valorCot(ini, mk), bid: x ? x[0] : null, ask: x ? x[1] : null };
+      if (o.tem) {
+        o.cobre = faixasCobertas(c.lo90, c.hi90);
+        o.fav = FAIXAS.reduce((a, y) => (c.probs[y] > c.probs[a] ? y : a), FAIXAS[0]);
+        o.p = f ? c.probs[f] : null;
+      }
+      L.push(o);
+    });
+    // o que você fez depois do último ciclo já conta para o "agora"
+    const kFim = C.length - 1;
+    while (i < ops.length) { const o = ops[i++]; mexer(o, true); if (kFim >= 0) feitas.push({ ...o, k: kFim, t: C[kFim].t, depois: true }); }
+    feitas.forEach((o) => ev.push({ chave: `realop|${o.ts}|${o.tipo}|${o.op}|${o.faixa}|${o.lado}|${o.cotas}`, k: o.k, t: o.t,
+                                    nivel: "neutro", som: null, texto: `Você ${textoOp(o)} às ${horaTs(o.ts)}.` }));
+    ev.sort((a, b) => a.k - b.k);
+    // valor no começo da sessão (caixa da estratégia + o que você já tinha), base do "sobre o começo"
+    const inicioValor = r.banca + valorCot(ini, mk0 || livrosAgora());
+    return { L, ev, cot, ini, hIni, caixa, trocas, feitas, estranho, inicioValor, sinal: L.length ? L[L.length - 1].sinal : null };
+  }
+  function livrosAgora() {  // o livro mais novo da Polymarket, no formato dos ciclos: {faixa: [bid, ask]}
+    const m = mercadoAgora();
+    if (!m) return null;
+    const out = {};
+    Object.entries(m.livros).forEach(([f, x]) => { out[f] = [x.bid, x.ask]; });
+    return out;
+  }
+  function avaliarReal(s) {
+    const base = regraTrade(), J = jogarReal(s.ciclos, base);
+    const r = { ...base, inicial: J.hIni === null ? "dinheiro" : FAIXAS[J.hIni] };
+    const mk = livrosAgora() || (J.L.length ? J.L[J.L.length - 1].c.mercado : null);
+    const hAgora = seguraDe(J.cot, mk), foco = hAgora === null ? null : FAIXAS[hAgora];
+    // confere com a posição que a Polymarket mostra agora
+    const api = {};
+    CART.posicoes.forEach((p) => { api[chaveC(p.faixa, p.lado)] = (api[chaveC(p.faixa, p.lado)] || 0) + p.cotas; });
+    const difs = [...new Set([...Object.keys(api), ...Object.keys(J.cot)])].filter((k) => Math.abs((api[k] || 0) - (J.cot[k] || 0)) >= 0.05);
+    const ops = J.feitas.filter((o) => o.tipo === "TRADE").map((o) => ({ k: o.k, t: o.t, op: o.op === "SELL" ? "vende" : "compra",
+      faixa: o.faixa, preco: o.preco, valor: o.usdc, cotas: o.cotas, manual: true }));
+    return { L: J.L, ev: J.ev, R: { ops, cotas: foco ? J.cot[chaveC(foco, "sim")] || 0 : 0, caixa: J.caixa, h: hAgora },
+             regra: r, final: null, foco, vendas: J.trocas, auto: true, real: { ...J, difs, mk },
+             valorAgora: J.caixa + valorCot(J.cot, mk), segAgora: r.banca + valorCot(J.ini, mk) };
+  }
+
   function avaliarTrade(s) {
+    if (s === S.vivo && trade.carteira === "real") return avaliarReal(s);
     const r = regraTrade(), R = jogarTrade(s.ciclos, r, s.manuais || [], s.autoInicio ?? trade.auto);
     const mf = s.info && s.info.margem_final, final = mf != null ? faixaDe(mf) : null;
     const L = s.ciclos.map((c, k) => {
@@ -1171,25 +1339,33 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
 
   function conselhoTrade(T, um, s) {
     const r = T.regra, mf = s.info.margem_final;
+    if (T.real && !CART.endereco) return ["aviso", "Falta a sua carteira", "Ponha no campo acima o endereço da sua carteira na Polymarket (o 0x… do seu perfil). O painel lê dali, sem chave, a sua posição e as suas compras e vendas neste mercado."];
+    if (T.real && !CART.lida) return [CART.erro ? "ruim" : "neutro", CART.erro ? "Carteira sem leitura" : "Lendo a carteira",
+      CART.erro ? `Não consegui ler a sua carteira na Polymarket (${CART.erro}). Tento de novo a cada ${CFG.intervalo_carteira || 15} s.` : "Lendo a sua posição na Polymarket..."];
     if (s.estado === "fim" && mf != null) {
       const fx = faixaDe(mf);
       return [T.valorAgora >= T.segAgora ? "bom" : "ruim", "Apuração encerrada",
         `Resultado: ${margem(mf)}, faixa "${fx}". A carteira terminou ${T.foco ? `em "${T.foco}"` : "em dinheiro"} com ${usd(T.valorAgora)}; ${parado(r)} daria ${usd(T.segAgora)}.`];
     }
-    if (!um) return ["neutro", "Espere", "Ainda não há votos apurados. " + (r.inicial === "dinheiro"
-      ? "A carteira começa em dinheiro e só compra quando o modelo der o sinal." : `A carteira começa em Sim "${r.inicial}".`)];
+    // na carteira real, quem está na faixa e opera é você: a regra só dá o sinal
+    const quem = T.real ? "Você" : "A carteira", segue = T.real ? "Você segue" : "A carteira segue";
+    if (!um) return ["neutro", "Espere", "Ainda não há votos apurados. " + (T.real
+      ? (r.inicial === "dinheiro" ? `Você começa em dinheiro, com ${usd(r.banca)} para a estratégia; o painel avisa o sinal de compra.` : `Você começa com Sim em "${r.inicial}".`)
+      : r.inicial === "dinheiro" ? "A carteira começa em dinheiro e só compra quando o modelo der o sinal." : `A carteira começa em Sim "${r.inicial}".`)];
     const c = um.c, fav = um.fav, pfav = c.probs[fav], foco = T.foco;
     const desl = T.auto ? "" : " O automático está desligado: a regra só observa.";
     if (um.ap < r.apurado_min) return ["neutro", "Cedo demais", `Só ${virg(um.ap.toFixed(1))}% apurado; a regra só age a partir de ${virg(r.apurado_min)}%. A favorita do modelo agora é "${fav}" (${pct(pfav)}).`];
-    if (foco === fav) return ["bom", "Na favorita", `A carteira está em "${fav}", a faixa que o modelo mais aponta (${pct(pfav)}).` + desl];
+    if (foco === fav) return ["bom", "Na favorita", `${quem} está em "${fav}", a faixa que o modelo mais aponta (${pct(pfav)}).` + desl];
     if (foco !== null) {
-      if (pfav < r.limiar) return ["aviso", "Mantém", `O modelo prefere "${fav}" (${pct(pfav)}), abaixo dos ${pct(r.limiar)} para trocar. A carteira segue em "${foco}" (${pct(c.probs[foco])}).` + desl];
-      if (T.vendas >= r.max_trocas) return ["ruim", "Sem trocas sobrando", `O modelo dá ${pct(pfav)} a "${fav}", mas a carteira já usou as ${r.max_trocas} trocas da noite e segue em "${foco}".`];
+      if (pfav < r.limiar) return ["aviso", "Mantém", `O modelo prefere "${fav}" (${pct(pfav)}), abaixo dos ${pct(r.limiar)} para trocar. ${segue} em "${foco}" (${pct(c.probs[foco])}).` + desl];
+      if (T.vendas >= r.max_trocas) return ["ruim", "Sem trocas sobrando", `O modelo dá ${pct(pfav)} a "${fav}", mas ${T.real ? "você" : "a carteira"} já usou as ${r.max_trocas} trocas da noite e segue em "${foco}".`];
+      if (T.real) return ["aviso", "Sinal de venda", `O modelo dá ${pct(pfav)} a "${fav}": venda "${foco}" na Polymarket (troca ${T.vendas + 1} de ${r.max_trocas}). O painel detecta a venda e segue daí.`];
       return ["aviso", "Trocaria agora", `O modelo dá ${pct(pfav)} a "${fav}": com o automático ligado, a carteira venderia "${foco}" e iria para ela.` + desl];
     }
     const mkf = c.mercado && c.mercado[fav], ask = mkf ? mkf[1] : null, vant = ask != null ? pfav - ask : null;
     if (pfav < r.limiar) return ["aviso", "Em dinheiro, esperando", `Nenhuma faixa passa de ${pct(r.limiar)} no modelo (a favorita, "${fav}", tem ${pct(pfav)}).` + desl];
     if (vant != null && vant < r.vantagem) return ["aviso", "Em dinheiro, esperando", `O modelo dá ${pct(pfav)} a "${fav}", mas comprar custa ${cents(ask)}: vantagem de ${virg((vant * 100).toFixed(1))} pontos, abaixo dos ${virg(Math.round(r.vantagem * 100))} pedidos.` + desl];
+    if (T.real) return ["aviso", "Sinal de compra", `O modelo dá ${pct(pfav)} a "${fav}" e a compra custa ~${cents(ask)}: compre na Polymarket. O painel detecta a compra.`];
     return ["aviso", "Compraria agora", `O modelo dá ${pct(pfav)} a "${fav}" e a compra custa ${cents(ask)}.` + desl];
   }
 
@@ -1200,27 +1376,29 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     renderTopo(s, ult);
     renderModelo(um, ult, T.foco);
     renderParcial(ult);
-    setTxt("k-pos-rot", `Carteira · ${T.foco ? `Sim em "${T.foco}"` : T.R.ops.length ? "em dinheiro" : "em dinheiro, esperando o sinal"}`);
+    setTxt("k-pos-rot", (T.real ? "Sua carteira · " : "Carteira · ") + (T.foco ? `Sim em "${T.foco}"` : T.R.ops.length ? "em dinheiro" : "em dinheiro, esperando o sinal"));
     setTxt("k-chance", usd(T.valorAgora));
-    if (ult && T.foco) {
-      const mk = ult.c.mercado && ult.c.mercado[T.foco];
+    if ((ult || T.real) && T.foco) {
+      const mk = T.real ? T.real.mk && T.real.mk[T.foco] : ult.c.mercado && ult.c.mercado[T.foco];
       setTxt("k-preco", `${virg(T.R.cotas.toFixed(1))} cotas` + (um ? ` · modelo dá ${pct(um.c.probs[T.foco], 1)}` : "") + (mk ? ` · venda a ~${cents(mk[0])}` : ""));
-    } else setTxt("k-preco", ult ? `${usd(T.R.caixa)} em caixa` : r.inicial === "dinheiro" ? `começa com ${usd(r.banca)} em dinheiro`
+    } else setTxt("k-preco", T.real ? `${usd(T.R.caixa)} em caixa da estratégia` : ult ? `${usd(T.R.caixa)} em caixa` : r.inicial === "dinheiro" ? `começa com ${usd(r.banca)} em dinheiro`
       : `começa com ${usd(r.banca)} em Sim "${r.inicial}" a ${cents(r.entrada)}`);
-    setTxt("k-dif", ult ? `${parado(r)}: ${usd(T.segAgora)}` : "");
+    setTxt("k-dif", ult || T.real ? `${parado(r)}: ${usd(T.segAgora)}` : "");
     const [n, tag, txt] = conselhoTrade(T, um, s);
     $("k-conselho").dataset.n = n; setTxt("k-tag", tag); setTxt("k-txt", txt);
     $("plano").innerHTML = '<span class="rot">Regra</span>' + [
-      ...(r.inicial === "dinheiro" ? ["começa em dinheiro: compra no 1º sinal"] : []),
+      ...(T.real ? [CART.endereco ? `carteira real ${abreviar(CART.endereco)}` + (CART.idade != null ? `, lida há ${idadeTxt(CART.idade)}` : "") : "sem carteira"] : []),
+      ...(r.inicial === "dinheiro" ? [T.real ? "começa em dinheiro: o painel avisa o 1º sinal" : "começa em dinheiro: compra no 1º sinal"] : []),
       `troca quando a favorita do modelo tem ≥ ${pct(r.limiar)}`,
       `compra com vantagem ≥ ${virg(Math.round(r.vantagem * 100))} pts`,
       `desde ${virg(r.apurado_min)}% apurado`,
       `${T.vendas} de ${r.max_trocas} trocas usadas`,
-      T.auto ? "automático ligado" : "automático desligado",
+      ...(T.real ? [] : [T.auto ? "automático ligado" : "automático desligado"]),
     ].map((t) => `<span class="degrau">${esc(t)}</span>`).join("");
     renderTabela(ult, um, T.foco);
     $("term").innerHTML = tela(ult, um, T.foco ? { faixa: T.foco, lado: "sim" } : null);
-    renderEventos(T.ev, s, "Nada ainda. Aqui aparecem as vendas e compras da carteira.");
+    renderEventos(T.ev, s, T.real ? "Nada ainda. Aqui aparecem os sinais da regra e as compras e vendas que você fizer na Polymarket."
+      : "Nada ainda. Aqui aparecem as vendas e compras da carteira.");
     renderizarControles(s);
     renderCarteira(s, T, um);
     if (!temChart()) return;
@@ -1228,7 +1406,8 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     const g = G.carteira, [t0, t1] = eixoT(L);
     g.data.datasets[0].data = serie(L, (o) => o.valor);
     g.data.datasets[1].data = serie(L, (o) => o.seg);
-    g.data.datasets[1].label = r.inicial === "dinheiro" ? "Ficando em dinheiro" : "Segurando a posição inicial";
+    g.data.datasets[1].label = r.inicial === "dinheiro" ? "Ficando em dinheiro" : T.real ? "Segurando o que você tinha no começo" : "Segurando a posição inicial";
+    g.data.datasets[0].label = T.real ? "Sua carteira" : "Carteira (com trocas)";
     g.options.scales.x.min = t0; g.options.scales.x.max = t1;
     const compras = new Set(T.R.ops.filter((o) => o.op === "compra").map((o) => o.k));
     g.$linhas = { verticais: T.R.ops.filter((o) => o.op === "compra" || !compras.has(o.k))
@@ -1239,18 +1418,31 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
   function renderCarteira(s, T, um) {
     const r = T.regra, L = T.L;
     const suf = s.estado === "fim" ? " (final)" : T.final ? " (com o resultado revelado)" : " (a preço de venda de agora)";
-    const res = (id, v) => { setTxt(id, usd(v)); setTxt(id + "-s", `${v >= r.banca ? "+" : "−"}${usd(Math.abs(v - r.banca))} sobre a banca${suf}`); };
+    // na carteira real, a base é o começo da sessão: o caixa da estratégia mais o que você já tinha
+    const base = T.real ? T.real.inicioValor : r.banca, sobre = T.real ? `sobre o começo (${usd(base)})` : "sobre a banca";
+    const res = (id, v) => { setTxt(id, usd(v)); setTxt(id + "-s", `${v >= base ? "+" : "−"}${usd(Math.abs(v - base))} ${sobre}${suf}`); };
     const dinheiro = r.inicial === "dinheiro";
-    setTxt("tr-titulo", s === S.vivo ? "Carteira de papel (ao vivo)" : "Carteira");
-    setTxt("tr-segurar-rot", dinheiro ? "Ficando em dinheiro" : "Segurando a posição inicial");
-    if (L.length) {
+    setTxt("tr-titulo", T.real ? "Sua carteira na Polymarket (ao vivo)" : s === S.vivo ? "Carteira de papel (ao vivo)" : "Carteira");
+    $("tr-botoes").hidden = !!T.real;  // na carteira real, o painel detecta o que você faz
+    $("tr-real").hidden = !T.real;
+    setTxt("tr-valor-rot", T.real ? "Sua carteira (estratégia)" : "Carteira (com trocas)");
+    setTxt("tr-segurar-rot", dinheiro ? "Ficando em dinheiro" : T.real ? "Segurando o que você tinha no começo" : "Segurando a posição inicial");
+    if (L.length || (T.real && CART.lida)) {
       res("tr-valor", T.valorAgora); res("tr-segurar", T.segAgora);
       const d = T.valorAgora - T.segAgora;
       setTxt("tr-dif", (d >= 0 ? "+" : "−") + usd(Math.abs(d)));
       setTxt("tr-dif-s", Math.abs(d) < 0.005 ? (dinheiro ? "igual a ficar parado" : "igual a segurar")
         : d > 0 ? (dinheiro ? "operar pelo sinal rendeu mais que ficar parado" : "trocar rendeu mais que segurar")
         : (dinheiro ? "ficar parado rendeu mais que operar" : "segurar rendeu mais que trocar"));
-    } else ["tr-valor", "tr-segurar", "tr-dif"].forEach((id) => { setTxt(id, "—"); setTxt(id + "-s", s === S.vivo ? "comece a ler o TSE" : "comece uma simulação"); });
+    } else ["tr-valor", "tr-segurar", "tr-dif"].forEach((id) => { setTxt(id, "—"); setTxt(id + "-s", T.real ? "esperando a leitura da carteira" : s === S.vivo ? "comece a ler o TSE" : "comece uma simulação"); });
+    if (T.real) {
+      renderReal(T);
+      $("tr-ops").innerHTML = T.real.feitas.length
+        ? T.real.feitas.map((o) => `<li>${horaTs(o.ts)} · você ${esc(textoOp(o))}</li>`).join("")
+        : "<li>Nenhuma operação sua neste mercado desde o começo da sessão.</li>";
+      $("tr-revelado").hidden = true;
+      return;
+    }
     $("tr-ops").innerHTML = T.R.ops.length
       ? T.R.ops.map((o) => `<li>${hora(o.t)} · ${o.manual ? "você " : ""}${o.op === "vende" ? "vendeu" : "comprou"} "${esc(o.faixa)}" a ${cents(o.preco)}${o.op === "vende" ? ` → ${usd(o.valor)}` : ` (${virg(o.cotas.toFixed(1))} cotas)`}</li>`).join("")
       : "<li>Nenhuma troca ainda.</li>";
@@ -1264,6 +1456,33 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     $("tr-favorita").disabled = !pode || !um || um.fav === T.foco;
     setTxt("tr-favorita", T.foco === null ? "Comprar a favorita agora" : "Trocar agora para a favorita");
     $("tr-dinheiro").disabled = !pode || T.foco === null;
+  }
+
+  // estado da leitura, conferência e a posição de agora, como a Polymarket mostra
+  function renderReal(T) {
+    const J = T.real, partes = [];
+    const nomeCot = (k) => k.replace("|sim", " (Sim)").replace("|nao", " (Não)");
+    if (CART.erroConfig) partes.push(`Endereço recusado: ${CART.erroConfig}.`);
+    if (!CART.endereco) partes.push("Sem endereço: ponha no campo acima o 0x… do seu perfil na Polymarket.");
+    else {
+      partes.push(`Carteira ${abreviar(CART.endereco)}, ` + (CART.idade != null ? `lida há ${idadeTxt(CART.idade)}` : "lendo...") +
+        `; o painel relê a cada ${CFG.intervalo_carteira || 15} s, só leitura.`);
+      if (CART.erro) partes.push(`A última leitura falhou (${CART.erro}); vale a anterior.`);
+      if (CART.lida && J.difs.length) partes.push(`A posição que a Polymarket mostra não bate com a soma das suas operações em ${J.difs.map(nomeCot).join(", ")}. Vale a da Polymarket; costuma ser uma operação que ainda não entrou na lista e aparece na próxima leitura.`);
+      if (J.estranho) partes.push("Há uma operação de conversão neste mercado: a carteira refeita ciclo a ciclo pode não bater com a real.");
+      const ini = Object.entries(J.ini).filter(([, n]) => n > 0.5);
+      if (CART.lida) partes.push(ini.length ? `No começo da sessão: ${ini.map(([k, n]) => `${virg(n.toFixed(1))} cotas de ${nomeCot(k)}`).join(", ")}, mais ${usd(T.regra.banca)} para a estratégia.`
+        : `No começo da sessão: em dinheiro, com ${usd(T.regra.banca)} para a estratégia.`);
+    }
+    setTxt("tr-real-estado", partes.join(" "));
+    const mk = J.mk;
+    $("tr-real-pos").innerHTML = CART.posicoes.length
+      ? CART.posicoes.map((p) => {
+          const x = mk && mk[p.faixa], venda = x ? (p.lado === "sim" ? x[0] : 1 - x[1]) : null;
+          return `<li>Agora: ${virg(p.cotas.toFixed(1))} cotas de ${p.lado === "sim" ? "Sim" : "Não"} em "${esc(p.faixa)}", preço médio ${cents(p.preco_medio)}` +
+            (venda != null ? `; valem ~${usd(p.cotas * venda)} vendendo a ${cents(venda)}` : "") + "</li>";
+        }).join("")
+      : CART.lida ? "<li>Agora: nenhuma posição sua neste mercado.</li>" : "";
   }
 
   function mostrarAuto() {
@@ -1294,7 +1513,8 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     trade = { inicial, entrada: novaFaixa && inicial !== "dinheiro" ? precoHoje(inicial) : Math.min(Math.max(n("tr-entrada", precoHoje(inicial)), 1), 99),
               banca: Math.max(n("tr-banca", 100), 1), limiar: Math.min(Math.max(n("tr-limiar", 80), 1), 99),
               vantagem: Math.max(n("tr-vantagem", 5), 0), apurado: Math.max(n("tr-apurado", 2), 0),
-              trocas: Math.max(Math.round(n("tr-trocas", 2)), 0), auto: trade.auto, noite: trade.noite, v: 2 };
+              trocas: Math.max(Math.round(n("tr-trocas", 2)), 0), auto: trade.auto, noite: trade.noite,
+              carteira: trade.carteira, endereco: trade.endereco, v: 2 };
     if (novaFaixa) $("tr-entrada").value = trade.entrada;
     $("tr-entrada").disabled = inicial === "dinheiro";  // começando em dinheiro, não há preço pago
     salvarTrade();
@@ -1309,7 +1529,29 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     mostrarAuto();
     $("tr-noite-sim").setAttribute("aria-pressed", String(trade.noite === "sim"));
     $("tr-noite-vivo").setAttribute("aria-pressed", String(trade.noite === "vivo"));
+    $("tr-cart-papel").setAttribute("aria-pressed", String(trade.carteira !== "real"));
+    $("tr-cart-real").setAttribute("aria-pressed", String(trade.carteira === "real"));
+    if (document.activeElement !== $("tr-endereco")) $("tr-endereco").value = trade.endereco || "";
   }
+  // carteira de papel ou a real: os eventos de um jeito não tocam ao trocar para o outro
+  function trocarCarteira(modo) {
+    trade.carteira = modo;
+    salvarTrade();
+    mostrarTrade();
+    if (modo === "real" && trade.endereco && CART.endereco !== trade.endereco.toLowerCase())
+      configurarCarteira(trade.endereco).catch((e) => { CART.erroConfig = e.message; });
+    avaliarTrade(S.vivo).ev.forEach((e) => S.vivo.vistosTrade.add(e.chave));
+    ciclo(true);
+  }
+  $("tr-cart-papel").addEventListener("click", () => trocarCarteira("papel"));
+  $("tr-cart-real").addEventListener("click", () => trocarCarteira("real"));
+  $("tr-endereco").addEventListener("change", () => {
+    const e = $("tr-endereco").value.trim();
+    configurarCarteira(e)
+      .then(() => { trade.endereco = e; salvarTrade(); CART.erroConfig = null; $("tr-endereco").removeAttribute("aria-invalid"); return puxarCarteira(); })
+      .catch((err) => { CART.erroConfig = err.message; $("tr-endereco").setAttribute("aria-invalid", "true"); })
+      .finally(() => renderizar());
+  });
   // noite simulada ou ao vivo: o que já aconteceu na outra noite não toca ao trocar
   function trocarNoite(noite) {
     trade.noite = noite;
@@ -1499,7 +1741,8 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
       rodada++;
       const atual = sessaoDa(aba), outro = atual === "vivo" ? "sim" : "vivo";
       const tarefas = [puxar(atual)];
-      if (atual === "vivo" && !M.desligado) tarefas.push(puxarMercado());
+      if ((atual === "vivo" || modoReal()) && !M.desligado) tarefas.push(puxarMercado());
+      if (modoReal() && (forcar || rodada % 3 === 0)) tarefas.push(puxarCarteira());
       // a outra sessão também é lida (mais devagar) para não perder alertas do ao vivo
       if (forcar || rodada % 3 === 0 || S[outro].estado === "rodando") tarefas.push(puxar(outro));
       await Promise.all(tarefas);
@@ -1537,6 +1780,10 @@ details.tela summary { cursor: pointer; color: var(--ink-2); font-weight: 600; }
     trade = Object.assign(trade, { inicial: pos.faixa, entrada: precoHoje(pos.faixa) },
                           tsalvo && (FAIXAS.includes(tsalvo.inicial) || tsalvo.inicial === "dinheiro") ? tsalvo : {});
     if (trade.noite !== "vivo") trade.noite = "sim";
+    if (trade.carteira !== "real") trade.carteira = "papel";
+    // a carteira real: a do servidor (--carteira) vale; senão, a que esta página guardou
+    if (CFG.carteira) trade.endereco = CFG.carteira;
+    else if (trade.endereco && trade.carteira === "real") configurarCarteira(trade.endereco).catch((e) => { CART.erroConfig = e.message; });
     mostrarTrade();
     if (!temChart()) setTxt("tab-nota", "Os gráficos precisam da internet (Chart.js); o resto do painel funciona sem eles.");
     criarGraficos();

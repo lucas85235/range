@@ -379,15 +379,18 @@ class Monitor:
         if self.F.sum() + self.L.sum() == 0:
             res["msg"] = "sem votos apurados ainda"
             res["duracao"], res["idade_tse"] = time.time() - inicio, idade_segundos(data, hora)
+            res["quando"] = round(time.time(), 1)
             return res
         r = self.modelo.prever(self.F, self.L, self.est, t=t)
         probs = prob_faixas(r["mu"], r["sd"], self.params.gl)
         res.update(parcial=ingenuo(self.F, self.L), parcial_tse=ingenuo(br["F"], br["L"]),
                    mu=r["mu"], sd=r["sd"], w=r["w_medio"],
                    probs=dict(zip(NOMES_FAIXAS, np.round(probs, 4).tolist())))
-        # quanto tempo o ciclo levou e quão velho estava o arquivo do TSE quando ele terminou
+        # quanto tempo o ciclo levou, quão velho estava o arquivo do TSE quando ele terminou e a
+        # hora em que terminou (unix s; o painel casa com ela as operações da sua carteira)
         res["duracao"] = time.time() - inicio
         res["idade_tse"] = idade_segundos(data, hora)
+        res["quando"] = round(time.time(), 1)
         if self.gravar:
             np.savez_compressed(self.saida / f"retrato_{self.ciclos:04d}.npz", F=self.F, L=self.L,
                                 est=self.est, st=self.st, ts=self.ts, te=self.te, t=t, cd=self.munis.to_numpy())

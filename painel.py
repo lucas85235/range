@@ -40,7 +40,7 @@ from nucleo.dados_eleicao import secoes  # noqa: E402
 from nucleo.fonte_tse import URL_OFICIAL, FonteTSE  # noqa: E402
 from nucleo.mercado_sim import PRECO_HOJE, RITMOS, mercado_sim, sortear_margem  # noqa: E402
 from nucleo.modelo import NOMES_FAIXAS, carregar_params, faixa_provavel  # noqa: E402
-from nucleo.polymarket import FontePolymarket  # noqa: E402
+from nucleo.polymarket import DATA_API, ENDERECO, CarteiraPolymarket, FontePolymarket  # noqa: E402
 from monitor import (AO_VIVO, BRT, PRAZO, Degrau, Monitor, achar_sessao, aviso_municipios,  # noqa: E402
                      carregar_base, conferir_sessao, ler_log, retratos)
 from nucleo.replay_tse import GRADE, Replay, passo, responder  # noqa: E402
@@ -324,6 +324,55 @@ class MercadoAoVivo:
                     "intervalo": self.intervalo, "historico": self.historico}
 
 
+class CarteiraAoVivo:
+    """Lê a cada `intervalo` s a posição e as operações da sua carteira neste mercado, pela Data
+    API pública. Só leitura: detecta o que você fez na Polymarket; o painel nunca manda ordens."""
+
+    def __init__(self, intervalo: float, data_api: str = DATA_API):
+        self.intervalo, self.data_api = intervalo, data_api
+        self.fonte = FontePolymarket()
+        self.leitor: CarteiraPolymarket | None = None
+        self.dados: dict | None = None
+        self.erro: str | None = None
+        self.quando: float | None = None  # hora da última leitura que deu certo
+        self.lock = threading.Lock()
+        self.acordar = threading.Event()
+        threading.Thread(target=self._rodar, daemon=True).start()
+
+    def configurar(self, endereco: str | None) -> None:
+        leitor = CarteiraPolymarket(self.fonte, endereco, self.data_api) if endereco else None  # valida
+        with self.lock:
+            if (leitor and leitor.endereco) != (self.leitor and self.leitor.endereco):
+                self.leitor, self.dados, self.erro, self.quando = leitor, None, None, None
+        self.acordar.set()
+
+    def _rodar(self) -> None:
+        while True:
+            self.acordar.wait(self.intervalo)
+            self.acordar.clear()
+            with self.lock:
+                leitor = self.leitor
+            if leitor is None:
+                continue
+            try:
+                d = leitor.ler()
+                with self.lock:
+                    if self.leitor is leitor:
+                        self.dados, self.erro, self.quando = d, None, time.time()
+            except Exception as e:  # rede instável: tenta de novo na próxima
+                with self.lock:
+                    if self.leitor is leitor:
+                        self.erro = repr(e)
+
+    def json(self) -> dict:
+        with self.lock:
+            if self.leitor is None:
+                return {"endereco": None}
+            return {"endereco": self.leitor.endereco, "erro": self.erro, "intervalo": self.intervalo,
+                    "idade": None if self.quando is None else time.time() - self.quando,
+                    **(self.dados or {"posicoes": [], "operacoes": []})}
+
+
 class SessaoSim(Sessao):
     tipo = "sim"
 
@@ -422,6 +471,10 @@ class Contexto:
         self._retomavel = (0.0, None)
         # preços da Polymarket a cada intervalo_mercado s, desde já (não esperam o monitor do TSE)
         self.mercado = None if args.sem_polymarket else MercadoAoVivo(args.intervalo_mercado).iniciar()
+        # sua carteira na Polymarket (só leitura), para a aba Trade ao vivo seguir o que você fizer
+        self.carteira = CarteiraAoVivo(args.intervalo_carteira, args.data_api)
+        if args.carteira:
+            self.carteira.configurar(args.carteira)
 
     def dados_sim(self):
         with self._lock_dados:
@@ -438,7 +491,8 @@ class Contexto:
         return {"faixas": NOMES_FAIXAS, "faixa": a.faixa, "lado": a.lado, "alerta": a.alerta, "plano": plano,
                 "ritmos": list(RITMOS), "preco_hoje": PRECO_HOJE, "cenarios": CENARIOS,
                 "velocidades": VELOCIDADES, "url": a.url, "polymarket": not a.sem_polymarket,
-                "intervalo": a.intervalo, "intervalo_mercado": a.intervalo_mercado}
+                "intervalo": a.intervalo, "intervalo_mercado": a.intervalo_mercado,
+                "carteira": self.carteira.json().get("endereco"), "intervalo_carteira": a.intervalo_carteira}
 
     def iniciar_vivo(self, retomar: Path | None = None) -> SessaoVivo:
         with self.lock:
@@ -580,6 +634,8 @@ def manipulador(ctx: Contexto, porta: int) -> type[BaseHTTPRequestHandler]:
                 self._json(ctx.mercado.json(int(q.get("desde", ["0"])[0])) if ctx.mercado else {"desligado": True})
             elif u.path == "/api/config":
                 self._json(ctx.config())
+            elif u.path == "/api/carteira":
+                self._json(limpo(ctx.carteira.json()))
             elif u.path == "/api/estado":
                 q = parse_qs(u.query)
                 vivo = q.get("tipo", ["vivo"])[0] == "vivo"
@@ -638,6 +694,9 @@ def manipulador(ctx: Contexto, porta: int) -> type[BaseHTTPRequestHandler]:
                     self._json({"ok": True})
                 elif caminho == "/api/trade/lote":
                     self._json(ctx.trade_lote(d))
+                elif caminho == "/api/carteira":  # {endereco: "0x…"} ou {endereco: null} para desligar
+                    ctx.carteira.configurar((d.get("endereco") or "").strip() or None)
+                    self._json(limpo(ctx.carteira.json()))
                 else:
                     self._json({"erro": "não encontrado"}, 404)
             except (ValueError, TypeError, json.JSONDecodeError) as e:
@@ -663,6 +722,12 @@ def main() -> None:
     a.add_argument("--lado", default="sim", choices=["sim", "nao"])
     a.add_argument("--alerta", type=float, default=0.5, help="avisa quando a chance da posição cai abaixo disto")
     a.add_argument("--degrau", action="append", default=[], help="degrau do plano CHANCE@APURADO:FRACAO (pode repetir)")
+    a.add_argument("--carteira", metavar="0x…",
+                   help="endereço da sua carteira na Polymarket (o do perfil): a aba Trade ao vivo detecta "
+                        "suas compras e vendas neste mercado (só leitura; dá para pôr na página também)")
+    a.add_argument("--intervalo-carteira", type=float, default=15.0,
+                   help="segundos entre leituras da sua carteira na Polymarket")
+    a.add_argument("--data-api", default=DATA_API, help=argparse.SUPPRESS)  # ensaio com uma Data API local
     a.add_argument("--sem-navegador", action="store_true", help="não abre o navegador")
     a.add_argument("--retomar", metavar="PASTA",
                    help='já começa ao vivo continuando uma sessão gravada (depois de uma queda): "ultima" = '
@@ -670,6 +735,8 @@ def main() -> None:
     args = a.parse_args()
     for txt in args.degrau:
         Degrau(txt)  # erro de digitação aparece já, não no meio da noite
+    if args.carteira and not ENDERECO.fullmatch(args.carteira):
+        a.error("--carteira: use o endereço 0x… de 40 dígitos do seu perfil na Polymarket")
     retomar = None
     if args.retomar:  # pasta errada ou de outra fonte aparece já, antes de carregar a base
         try:
